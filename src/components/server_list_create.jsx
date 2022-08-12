@@ -2,11 +2,18 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import useSWR from 'swr'
 
+import ServerListIdItems from "./server_list_id_items";
+
 const ServerListCreate = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [name, setName] = useState('');
-  const [serverIds, setServerIds] = useState('');
   const [readme, setReadme] = useState('');
+
+  const [serverDict, setServerDict] = useState({
+    "serverId": "",
+    "serverIds": [],
+    "dragFrom": -1
+  })
   const navigate = useNavigate();
 
   const logined = new Date(localStorage.getItem('logined'));
@@ -17,8 +24,13 @@ const ServerListCreate = () => {
   }
 
   useEffect(() => {
-    document.title = `Create server list - Bench.im`;
-    if(!isLogin && searchParams.get("pk")){
+    if (searchParams.get("pk")) {
+      document.title = `Edit server list ${searchParams.get("pk")} - Bench.im`;
+    } else {
+      document.title = `Create server list - Bench.im`;
+    }
+
+    if (!isLogin && searchParams.get("pk")) {
       navigate("/login/");
     }
   });
@@ -33,9 +45,18 @@ const ServerListCreate = () => {
         <div></div>
       )
     }
-    if(!changed){
+    if (!changed) {
       setName(data.name);
-      setServerIds(data.servers.join(", "));
+      setServerDict((serverD) => {
+        let d = {
+          ...serverD,
+          "serverIds": data.server_ids,
+        }
+        for(let s of data.servers){
+          d[s.pk] = s
+        }
+        return d;
+      });
       setReadme(data.readme);
       setChanged(true);
     }
@@ -44,14 +65,13 @@ const ServerListCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const servers = serverIds.split(', ');
 
     const data = {
       "name": name,
       "readme": readme,
-      "servers": servers
+      "servers": serverDict.serverIds
     }
-    if(pk){
+    if (pk) {
       data.pk = pk;
     }
     try {
@@ -92,11 +112,10 @@ const ServerListCreate = () => {
       <div className="mx-auto sm:w-2/5 text-justify leading-8">
         <form onSubmit={handleSubmit}>
           <label>Name:<br /></label>
-          <input className="w-full" type="text" value={name} onChange={(e) => { setName(e.target.value) }} />
-          <label>Server IDs (Separated by ", " like "1, 2"):<br /></label>
-          <input className="w-full" type="text" value={serverIds} onChange={(e) => { setServerIds(e.target.value) }} />
+          <input className="w-full" type="text" value={name} onChange={(e) => setName(e.target.value)} />
           <label>Readme:<br /></label>
-          <textarea className="w-full" rows="15" value={readme} onChange={(e) => { setReadme(e.target.value) }}></textarea>
+          <textarea className="w-full" rows="15" value={readme} onChange={(e) => setReadme(e.target.value)}></textarea>
+          <ServerListIdItems serverDict={serverDict} setServerDict={setServerDict} />
           <button className="w-full border border-gray-700 bg-white my-2 py-1" type="submit">Submit</button>
         </form>
       </div>
