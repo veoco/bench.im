@@ -8,6 +8,7 @@ import ServerListCreate from "./components/server_list_create";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import My from "./components/my";
+import NotFound from "./components/404";
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,6 +47,7 @@ function App() {
         <Route path="/login/" element={<Login />} />
         <Route path="/signup/" element={<Signup />} />
         <Route path="/my/" element={<My />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   )
