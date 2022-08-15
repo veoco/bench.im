@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import useSWR from 'swr'
+import { FormattedMessage } from "react-intl";
 
 import ServerItem from "./server_item";
 
@@ -25,7 +26,7 @@ const ServerList = () => {
   return (
     <div className="mx-auto sm:w-2/5 text-justify">
       <div className="py-2 text-justify">
-        <p>Need your own server list? ➡️ <Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
+        <p><FormattedMessage defaultMessage="Need your own server list?" /> ➡️ <Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
       </div>
       <div className="border border-gray-700 bg-white p-2">
         <h3><span className="before:content-['#'] px-1 mr-2 bg-stone-700 text-white">{data.pk}</span>{data.name}{data.editable?<Link className="float-right" to={`/server_list/?pk=${data.pk}&edit=1`}>🖊️</Link>:""}</h3>

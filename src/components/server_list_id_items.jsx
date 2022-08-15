@@ -1,3 +1,5 @@
+import { FormattedMessage } from "react-intl";
+
 import ServerItem from "./server_item"
 
 const ServerListIdItems = ({ serverDict, setServerDict }) => {
@@ -35,9 +37,9 @@ const ServerListIdItems = ({ serverDict, setServerDict }) => {
   }
   return (
     <div className="mb-2">
-      <label>Server IDs:<br /></label>
+      <label><FormattedMessage defaultMessage="Server IDs:" /><br /></label>
       <input className="w-10/12" type="text" value={serverDict.serverId} onChange={handleChange} />
-      <button className="bg-white float-right w-2/12 py-1 border border-gray-700 border-l-0" onClick={handleAdd}>Add</button><br />
+      <button className="bg-white float-right w-2/12 py-1 border border-gray-700 border-l-0" onClick={handleAdd}><FormattedMessage defaultMessage="Add" /></button><br />
       <div className={serverDict.serverIds.length > 0 ? "border border-t-0 border-gray-700 bg-stone-200 p-2" : ""}>
         {serverDict.serverIds.map((sid, index) => {
           return (

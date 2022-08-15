@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FormattedMessage } from "react-intl";
 
 const Signup = () => {
   const [username, setUsername] = useState('');
@@ -55,15 +56,15 @@ const Signup = () => {
     <div className="mx-auto sm:w-2/5 text-justify">
       <div className="text-center text-2xl underline my-2">Sign up</div>
       <form className="leading-8" onSubmit={handleSubmit}>
-        <label>Username:</label><br />
+        <label><FormattedMessage defaultMessage="Username:" /></label><br />
         <input className="w-full" type="text" value={username} onChange={(e) => { setUsername(e.target.value) }} />
-        <label>Email:</label><br />
+        <label><FormattedMessage defaultMessage="Email:" /></label><br />
         <input className="w-full" type="text" value={email} onChange={(e) => { setEmail(e.target.value) }} />
-        <label>Password:</label><br />
+        <label><FormattedMessage defaultMessage="Password:" /></label><br />
         <input className="w-full" type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} />
-        <label>Password Again:</label><br />
+        <label><FormattedMessage defaultMessage="Password Again:" /></label><br />
         <input className="w-full" type="password" value={password2} onChange={(e) => { setPassword2(e.target.value) }} />
-        <button className="float-right bg-white border border-gray-700 px-2 my-2">Submit</button>
+        <button className="float-right bg-white border border-gray-700 px-2 my-2"><FormattedMessage defaultMessage="Submit" /></button>
       </form>
     </div>
   )

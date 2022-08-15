@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import useSWR from 'swr'
 import { useNavigate, Link } from "react-router-dom";
+import { FormattedMessage } from "react-intl";
 
 import ServerListItem from "./server_list_item";
 
@@ -49,8 +50,8 @@ const My = () => {
   return (
     <div>
       <div className="mx-auto sm:w-2/5 py-2 text-justify">
-        <p>You have {data.count} server list <Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
-        <button className='bg-white border border-gray-700 p-2 w-full my-2' onClick={handleLogout}>Logout</button>
+        <p><FormattedMessage defaultMessage="You have {count} server list" values={{ count: data.count }} /><Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
+        <button className='bg-white border border-gray-700 p-2 w-full my-2' onClick={handleLogout}><FormattedMessage defaultMessage="Logout" /></button>
         {data.results.map((item) => {
           return (
             <ServerListItem item={item} key={item.pk} />

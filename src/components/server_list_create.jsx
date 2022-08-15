@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import useSWR from 'swr'
+import { FormattedMessage } from "react-intl";
 
 import ServerListIdItems from "./server_list_id_items";
 
@@ -107,16 +108,16 @@ const ServerListCreate = () => {
   return (
     <div>
       <div className="mx-auto sm:w-2/5 py-2 text-justify">
-        {isLogin ? isEdit ? <p className="text-justify"><Link className="underline" to="/my/">You</Link> are editing server list <span className="before:content-['#'] px-1 mr-2 bg-stone-700 text-white">{pk}</span></p> : <p className="text-justify"><Link className="underline" to="/my/">You</Link> are creating a editable server list.</p> : <p className="text-justify">⚠️ <Link className="underline" to="/login/">Login</Link> to create a editable server list.</p>}
+        {isLogin ? isEdit ? <p className="text-justify"><Link className="underline" to="/my/"><FormattedMessage defaultMessage="You" /></Link><FormattedMessage defaultMessage=" are editing server list" /> <span className="before:content-['#'] px-1 mr-2 bg-stone-700 text-white">{pk}</span></p> : <p className="text-justify"><Link className="underline" to="/my/"><FormattedMessage defaultMessage="You" /></Link><FormattedMessage defaultMessage=" are creating a editable server list" /></p> : <p className="text-justify">⚠️ <Link className="underline" to="/login/"><FormattedMessage defaultMessage="Login" /></Link><FormattedMessage defaultMessage=" to create a editable server list" /></p>}
       </div>
       <div className="mx-auto sm:w-2/5 text-justify leading-8">
         <form onSubmit={handleSubmit}>
-          <label>Name:<br /></label>
+          <label><FormattedMessage defaultMessage="Name:" /><br /></label>
           <input className="w-full" type="text" value={name} onChange={(e) => setName(e.target.value)} />
-          <label>Readme:<br /></label>
+          <label><FormattedMessage defaultMessage="Readme:" /><br /></label>
           <textarea className="w-full" rows="15" value={readme} onChange={(e) => setReadme(e.target.value)}></textarea>
           <ServerListIdItems serverDict={serverDict} setServerDict={setServerDict} />
-          <button className="w-full border border-gray-700 bg-white my-2 py-1" type="submit">Submit</button>
+          <button className="w-full border border-gray-700 bg-white my-2 py-1" type="submit"><FormattedMessage defaultMessage="Submit" /></button>
         </form>
       </div>
     </div>

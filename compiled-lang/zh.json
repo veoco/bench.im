@@ -1,0 +1,226 @@
+{
+  "+3h4wC": [
+    {
+      "type": 0,
+      "value": "服务器清单"
+    }
+  ],
+  "2/2yg+": [
+    {
+      "type": 0,
+      "value": "添加"
+    }
+  ],
+  "5F+c5s": [
+    {
+      "type": 0,
+      "value": "想要你自己的服务器清单？"
+    }
+  ],
+  "5zD+wa": [
+    {
+      "type": 0,
+      "value": "线程（可选）："
+    }
+  ],
+  "7129im": [
+    {
+      "type": 0,
+      "value": "或者（仅 aarch64）："
+    }
+  ],
+  "8HJxXG": [
+    {
+      "type": 0,
+      "value": "注册"
+    }
+  ],
+  "AyGauy": [
+    {
+      "type": 0,
+      "value": "登录"
+    }
+  ],
+  "C81/uG": [
+    {
+      "type": 0,
+      "value": "登出"
+    }
+  ],
+  "D5jzMg": [
+    {
+      "type": 0,
+      "value": "正在创建一个可编辑服务器清单"
+    }
+  ],
+  "EcLAkj": [
+    {
+      "type": 0,
+      "value": "使用服务器的搜索关键字运行："
+    }
+  ],
+  "F/6VqP": [
+    {
+      "type": 0,
+      "value": "服务器"
+    }
+  ],
+  "FReYU2": [
+    {
+      "type": 0,
+      "value": "服务器 ID："
+    }
+  ],
+  "Opkbxa": [
+    {
+      "type": 0,
+      "value": "你有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个服务器清单"
+    }
+  ],
+  "Q+NxmZ": [
+    {
+      "type": 0,
+      "value": "来创建一个可编辑的服务器清单"
+    }
+  ],
+  "QU0rLB": [
+    {
+      "type": 0,
+      "value": "下载："
+    }
+  ],
+  "QtfopA": [
+    {
+      "type": 0,
+      "value": "再次输入密码："
+    }
+  ],
+  "THKbgg": [
+    {
+      "type": 0,
+      "value": "搜索关键字可以是 id, 地区代码（必须全大写）或名称："
+    }
+  ],
+  "WF8jKB": [
+    {
+      "type": 0,
+      "value": "名称："
+    }
+  ],
+  "WUrxAG": [
+    {
+      "type": 0,
+      "value": "发现 0 个结果，关键字 \""
+    },
+    {
+      "type": 1,
+      "value": "query"
+    },
+    {
+      "type": 0,
+      "value": "\""
+    }
+  ],
+  "YgghdL": [
+    {
+      "type": 0,
+      "value": "使用方法："
+    }
+  ],
+  "Zc7Wun": [
+    {
+      "type": 0,
+      "value": "用户名："
+    }
+  ],
+  "blxvth": [
+    {
+      "type": 0,
+      "value": "正在编辑服务器清单"
+    }
+  ],
+  "gcl3C7": [
+    {
+      "type": 0,
+      "value": "发现 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个结果，关键字 \""
+    },
+    {
+      "type": 1,
+      "value": "query"
+    },
+    {
+      "type": 0,
+      "value": "\""
+    }
+  ],
+  "hIqPSm": [
+    {
+      "type": 0,
+      "value": "或者一个服务器清单的 id："
+    }
+  ],
+  "hagaYK": [
+    {
+      "type": 0,
+      "value": "密码："
+    }
+  ],
+  "kJ5W29": [
+    {
+      "type": 0,
+      "value": "你"
+    }
+  ],
+  "lp7P7X": [
+    {
+      "type": 0,
+      "value": "下载客户端："
+    }
+  ],
+  "mAJmPt": [
+    {
+      "type": 0,
+      "value": "然后添加执行权限"
+    }
+  ],
+  "odzcz8": [
+    {
+      "type": 0,
+      "value": "介绍"
+    }
+  ],
+  "pGI8NW": [
+    {
+      "type": 0,
+      "value": "你可以指定客户端使用的线程数："
+    }
+  ],
+  "wSZR47": [
+    {
+      "type": 0,
+      "value": "提交"
+    }
+  ],
+  "xpTPb3": [
+    {
+      "type": 0,
+      "value": "邮箱："
+    }
+  ]
+}

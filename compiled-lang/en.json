@@ -1,0 +1,226 @@
+{
+  "+3h4wC": [
+    {
+      "type": 0,
+      "value": "Server List"
+    }
+  ],
+  "2/2yg+": [
+    {
+      "type": 0,
+      "value": "Add"
+    }
+  ],
+  "5F+c5s": [
+    {
+      "type": 0,
+      "value": "Need your own server list?"
+    }
+  ],
+  "5zD+wa": [
+    {
+      "type": 0,
+      "value": "Threads (Optional):"
+    }
+  ],
+  "7129im": [
+    {
+      "type": 0,
+      "value": "or (for aarch64):"
+    }
+  ],
+  "8HJxXG": [
+    {
+      "type": 0,
+      "value": "Sign up"
+    }
+  ],
+  "AyGauy": [
+    {
+      "type": 0,
+      "value": "Login"
+    }
+  ],
+  "C81/uG": [
+    {
+      "type": 0,
+      "value": "Logout"
+    }
+  ],
+  "D5jzMg": [
+    {
+      "type": 0,
+      "value": "are creating a editable server list"
+    }
+  ],
+  "EcLAkj": [
+    {
+      "type": 0,
+      "value": "Run with a search keywords for server:"
+    }
+  ],
+  "F/6VqP": [
+    {
+      "type": 0,
+      "value": "Server"
+    }
+  ],
+  "FReYU2": [
+    {
+      "type": 0,
+      "value": "Server IDs:"
+    }
+  ],
+  "Opkbxa": [
+    {
+      "type": 0,
+      "value": "You have "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " server list"
+    }
+  ],
+  "Q+NxmZ": [
+    {
+      "type": 0,
+      "value": "to create a editable server list"
+    }
+  ],
+  "QU0rLB": [
+    {
+      "type": 0,
+      "value": "Download:"
+    }
+  ],
+  "QtfopA": [
+    {
+      "type": 0,
+      "value": "Password Again:"
+    }
+  ],
+  "THKbgg": [
+    {
+      "type": 0,
+      "value": "Search keywords could be an id, country code(Must be all caps) or a name:"
+    }
+  ],
+  "WF8jKB": [
+    {
+      "type": 0,
+      "value": "Name:"
+    }
+  ],
+  "WUrxAG": [
+    {
+      "type": 0,
+      "value": "Found 0 results for \""
+    },
+    {
+      "type": 1,
+      "value": "query"
+    },
+    {
+      "type": 0,
+      "value": "\""
+    }
+  ],
+  "YgghdL": [
+    {
+      "type": 0,
+      "value": "Usage:"
+    }
+  ],
+  "Zc7Wun": [
+    {
+      "type": 0,
+      "value": "Username:"
+    }
+  ],
+  "blxvth": [
+    {
+      "type": 0,
+      "value": "are editing server list"
+    }
+  ],
+  "gcl3C7": [
+    {
+      "type": 0,
+      "value": "Found "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " results for \""
+    },
+    {
+      "type": 1,
+      "value": "query"
+    },
+    {
+      "type": 0,
+      "value": "\""
+    }
+  ],
+  "hIqPSm": [
+    {
+      "type": 0,
+      "value": "or an id for server list:"
+    }
+  ],
+  "hagaYK": [
+    {
+      "type": 0,
+      "value": "Password:"
+    }
+  ],
+  "kJ5W29": [
+    {
+      "type": 0,
+      "value": "You"
+    }
+  ],
+  "lp7P7X": [
+    {
+      "type": 0,
+      "value": "Download client:"
+    }
+  ],
+  "mAJmPt": [
+    {
+      "type": 0,
+      "value": "and then add execute permission:"
+    }
+  ],
+  "odzcz8": [
+    {
+      "type": 0,
+      "value": "Readme:"
+    }
+  ],
+  "pGI8NW": [
+    {
+      "type": 0,
+      "value": "You can specify the number of threads to be used by the client:"
+    }
+  ],
+  "wSZR47": [
+    {
+      "type": 0,
+      "value": "Submit"
+    }
+  ],
+  "xpTPb3": [
+    {
+      "type": 0,
+      "value": "Email:"
+    }
+  ]
+}

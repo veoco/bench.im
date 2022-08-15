@@ -1,0 +1,98 @@
+{
+  "+3h4wC": {
+    "defaultMessage": "Server List"
+  },
+  "2/2yg+": {
+    "defaultMessage": "Add"
+  },
+  "5F+c5s": {
+    "defaultMessage": "Need your own server list?"
+  },
+  "5zD+wa": {
+    "defaultMessage": "Threads (Optional):"
+  },
+  "7129im": {
+    "defaultMessage": "or (for aarch64):"
+  },
+  "8HJxXG": {
+    "defaultMessage": "Sign up"
+  },
+  "AyGauy": {
+    "defaultMessage": "Login"
+  },
+  "C81/uG": {
+    "defaultMessage": "Logout"
+  },
+  "D5jzMg": {
+    "defaultMessage": "are creating a editable server list"
+  },
+  "EcLAkj": {
+    "defaultMessage": "Run with a search keywords for server:"
+  },
+  "F/6VqP": {
+    "defaultMessage": "Server"
+  },
+  "FReYU2": {
+    "defaultMessage": "Server IDs:"
+  },
+  "Opkbxa": {
+    "defaultMessage": "You have {count} server list"
+  },
+  "Q+NxmZ": {
+    "defaultMessage": "to create a editable server list"
+  },
+  "QU0rLB": {
+    "defaultMessage": "Download:"
+  },
+  "QtfopA": {
+    "defaultMessage": "Password Again:"
+  },
+  "THKbgg": {
+    "defaultMessage": "Search keywords could be an id, country code(Must be all caps) or a name:"
+  },
+  "WF8jKB": {
+    "defaultMessage": "Name:"
+  },
+  "WUrxAG": {
+    "defaultMessage": "Found 0 results for \"{query}\""
+  },
+  "YgghdL": {
+    "defaultMessage": "Usage:"
+  },
+  "Zc7Wun": {
+    "defaultMessage": "Username:"
+  },
+  "blxvth": {
+    "defaultMessage": "are editing server list"
+  },
+  "gcl3C7": {
+    "defaultMessage": "Found {count} results for \"{query}\""
+  },
+  "hIqPSm": {
+    "defaultMessage": "or an id for server list:"
+  },
+  "hagaYK": {
+    "defaultMessage": "Password:"
+  },
+  "kJ5W29": {
+    "defaultMessage": "You"
+  },
+  "lp7P7X": {
+    "defaultMessage": "Download client:"
+  },
+  "mAJmPt": {
+    "defaultMessage": "and then add execute permission:"
+  },
+  "odzcz8": {
+    "defaultMessage": "Readme:"
+  },
+  "pGI8NW": {
+    "defaultMessage": "You can specify the number of threads to be used by the client:"
+  },
+  "wSZR47": {
+    "defaultMessage": "Submit"
+  },
+  "xpTPb3": {
+    "defaultMessage": "Email:"
+  }
+}

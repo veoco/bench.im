@@ -1,0 +1,98 @@
+{
+  "+3h4wC": {
+    "defaultMessage": "服务器清单"
+  },
+  "2/2yg+": {
+    "defaultMessage": "添加"
+  },
+  "5F+c5s": {
+    "defaultMessage": "想要你自己的服务器清单？"
+  },
+  "5zD+wa": {
+    "defaultMessage": "线程（可选）："
+  },
+  "7129im": {
+    "defaultMessage": "或者（仅 aarch64）："
+  },
+  "8HJxXG": {
+    "defaultMessage": "注册"
+  },
+  "AyGauy": {
+    "defaultMessage": "登录"
+  },
+  "C81/uG": {
+    "defaultMessage": "登出"
+  },
+  "D5jzMg": {
+    "defaultMessage": "正在创建一个可编辑服务器清单"
+  },
+  "EcLAkj": {
+    "defaultMessage": "使用服务器的搜索关键字运行："
+  },
+  "F/6VqP": {
+    "defaultMessage": "服务器"
+  },
+  "FReYU2": {
+    "defaultMessage": "服务器 ID："
+  },
+  "Opkbxa": {
+    "defaultMessage": "你有 {count} 个服务器清单"
+  },
+  "Q+NxmZ": {
+    "defaultMessage": "来创建一个可编辑的服务器清单"
+  },
+  "QU0rLB": {
+    "defaultMessage": "下载："
+  },
+  "QtfopA": {
+    "defaultMessage": "再次输入密码："
+  },
+  "THKbgg": {
+    "defaultMessage": "搜索关键字可以是 id, 地区代码（必须全大写）或名称："
+  },
+  "WF8jKB": {
+    "defaultMessage": "名称："
+  },
+  "WUrxAG": {
+    "defaultMessage": "发现 0 个结果，关键字 \"{query}\""
+  },
+  "YgghdL": {
+    "defaultMessage": "使用方法："
+  },
+  "Zc7Wun": {
+    "defaultMessage": "用户名："
+  },
+  "blxvth": {
+    "defaultMessage": "正在编辑服务器清单"
+  },
+  "gcl3C7": {
+    "defaultMessage": "发现 {count} 个结果，关键字 \"{query}\""
+  },
+  "hIqPSm": {
+    "defaultMessage": "或者一个服务器清单的 id："
+  },
+  "hagaYK": {
+    "defaultMessage": "密码："
+  },
+  "kJ5W29": {
+    "defaultMessage": "你"
+  },
+  "lp7P7X": {
+    "defaultMessage": "下载客户端："
+  },
+  "mAJmPt": {
+    "defaultMessage": "然后添加执行权限"
+  },
+  "odzcz8": {
+    "defaultMessage": "介绍"
+  },
+  "pGI8NW": {
+    "defaultMessage": "你可以指定客户端使用的线程数："
+  },
+  "wSZR47": {
+    "defaultMessage": "提交"
+  },
+  "xpTPb3": {
+    "defaultMessage": "邮箱："
+  }
+}

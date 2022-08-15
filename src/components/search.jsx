@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { FormattedMessage } from "react-intl";
 import useSWR from 'swr'
 
 import ServerItem from "./server_item";
@@ -23,7 +24,7 @@ const Search = () => {
     return (
       <div>
         <div className="mx-auto sm:w-2/5 py-2 text-justify">
-          <p>Found 0 results for "{searchParams.get("q")}" {isServerList?serverListDiv:""}</p>
+          <p><FormattedMessage defaultMessage='Found 0 results for "{query}"' values={{ query: searchParams.get("q") }} /> {isServerList ? serverListDiv : ""}</p>
         </div>
       </div>
     )
@@ -32,7 +33,7 @@ const Search = () => {
   return (
     <div>
       <div className="mx-auto sm:w-2/5 py-2 text-justify">
-        <p>Found {data.count} results for "{searchParams.get("q")}" {isServerList?serverListDiv:""}</p>
+        <p><FormattedMessage defaultMessage='Found {count} results for "{query}"' values={{ count: data.count, query: searchParams.get("q") }} /> {isServerList ? serverListDiv : ""}</p>
         {data.results.map((item) => {
           if (searchParams.get("t") == "server") {
             return (
