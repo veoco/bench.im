@@ -71,7 +71,7 @@ const ServerItem = ({ item, isEdit, index, serverDict, setServerDict }) => {
   return (
     <div className="my-2 border border-gray-700 bg-white p-2 group last:mb-0 first:mt-0">
       <h3><span className="before:content-['#'] px-1 mr-2 bg-stone-200 text-gray-700">{item.pk}</span>{name}</h3>
-      <p className="text-gray-400 text-justify">{item.provider} - {item.detail.id}{cc} - {host}</p>
+      <p className="text-gray-400 text-justify">{item.provider} - {item.detail.id}{cc} - {item.detail.ipv6?"IPv6 · ":""}{host}</p>
     </div>
   )
 }
