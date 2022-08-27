@@ -2,8 +2,14 @@
   "+3h4wC": {
     "defaultMessage": "Server List"
   },
+  "/s3yB5": {
+    "defaultMessage": "State:"
+  },
   "2/2yg+": {
     "defaultMessage": "Add"
+  },
+  "47bq0M": {
+    "defaultMessage": "Token:"
   },
   "5F+c5s": {
     "defaultMessage": "Need your own server list?"
@@ -35,6 +41,18 @@
   "FReYU2": {
     "defaultMessage": "Server IDs:"
   },
+  "K3jiIE": {
+    "defaultMessage": "are editing machine task"
+  },
+  "KR1oaB": {
+    "defaultMessage": "Last modified:"
+  },
+  "NpuLmT": {
+    "defaultMessage": "User Profile"
+  },
+  "OUCgbT": {
+    "defaultMessage": "IPv6:"
+  },
   "Opkbxa": {
     "defaultMessage": "You have {count} server list"
   },
@@ -62,11 +80,20 @@
   "Zc7Wun": {
     "defaultMessage": "Username:"
   },
+  "aCFQ7D": {
+    "defaultMessage": "Machine"
+  },
   "blxvth": {
     "defaultMessage": "are editing server list"
   },
+  "dN3l6r": {
+    "defaultMessage": "Theads:"
+  },
   "gcl3C7": {
     "defaultMessage": "Found {count} results for \"{query}\""
+  },
+  "gp9z/0": {
+    "defaultMessage": "Machine Tasks"
   },
   "hIqPSm": {
     "defaultMessage": "or an id for server list:"
@@ -83,11 +110,17 @@
   "mAJmPt": {
     "defaultMessage": "and then add execute permission:"
   },
+  "oLWLyZ": {
+    "defaultMessage": "Server id:"
+  },
   "odzcz8": {
     "defaultMessage": "Readme:"
   },
   "pGI8NW": {
     "defaultMessage": "You can specify the number of threads to be used by the client:"
+  },
+  "wFnjyk": {
+    "defaultMessage": "Oneshot:"
   },
   "wSZR47": {
     "defaultMessage": "Submit"

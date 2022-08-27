@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
 import useSWR from 'swr'
 
+import Searchbar from "./searchbar";
 import ServerItem from "./server_item";
 import ServerListItem from "./server_list_item";
 
@@ -32,6 +33,7 @@ const Search = () => {
 
   return (
     <div>
+      <Searchbar />
       <div className="mx-auto sm:w-2/5 py-2 text-justify">
         <p><FormattedMessage defaultMessage='Found {count} results for "{query}"' values={{ count: data.count, query: searchParams.get("q") }} /> {isServerList ? serverListDiv : ""}</p>
         {data.results.map((item) => {

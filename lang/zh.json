@@ -2,8 +2,14 @@
   "+3h4wC": {
     "defaultMessage": "服务器清单"
   },
+  "/s3yB5": {
+    "defaultMessage": "状态："
+  },
   "2/2yg+": {
     "defaultMessage": "添加"
+  },
+  "47bq0M": {
+    "defaultMessage": "密钥："
   },
   "5F+c5s": {
     "defaultMessage": "想要你自己的服务器清单？"
@@ -35,6 +41,18 @@
   "FReYU2": {
     "defaultMessage": "服务器 ID："
   },
+  "K3jiIE": {
+    "defaultMessage": "正在编辑机器的任务"
+  },
+  "KR1oaB": {
+    "defaultMessage": "最后修改于"
+  },
+  "NpuLmT": {
+    "defaultMessage": "用户信息"
+  },
+  "OUCgbT": {
+    "defaultMessage": "IPv6："
+  },
   "Opkbxa": {
     "defaultMessage": "你有 {count} 个服务器清单"
   },
@@ -62,11 +80,20 @@
   "Zc7Wun": {
     "defaultMessage": "用户名："
   },
+  "aCFQ7D": {
+    "defaultMessage": "机器"
+  },
   "blxvth": {
     "defaultMessage": "正在编辑服务器清单"
   },
+  "dN3l6r": {
+    "defaultMessage": "线程："
+  },
   "gcl3C7": {
     "defaultMessage": "发现 {count} 个结果，关键字 \"{query}\""
+  },
+  "gp9z/0": {
+    "defaultMessage": "机器任务"
   },
   "hIqPSm": {
     "defaultMessage": "或者一个服务器清单的 id："
@@ -83,11 +110,17 @@
   "mAJmPt": {
     "defaultMessage": "然后添加执行权限"
   },
+  "oLWLyZ": {
+    "defaultMessage": "服务器 ID："
+  },
   "odzcz8": {
     "defaultMessage": "介绍"
   },
   "pGI8NW": {
     "defaultMessage": "你可以指定客户端使用的线程数："
+  },
+  "wFnjyk": {
+    "defaultMessage": "一次性："
   },
   "wSZR47": {
     "defaultMessage": "提交"

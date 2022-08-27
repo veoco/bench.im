@@ -5,10 +5,22 @@
       "value": "Server List"
     }
   ],
+  "/s3yB5": [
+    {
+      "type": 0,
+      "value": "State:"
+    }
+  ],
   "2/2yg+": [
     {
       "type": 0,
       "value": "Add"
+    }
+  ],
+  "47bq0M": [
+    {
+      "type": 0,
+      "value": "Token:"
     }
   ],
   "5F+c5s": [
@@ -69,6 +81,30 @@
     {
       "type": 0,
       "value": "Server IDs:"
+    }
+  ],
+  "K3jiIE": [
+    {
+      "type": 0,
+      "value": "are editing machine task"
+    }
+  ],
+  "KR1oaB": [
+    {
+      "type": 0,
+      "value": "Last modified:"
+    }
+  ],
+  "NpuLmT": [
+    {
+      "type": 0,
+      "value": "User Profile"
+    }
+  ],
+  "OUCgbT": [
+    {
+      "type": 0,
+      "value": "IPv6:"
     }
   ],
   "Opkbxa": [
@@ -141,10 +177,22 @@
       "value": "Username:"
     }
   ],
+  "aCFQ7D": [
+    {
+      "type": 0,
+      "value": "Machine"
+    }
+  ],
   "blxvth": [
     {
       "type": 0,
       "value": "are editing server list"
+    }
+  ],
+  "dN3l6r": [
+    {
+      "type": 0,
+      "value": "Theads:"
     }
   ],
   "gcl3C7": [
@@ -167,6 +215,12 @@
     {
       "type": 0,
       "value": "\""
+    }
+  ],
+  "gp9z/0": [
+    {
+      "type": 0,
+      "value": "Machine Tasks"
     }
   ],
   "hIqPSm": [
@@ -199,6 +253,12 @@
       "value": "and then add execute permission:"
     }
   ],
+  "oLWLyZ": [
+    {
+      "type": 0,
+      "value": "Server id:"
+    }
+  ],
   "odzcz8": [
     {
       "type": 0,
@@ -209,6 +269,12 @@
     {
       "type": 0,
       "value": "You can specify the number of threads to be used by the client:"
+    }
+  ],
+  "wFnjyk": [
+    {
+      "type": 0,
+      "value": "Oneshot:"
     }
   ],
   "wSZR47": [
