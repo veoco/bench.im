@@ -51,7 +51,6 @@ const My = () => {
   return (
     <div>
       <div className="mx-auto sm:w-2/5 py-2 text-justify">
-        <p><FormattedMessage defaultMessage="You have {count} server list" values={{ count: data.server_list.count }} /><Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
         <button className='bg-white border border-gray-700 p-2 w-full my-2' onClick={handleLogout}><FormattedMessage defaultMessage="Logout" /></button>
         <div><FormattedMessage defaultMessage="User Profile" /></div>
         <div className="my-2 border border-gray-700 bg-white p-2 leading-8">
@@ -60,12 +59,13 @@ const My = () => {
           <p><FormattedMessage defaultMessage="Token:" /> {data.user.token}</p>
         </div>
         <div><FormattedMessage defaultMessage="Machine" /></div>
+        {data.machine.count > 0 ? "" : <div className="my-2 p-2 border border-gray-700 bg-white">Run: ./bim -d {data.user.email}:{data.user.token}</div>}
         {data.machine.results.map((item) => {
           return (
             <MachineItem item={item} key={item.pk} />
           )
         })}
-        <div><FormattedMessage defaultMessage="Server List" /></div>
+        <div><FormattedMessage defaultMessage="You have {count} server list" values={{ count: data.server_list.count }} /><Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></div>
         {data.server_list.results.map((item) => {
           return (
             <ServerListItem item={item} key={item.pk} />
