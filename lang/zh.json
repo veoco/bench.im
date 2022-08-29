@@ -2,9 +2,6 @@
   "+3h4wC": {
     "defaultMessage": "服务器清单"
   },
-  "/s3yB5": {
-    "defaultMessage": "状态："
-  },
   "2/2yg+": {
     "defaultMessage": "添加"
   },
@@ -41,11 +38,8 @@
   "FReYU2": {
     "defaultMessage": "服务器 ID："
   },
-  "K3jiIE": {
-    "defaultMessage": "正在编辑机器的任务"
-  },
   "KR1oaB": {
-    "defaultMessage": "最后修改于"
+    "defaultMessage": "修改于"
   },
   "NpuLmT": {
     "defaultMessage": "用户信息"
@@ -82,6 +76,9 @@
   },
   "aCFQ7D": {
     "defaultMessage": "机器"
+  },
+  "bS4//q": {
+    "defaultMessage": "创建于："
   },
   "blxvth": {
     "defaultMessage": "正在编辑服务器清单"
@@ -124,6 +121,9 @@
   },
   "wSZR47": {
     "defaultMessage": "提交"
+  },
+  "xKiz/X": {
+    "defaultMessage": "正在运行 {count} 个任务"
   },
   "xpTPb3": {
     "defaultMessage": "邮箱："

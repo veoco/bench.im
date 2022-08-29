@@ -2,9 +2,6 @@
   "+3h4wC": {
     "defaultMessage": "Server List"
   },
-  "/s3yB5": {
-    "defaultMessage": "State:"
-  },
   "2/2yg+": {
     "defaultMessage": "Add"
   },
@@ -40,9 +37,6 @@
   },
   "FReYU2": {
     "defaultMessage": "Server IDs:"
-  },
-  "K3jiIE": {
-    "defaultMessage": "are editing machine task"
   },
   "KR1oaB": {
     "defaultMessage": "Last modified:"
@@ -83,6 +77,9 @@
   "aCFQ7D": {
     "defaultMessage": "Machine"
   },
+  "bS4//q": {
+    "defaultMessage": "Created:"
+  },
   "blxvth": {
     "defaultMessage": "are editing server list"
   },
@@ -119,11 +116,11 @@
   "pGI8NW": {
     "defaultMessage": "You can specify the number of threads to be used by the client:"
   },
-  "wFnjyk": {
-    "defaultMessage": "Oneshot:"
-  },
   "wSZR47": {
     "defaultMessage": "Submit"
+  },
+  "xKiz/X": {
+    "defaultMessage": "Running {count} tasks"
   },
   "xpTPb3": {
     "defaultMessage": "Email:"

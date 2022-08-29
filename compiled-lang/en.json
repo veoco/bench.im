@@ -5,12 +5,6 @@
       "value": "Server List"
     }
   ],
-  "/s3yB5": [
-    {
-      "type": 0,
-      "value": "State:"
-    }
-  ],
   "2/2yg+": [
     {
       "type": 0,
@@ -81,12 +75,6 @@
     {
       "type": 0,
       "value": "Server IDs:"
-    }
-  ],
-  "K3jiIE": [
-    {
-      "type": 0,
-      "value": "are editing machine task"
     }
   ],
   "KR1oaB": [
@@ -183,6 +171,12 @@
       "value": "Machine"
     }
   ],
+  "bS4//q": [
+    {
+      "type": 0,
+      "value": "Created:"
+    }
+  ],
   "blxvth": [
     {
       "type": 0,
@@ -271,16 +265,24 @@
       "value": "You can specify the number of threads to be used by the client:"
     }
   ],
-  "wFnjyk": [
-    {
-      "type": 0,
-      "value": "Oneshot:"
-    }
-  ],
   "wSZR47": [
     {
       "type": 0,
       "value": "Submit"
+    }
+  ],
+  "xKiz/X": [
+    {
+      "type": 0,
+      "value": "Running "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " tasks"
     }
   ],
   "xpTPb3": [
