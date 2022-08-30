@@ -9,9 +9,22 @@ const MachineTaskItem = ({ item }) => {
 
   const modified = new Date(item.modified);
   const colors = {
-    "Wait": "bg-amber-400",
-    "Work": "bg-emerald-400",
-    "Finish": "bg-red-400"
+    "Wait": "bg-yellow-500",
+    "Work": "bg-emerald-500",
+    "Finish": "bg-red-500"
+  }
+
+  let name, thread;
+  if (item.server.provider == "Ookla") {
+    name = `${item.server.detail.sponsor} - ${item.server.detail.name}`;
+  } else if (item.provider == "LibreSpeed") {
+    name = `${item.server.detail.sponsorName} - ${item.server.detail.name}`;
+  }
+
+  if(item.detail.thread == 1){
+    thread = <FormattedMessage defaultMessage="Single thread" />
+  } else {
+    thread = <FormattedMessage defaultMessage='{t} threads' values={{ t: item.detail.thread }} />
   }
 
   const handleStop = async (e) => {
@@ -53,12 +66,14 @@ const MachineTaskItem = ({ item }) => {
     <div className="my-2 border border-gray-700 bg-white p-2 group">
       <h3>
         <span className={`before:content-['#'] px-1 mr-2 text-white ${colors[item.state]}`}>{item.pk}</span>
-        <Link to={`/machine/${item.machine_id}/task/${item.pk}/`}>{item.detail.server}</Link>
+        <Link to={`/machine/${item.machine_id}/task/${item.pk}/`}>{item.server.pk} - {name}</Link>
         {item.state == "Finish" ? "" : <button className="float-right invisible group-hover:visible" onClick={handleStop}>🛑</button>}
       </h3>
-      <div className="text-gray-400">
+      <div className="text-gray-400 text-sm">
         <FormattedMessage defaultMessage="Last modified:" />
         <span> {modified.toLocaleString()}</span>
+        <span> - {thread}</span>
+        {item.detail.ipv6?<span> - IPv6</span>:""}
       </div>
       {item["3h"] ? <MachineTaskChart item={item} name="3h" /> : ""}
       {item["30h"] ? <MachineTaskChart item={item} name="30h" /> : ""}
