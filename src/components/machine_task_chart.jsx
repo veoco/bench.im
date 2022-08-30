@@ -6,15 +6,13 @@ import { FormattedMessage } from "react-intl";
 const MachineTaskChart = ({ item, name }) => {
   const data = [];
   const title = {
-    "3h": <FormattedMessage defaultMessage="Last 3 hours" />,
     "30h": <FormattedMessage defaultMessage="Last 30 hours" />,
     "10d": <FormattedMessage defaultMessage="Last 10 days" />,
     "360d": <FormattedMessage defaultMessage="Last 360 days" />
   }
   const fmt = {
-    "3h": "HH:mm",
     "30h": "DD HH:mm",
-    "10d": "MM/DD",
+    "10d": "MM/DD HH:mm",
     "360d": "YY MM/DD"
   }
   let speed_max = 100;
@@ -59,7 +57,7 @@ const MachineTaskChart = ({ item, name }) => {
         return val + ' Mbps';
       },
       nice: true,
-      tickCount: 5,
+      tickCount: 12,
       max: speed_max,
       min: 0
     },
@@ -69,14 +67,14 @@ const MachineTaskChart = ({ item, name }) => {
       formatter: (val) => {
         return val + ' ms';
       },
-      tickCount: 5,
+      tickCount: 12,
       max: ping_max,
       min: 0
     },
     hour: {
       alias: "Time",
       type: "time",
-      tickCount: 18,
+      tickCount: 30,
       mask: fmt[name],
       nice: true
     },
@@ -85,15 +83,15 @@ const MachineTaskChart = ({ item, name }) => {
   const axisConfig = {
     line: {
       style: {
-        stroke: '#ccc',
-        lineDash: [3, 3],
+        stroke: '#c3c3c3',
+        lineDash: [1, 1],
       }
     },
     grid: {
       line: {
         style: {
-          stroke: '#ccc',
-          lineDash: [3, 3],
+          stroke: '#c3c3c3',
+          lineDash: [1, 1],
         },
       }
     },
