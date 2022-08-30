@@ -69,6 +69,7 @@ const MachineTaskChart = ({ item, name }) => {
     hour: {
       alias: "Time",
       type: "timeCat",
+      tickCount: 19,
       mask: fmt[name],
       nice: true
     },
