@@ -1,9 +1,16 @@
 import { Chart, Geom, Axis, LineAdvance } from "bizcharts";
 import DataSet from '@antv/data-set';
+import { FormattedMessage } from "react-intl";
 
 
 const MachineTaskChart = ({ item, name }) => {
   const data = [];
+  const title = {
+    "3h": <FormattedMessage defaultMessage="Last 3 hours" />,
+    "30h": <FormattedMessage defaultMessage="Last 30 hours" />,
+    "10d": <FormattedMessage defaultMessage="Last 10 days" />,
+    "360d": <FormattedMessage defaultMessage="Last 360 days" />
+  }
   const fmt = {
     "3h": "HH:mm",
     "30h": "DD HH:mm",
@@ -27,7 +34,7 @@ const MachineTaskChart = ({ item, name }) => {
     if (download) {
       r.download = download;
       speed_max = speed_max < 1000 && download > 100 ? 1000 : speed_max;
-      speed_max = speed_max < 10000 && download > 1000 ? 10000: speed_max;
+      speed_max = speed_max < 10000 && download > 1000 ? 10000 : speed_max;
     }
     if (ping) {
       r.ping = ping;
@@ -93,13 +100,16 @@ const MachineTaskChart = ({ item, name }) => {
   }
 
   return (
-    <Chart className="border border-gray-700 p-2 pt-2 pb-0 mt-2" height={200} data={dv.rows} scale={scale} autoFit>
-      <Axis name="hour" {...axisConfig} />
-      <Axis name="value" {...axisConfig} />
-      <Axis name="ping" {...axisConfig} />
-      <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral"]]} area />
-      <LineAdvance type="line" position="hour*ping" size={1} color={"green"} shape={"hv"} />
-    </Chart>
+    <div className="border border-gray-700 px-2 mt-2">
+      <h4 className="text-center my-1 text-sm text-gray-700">{title[name]}</h4>
+      <Chart height={200} data={dv.rows} scale={scale} autoFit>
+        <Axis name="hour" {...axisConfig} />
+        <Axis name="value" {...axisConfig} />
+        <Axis name="ping" {...axisConfig} />
+        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral"]]} area />
+        <LineAdvance type="line" position="hour*ping" size={1} color={"green"} shape={"hv"} />
+      </Chart>
+    </div>
   )
 }
 
