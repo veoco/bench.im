@@ -110,6 +110,9 @@
   "kJ5W29": {
     "defaultMessage": "You"
   },
+  "l6mufx": {
+    "defaultMessage": "{t} threads"
+  },
   "lp7P7X": {
     "defaultMessage": "Download client:"
   },
@@ -124,6 +127,9 @@
   },
   "pGI8NW": {
     "defaultMessage": "You can specify the number of threads to be used by the client:"
+  },
+  "pNizLL": {
+    "defaultMessage": "Single thread"
   },
   "wSZR47": {
     "defaultMessage": "Submit"

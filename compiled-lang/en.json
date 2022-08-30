@@ -253,6 +253,16 @@
       "value": "You"
     }
   ],
+  "l6mufx": [
+    {
+      "type": 1,
+      "value": "t"
+    },
+    {
+      "type": 0,
+      "value": " threads"
+    }
+  ],
   "lp7P7X": [
     {
       "type": 0,
@@ -281,6 +291,12 @@
     {
       "type": 0,
       "value": "You can specify the number of threads to be used by the client:"
+    }
+  ],
+  "pNizLL": [
+    {
+      "type": 0,
+      "value": "Single thread"
     }
   ],
   "wSZR47": [
