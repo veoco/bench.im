@@ -17,6 +17,9 @@
   "7129im": {
     "defaultMessage": "or (for aarch64):"
   },
+  "7363TX": {
+    "defaultMessage": "Last 30 hours"
+  },
   "8HJxXG": {
     "defaultMessage": "Sign up"
   },
@@ -37,6 +40,12 @@
   },
   "FReYU2": {
     "defaultMessage": "Server IDs:"
+  },
+  "GSuJjD": {
+    "defaultMessage": "Last 360 days"
+  },
+  "IkMMKr": {
+    "defaultMessage": "Last 10 days"
   },
   "KR1oaB": {
     "defaultMessage": "Last modified:"
@@ -115,6 +124,9 @@
   },
   "pGI8NW": {
     "defaultMessage": "You can specify the number of threads to be used by the client:"
+  },
+  "v9l1xq": {
+    "defaultMessage": "Last 3 hours"
   },
   "wSZR47": {
     "defaultMessage": "Submit"

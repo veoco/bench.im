@@ -17,6 +17,9 @@
   "7129im": {
     "defaultMessage": "或者（仅 aarch64）："
   },
+  "7363TX": {
+    "defaultMessage": "前 30 小时"
+  },
   "8HJxXG": {
     "defaultMessage": "注册"
   },
@@ -37,6 +40,12 @@
   },
   "FReYU2": {
     "defaultMessage": "服务器 ID："
+  },
+  "GSuJjD": {
+    "defaultMessage": "前 360 天"
+  },
+  "IkMMKr": {
+    "defaultMessage": "前 10 天"
   },
   "KR1oaB": {
     "defaultMessage": "修改于"
@@ -115,6 +124,9 @@
   },
   "pGI8NW": {
     "defaultMessage": "你可以指定客户端使用的线程数："
+  },
+  "v9l1xq": {
+    "defaultMessage": "前 3 小时"
   },
   "wFnjyk": {
     "defaultMessage": "一次性："
