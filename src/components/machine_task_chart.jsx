@@ -1,4 +1,4 @@
-import { Chart, Geom, Axis, LineAdvance } from "bizcharts";
+import { Chart, Legend, Axis, LineAdvance } from "bizcharts";
 import DataSet from '@antv/data-set';
 import { FormattedMessage } from "react-intl";
 
@@ -15,8 +15,7 @@ const MachineTaskChart = ({ item, name }) => {
     "10d": "MM/DD HH:mm",
     "360d": "YY MM/DD"
   }
-  let speed_max = 100;
-  let ping_max = 300;
+  let yMax = 100;
   for (const row of item[name]) {
     const hour = new Date(row[0] * 1000);
     const upload = row[1];
@@ -24,19 +23,16 @@ const MachineTaskChart = ({ item, name }) => {
     const ping = row[3]
 
     const r = { "hour": hour };
-    if (upload) {
-      r.upload = upload;
-      speed_max = speed_max < 1000 && upload > 100 ? 1000 : speed_max;
-      speed_max = speed_max < 10000 && upload > 1000 ? 10000 : speed_max;
-    }
-    if (download) {
-      r.download = download;
-      speed_max = speed_max < 1000 && download > 100 ? 1000 : speed_max;
-      speed_max = speed_max < 10000 && download > 1000 ? 10000 : speed_max;
-    }
     if (ping) {
-      r.ping = ping;
-      ping_max = ping_max < 1000 && ping > 300 ? 1000 : ping_max;
+      r.Upload = upload;
+      r.Download = download;
+      r.Latency = ping;
+      yMax = yMax < 1000 && upload > 100 ? 1000 : yMax;
+      yMax = yMax < 10000 && upload > 1000 ? 10000 : yMax;
+      yMax = yMax < 1000 && download > 100 ? 1000 : yMax;
+      yMax = yMax < 10000 && download > 1000 ? 10000 : yMax;
+      yMax = yMax < 1000 && ping > 100 ? 1000 : yMax;
+      yMax = yMax < 10000 && ping > 1000 ? 10000 : yMax;
     }
     data.push(r);
   }
@@ -44,7 +40,7 @@ const MachineTaskChart = ({ item, name }) => {
   const dv = new DataSet.View().source(data);
   dv.transform({
     type: "fold",
-    fields: ["upload", "download"],
+    fields: ["Upload", "Download", "Latency"],
     key: "key",
     value: "value"
   });
@@ -53,22 +49,9 @@ const MachineTaskChart = ({ item, name }) => {
     value: {
       alias: "Speed",
       type: 'linear-strict',
-      formatter: (val) => {
-        return val + ' Mbps';
-      },
       nice: true,
-      tickCount: 12,
-      max: speed_max,
-      min: 0
-    },
-    ping: {
-      alias: "Latency",
-      type: 'linear-strict',
-      formatter: (val) => {
-        return val + ' ms';
-      },
-      tickCount: 12,
-      max: ping_max,
+      tickCount: 11,
+      max: yMax,
       min: 0
     },
     hour: {
@@ -97,15 +80,21 @@ const MachineTaskChart = ({ item, name }) => {
     },
   }
 
+  const toolTip = ['hour*value*key', (hour, value, key) => {
+    return {
+      title: `${hour.toLocaleString()}`,
+      name: `${key}`,
+      value: key=="Latency"?`${value} ms`: `${value} Mbps`
+    }
+ }]
+
   return (
     <div className="border border-gray-700 px-2 mt-2">
       <h4 className="text-center my-1 text-sm text-gray-700">{title[name]}</h4>
       <Chart height={200} data={dv.rows} scale={scale} autoFit>
         <Axis name="hour" {...axisConfig} />
         <Axis name="value" {...axisConfig} />
-        <Axis name="ping" {...axisConfig} />
-        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral"]]} area />
-        <LineAdvance type="line" position="hour*ping" size={1} color={"green"} shape={"hv"} />
+        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral", "lightgreen"]]} tooltip={toolTip} area />
       </Chart>
     </div>
   )
