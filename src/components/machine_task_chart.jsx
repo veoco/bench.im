@@ -88,9 +88,9 @@ const MachineTaskChart = ({ item, name }) => {
     return {
       title: `${hour.toLocaleString()}`,
       name: `${key}`,
-      value: key=="Latency"?`${value} ms`: `${value} Mbps`
+      value: key == "Latency" || key == "Jitter" ? `${value} ms` : `${value} Mbps`
     }
- }]
+  }]
 
   return (
     <div className="border border-gray-700 px-2 mt-2">
