@@ -36,7 +36,11 @@ const Login = () => {
     if (!r.ok) {
       if (r.status == 400) {
         const res = await r.json();
-        alert(`Invalid: ${res.msg}`);
+        let msg = "";
+        for (let k in res.msg) {
+          msg += k + " - " + res.msg[k];
+        }
+        alert(`Invalid: ${msg}`);
         return;
       }
       alert("Server Error! Please refresh the page and try again.")
