@@ -21,18 +21,22 @@ const MachineTaskChart = ({ item, name }) => {
     const upload = row[1];
     const download = row[2];
     const ping = row[3]
+    const jitter = row[4]
 
     const r = { "hour": hour };
     if (ping) {
       r.Upload = upload;
       r.Download = download;
       r.Latency = ping;
+      r.Jitter = jitter;
       yMax = yMax < 1000 && upload > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && upload > 1000 ? 10000 : yMax;
       yMax = yMax < 1000 && download > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && download > 1000 ? 10000 : yMax;
       yMax = yMax < 1000 && ping > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && ping > 1000 ? 10000 : yMax;
+      yMax = yMax < 1000 && jitter > 100 ? 1000 : yMax;
+      yMax = yMax < 10000 && jitter > 1000 ? 10000 : yMax;
     }
     data.push(r);
   }
@@ -40,7 +44,7 @@ const MachineTaskChart = ({ item, name }) => {
   const dv = new DataSet.View().source(data);
   dv.transform({
     type: "fold",
-    fields: ["Upload", "Download", "Latency"],
+    fields: ["Upload", "Download", "Latency", "Jitter"],
     key: "key",
     value: "value"
   });
@@ -94,7 +98,7 @@ const MachineTaskChart = ({ item, name }) => {
       <Chart height={200} data={dv.rows} scale={scale} autoFit>
         <Axis name="hour" {...axisConfig} />
         <Axis name="value" {...axisConfig} />
-        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral", "lightgreen"]]} tooltip={toolTip} area />
+        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral", "lightgreen", "black"]]} tooltip={toolTip} area />
       </Chart>
     </div>
   )
