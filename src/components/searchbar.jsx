@@ -29,6 +29,9 @@ const Searchbar = () => {
         <input className="w-7/12 sm:w-8/12 border-x-0 focus:ring-0 focus:border-gray-700" type="text" placeholder={queryType == "server" ? "id, country code or name" : "id, name or readme"} value={query} onChange={(e) => { setQuery(e.target.value) }} />
         <button className="w-1/6 sm:w-1/12 border border-l-0 border-gray-700 bg-white p-2" type="submit">🔍</button>
       </form>
+      <div className="mx-auto my-2 sm:w-2/5">
+        <p className="leading-4"><Link className="text-sm bg-white w-5 mr-2 text-center border border-gray-700 px-1" to="/my/">U</Link><FormattedMessage defaultMessage="Need your own server list?" /> ➡️ <Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></p>
+      </div>
     </div>
 
   )
