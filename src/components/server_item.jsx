@@ -9,7 +9,7 @@ const ServerItem = ({ item, isEdit, index, serverDict, setServerDict }) => {
     cc = ' · ' + item.detail.cc
   } else if (item.provider == "LibreSpeed") {
     name = `${item.detail.sponsorName} - ${item.detail.name}`;
-    host = item.detail.server;
+    host = item.detail.dl;
     cc = "";
   }
 
