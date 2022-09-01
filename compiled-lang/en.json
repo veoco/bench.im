@@ -5,6 +5,12 @@
       "value": "Server List"
     }
   ],
+  "/7vjb7": [
+    {
+      "type": 0,
+      "value": "Upload Url:"
+    }
+  ],
   "2/2yg+": [
     {
       "type": 0,
@@ -253,6 +259,12 @@
       "value": "You"
     }
   ],
+  "kZ4miP": [
+    {
+      "type": 0,
+      "value": "are editing server"
+    }
+  ],
   "l6mufx": [
     {
       "type": 1,
@@ -299,6 +311,12 @@
       "value": "Single thread"
     }
   ],
+  "rR474Z": [
+    {
+      "type": 0,
+      "value": "are creating a editable server"
+    }
+  ],
   "wSZR47": [
     {
       "type": 0,
@@ -319,10 +337,28 @@
       "value": " tasks"
     }
   ],
+  "xkF2z2": [
+    {
+      "type": 0,
+      "value": "Sponsor Name:"
+    }
+  ],
   "xpTPb3": [
     {
       "type": 0,
       "value": "Email:"
+    }
+  ],
+  "y7MS0I": [
+    {
+      "type": 0,
+      "value": "to create a editable server"
+    }
+  ],
+  "yvJUuH": [
+    {
+      "type": 0,
+      "value": "Download Url:"
     }
   ]
 }

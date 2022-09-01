@@ -2,6 +2,9 @@
   "+3h4wC": {
     "defaultMessage": "服务器清单"
   },
+  "/7vjb7": {
+    "defaultMessage": "上传网址："
+  },
   "2/2yg+": {
     "defaultMessage": "添加"
   },
@@ -110,6 +113,9 @@
   "kJ5W29": {
     "defaultMessage": "你"
   },
+  "kZ4miP": {
+    "defaultMessage": "正在编辑服务器"
+  },
   "l6mufx": {
     "defaultMessage": "{t} 线程"
   },
@@ -131,13 +137,25 @@
   "pNizLL": {
     "defaultMessage": "单线程"
   },
+  "rR474Z": {
+    "defaultMessage": "正在创建一个可编辑的服务器"
+  },
   "wSZR47": {
     "defaultMessage": "提交"
   },
   "xKiz/X": {
     "defaultMessage": "正在运行 {count} 个任务"
   },
+  "xkF2z2": {
+    "defaultMessage": "赞助商名称："
+  },
   "xpTPb3": {
     "defaultMessage": "邮箱："
+  },
+  "y7MS0I": {
+    "defaultMessage": "来创建一个可编辑的服务器"
+  },
+  "yvJUuH": {
+    "defaultMessage": "下载网址："
   }
 }

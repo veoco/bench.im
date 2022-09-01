@@ -2,6 +2,9 @@
   "+3h4wC": {
     "defaultMessage": "Server List"
   },
+  "/7vjb7": {
+    "defaultMessage": "Upload Url:"
+  },
   "2/2yg+": {
     "defaultMessage": "Add"
   },
@@ -110,6 +113,9 @@
   "kJ5W29": {
     "defaultMessage": "You"
   },
+  "kZ4miP": {
+    "defaultMessage": "are editing server"
+  },
   "l6mufx": {
     "defaultMessage": "{t} threads"
   },
@@ -131,13 +137,25 @@
   "pNizLL": {
     "defaultMessage": "Single thread"
   },
+  "rR474Z": {
+    "defaultMessage": "are creating a editable server"
+  },
   "wSZR47": {
     "defaultMessage": "Submit"
   },
   "xKiz/X": {
     "defaultMessage": "Running {count} tasks"
   },
+  "xkF2z2": {
+    "defaultMessage": "Sponsor Name:"
+  },
   "xpTPb3": {
     "defaultMessage": "Email:"
+  },
+  "y7MS0I": {
+    "defaultMessage": "to create a editable server"
+  },
+  "yvJUuH": {
+    "defaultMessage": "Download Url:"
   }
 }
