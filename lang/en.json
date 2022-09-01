@@ -11,9 +11,6 @@
   "47bq0M": {
     "defaultMessage": "Token:"
   },
-  "5F+c5s": {
-    "defaultMessage": "Need your own server list?"
-  },
   "5zD+wa": {
     "defaultMessage": "Threads (Optional):"
   },
@@ -157,6 +154,9 @@
   },
   "y7MS0I": {
     "defaultMessage": "to create a editable server"
+  },
+  "yggiJE": {
+    "defaultMessage": "Need your own?"
   },
   "yvJUuH": {
     "defaultMessage": "Download Url:"

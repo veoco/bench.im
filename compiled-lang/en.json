@@ -23,12 +23,6 @@
       "value": "Token:"
     }
   ],
-  "5F+c5s": [
-    {
-      "type": 0,
-      "value": "Need your own server list?"
-    }
-  ],
   "5zD+wa": [
     {
       "type": 0,
@@ -367,6 +361,12 @@
     {
       "type": 0,
       "value": "to create a editable server"
+    }
+  ],
+  "yggiJE": [
+    {
+      "type": 0,
+      "value": "Need your own?"
     }
   ],
   "yvJUuH": [
