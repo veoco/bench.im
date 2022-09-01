@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import { useNavigate, Link } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
 
+import ServerItem from "./server_item";
 import ServerListItem from "./server_list_item";
 import MachineItem from "./machine_item";
 
@@ -63,6 +64,12 @@ const My = () => {
         {data.machine.results.map((item) => {
           return (
             <MachineItem item={item} key={item.pk} />
+          )
+        })}
+        <div><FormattedMessage defaultMessage="You have {count} server" values={{ count: data.server.count }} /><Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server/">+</Link></div>
+        {data.server.results.map((item) => {
+          return (
+            <ServerItem item={item} key={item.pk} />
           )
         })}
         <div><FormattedMessage defaultMessage="You have {count} server list" values={{ count: data.server_list.count }} /><Link className="text-sm float-right bg-white w-5 text-center border border-gray-700" to="/server_list/">+</Link></div>
