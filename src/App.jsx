@@ -4,6 +4,8 @@ import { IntlProvider, FormattedMessage } from "react-intl";
 
 import Home from "./components/home"
 import Search from "./components/search";
+import Server from "./components/server";
+import ServerCreate from "./components/server_create";
 import ServerList from "./components/server_list";
 import ServerListCreate from "./components/server_list_create";
 import Login from "./components/login";
@@ -50,6 +52,8 @@ function App(props) {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search/" element={<Search />} />
+          <Route path="/server/" element={<ServerCreate />} />
+          <Route path="/server/:serverId/" element={<Server />} />
           <Route path="/server_list/" element={<ServerListCreate />} />
           <Route path="/server_list/:serverListId/" element={<ServerList />} />
           <Route path="/machine/:uuid/" element={<Machine />} />
