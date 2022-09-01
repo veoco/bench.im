@@ -101,6 +101,20 @@
       "value": "Last 10 days"
     }
   ],
+  "JEQo9b": [
+    {
+      "type": 0,
+      "value": "You have "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " server"
+    }
+  ],
   "KR1oaB": [
     {
       "type": 0,
