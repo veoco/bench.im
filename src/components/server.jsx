@@ -1,10 +1,8 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import useSWR from 'swr'
-import { FormattedMessage } from "react-intl";
 
 import Searchbar from "./searchbar";
-import ServerItem from "./server_item";
 
 const Server = () => {
   let params = useParams();
@@ -27,7 +25,7 @@ const Server = () => {
     cc = ' · ' + data.detail.cc
   } else if (data.provider == "LibreSpeed") {
     name = `${data.detail.sponsorName} - ${data.detail.name}`;
-    host = data.detail.server;
+    host = data.detail.dl;
     cc = "";
   }
   const created = new Date(data.created);
