@@ -17,9 +17,14 @@ const Searchbar = () => {
     <div>
       <div className="text-center my-2">
         <p><FormattedMessage defaultMessage="Download:" /></p>
-        <nav className="underline">
-          <Link className="mx-2" to="/dl/linux/x86_64/bim" reloadDocument>x86_64</Link>
-          <Link className="mx-2" to="/dl/linux/aarch64/bim" reloadDocument>aarch64</Link>
+        <nav>
+          <span>Linux: </span>
+          <Link className="mx-2 underline" to="/dl/linux/loongarch64/bim" reloadDocument>loongarch64</Link>
+          <Link className="mx-2 underline" to="/dl/linux/x86_64/bim" reloadDocument>x86_64</Link>
+          <Link className="mx-2 underline" to="/dl/linux/aarch64/bim" reloadDocument>aarch64</Link>
+          <span>Others: </span>
+          <Link className="mx-2 underline" to="/dl/windows/bim.exe" reloadDocument>windows</Link>
+          <Link className="mx-2 underline" to="/dl/macos/bim" reloadDocument>macos</Link>
         </nav>
       </div>
       <form className="mx-auto sm:w-2/5" onSubmit={handleSearch}>
