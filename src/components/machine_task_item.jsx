@@ -17,7 +17,7 @@ const MachineTaskItem = ({ item }) => {
   let name, thread;
   if (item.server.provider == "Ookla") {
     name = `${item.server.detail.sponsor} - ${item.server.detail.name}`;
-  } else if (item.provider == "LibreSpeed") {
+  } else if (item.server.provider == "LibreSpeed") {
     name = `${item.server.detail.sponsorName} - ${item.server.detail.name}`;
   }
 
