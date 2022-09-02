@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import useSWR from 'swr'
 import { useNavigate, Link } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import ServerItem from "./server_item";
 import ServerListItem from "./server_list_item";
@@ -10,6 +10,7 @@ import MachineItem from "./machine_item";
 const My = () => {
   const { data, error } = useSWR(`/api/my/`);
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const logined = new Date(localStorage.getItem('logined'));
   const now = new Date();
@@ -18,7 +19,8 @@ const My = () => {
   }
 
   useEffect(() => {
-    document.title = `My - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'My' });
+    document.title = `${title} - Bench.im`;
     const logined = new Date(localStorage.getItem('logined'));
     const now = new Date();
     if ((now - logined) > 14 * 86400000) {
@@ -39,10 +41,12 @@ const My = () => {
     if (!r.ok) {
       if (r.status == 400) {
         const res = await r.json();
-        alert(`Invalid: ${res.msg}`);
+        const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+        alert(`${invalid}: ${res.msg}`);
         return;
       }
-      alert("Server Error! Please refresh the page and try again.")
+      const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+      alert(server_error);
       return;
     }
     localStorage.removeItem('logined');

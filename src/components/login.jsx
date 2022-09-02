@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const intl = useIntl();
 
   useEffect(() => {
-    document.title = `Login - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'Login' });
+    document.title = `${title} - Bench.im`;
     const logined = new Date(localStorage.getItem('logined'));
     const now = new Date();
     if ((now - logined) < 14 * 86400000) {
@@ -26,29 +28,37 @@ const Login = () => {
       "email": email,
       "password": password
     }
-    const r = await fetch("/api/login/", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    if (!r.ok) {
-      if (r.status == 400) {
-        const res = await r.json();
-        let msg = "";
-        for (let k in res.msg) {
-          msg += k + " - " + res.msg[k];
+    try {
+      const r = await fetch("/api/login/", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      if (!r.ok) {
+        if (r.status == 400) {
+          const res = await r.json();
+          let msg = "";
+          for (let k in res.msg) {
+            msg += k + " - " + res.msg[k];
+          }
+          const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+          alert(`${invalid} ${msg}`);
+          return;
         }
-        alert(`Invalid: ${msg}`);
+        const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+        alert(server_error);
         return;
       }
-      alert("Server Error! Please refresh the page and try again.")
-      return;
+      const now = new Date();
+      localStorage.setItem('logined', now.toUTCString());
+      navigate(`/my/`);
     }
-    const now = new Date();
-    localStorage.setItem('logined', now.toUTCString());
-    navigate(`/my/`);
+    catch (err) {
+      const network_error = intl.formatMessage({ defaultMessage: "Network Error! Please refresh the page and try again." });
+      alert(network_error)
+    }
   }
 
   return (

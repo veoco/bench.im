@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const ServerListItem = ({ item }) => {
   const created = new Date(item.created);
   const modified = new Date(item.modified);
-  const readme = {"__html": item.readme}
+  const readme = { "__html": item.readme }
 
   return (
     <div className="my-2 border border-gray-700 bg-white p-2">

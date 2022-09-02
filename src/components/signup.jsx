@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Signup = () => {
   const [username, setUsername] = useState('');
@@ -8,9 +8,12 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const navigate = useNavigate();
+  const intl = useIntl();
 
   useEffect(() => {
-    document.title = `Sign up - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'Sign up' });
+    document.title = `${title} - Bench.im`;
+
     const logined = new Date(localStorage.getItem('logined'));
     const now = new Date();
     if ((now - logined) < 14 * 86400000) {
@@ -21,7 +24,8 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password != password2) {
-      alert("The two passwords do not match.");
+      const passwd = intl.formatMessage({ defaultMessage: 'The two passwords do not match' });
+      alert(`${passwd}`);
       return;
     }
     const data = {
@@ -43,10 +47,12 @@ const Signup = () => {
         for (let k in res.msg) {
           msg += k + " - " + res.msg[k];
         }
-        alert(`Invalid: ${msg}`);
+        const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+        alert(`${invalid} ${msg}`);
         return;
       }
-      alert("Server Error! Please refresh the page and try again.")
+      const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+      alert(server_error);
       return;
     }
     navigate(`/login/`);
@@ -54,7 +60,7 @@ const Signup = () => {
 
   return (
     <div className="mx-auto sm:w-2/5 text-justify">
-      <div className="text-center text-2xl underline my-2">Sign up</div>
+      <div className="text-center text-2xl underline my-2"><FormattedMessage defaultMessage="Sign up" /></div>
       <form className="leading-8" onSubmit={handleSubmit}>
         <label><FormattedMessage defaultMessage="Username:" /></label><br />
         <input className="w-full" type="text" value={username} onChange={(e) => { setUsername(e.target.value) }} />

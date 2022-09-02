@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useSWRConfig } from 'swr'
 
 import MachineTaskChart from "./machine_task_chart";
 
 const MachineTaskItem = ({ item }) => {
   const { mutate } = useSWRConfig()
+  const intl = useIntl();
 
   const modified = new Date(item.modified);
   const colors = {
@@ -21,7 +22,7 @@ const MachineTaskItem = ({ item }) => {
     name = `${item.server.detail.sponsorName} - ${item.server.detail.name}`;
   }
 
-  if(item.detail.thread == 1){
+  if (item.detail.thread == 1) {
     thread = <FormattedMessage defaultMessage="Single thread" />
   } else {
     thread = <FormattedMessage defaultMessage='{t} threads' values={{ t: item.detail.thread }} />
@@ -47,10 +48,12 @@ const MachineTaskItem = ({ item }) => {
           for (let k in res.msg) {
             msg += k + " - " + res.msg[k];
           }
-          alert(`Invalid: ${msg}`);
+          const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+          alert(`${invalid} ${msg}`);
           return;
         }
-        alert("Server Error! Please refresh the page and try again.")
+        const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+        alert(server_error)
         return;
       }
       const res = await r.json();
@@ -58,7 +61,8 @@ const MachineTaskItem = ({ item }) => {
       mutate(`/api/machine/?pk=${item.machine_id}`);
     }
     catch (err) {
-      alert("Network Error! Please refresh the page and try again.")
+      const network_error = intl.formatMessage({ defaultMessage: "Network Error! Please refresh the page and try again." });
+      alert(network_error)
     }
   }
 
@@ -73,7 +77,7 @@ const MachineTaskItem = ({ item }) => {
         <FormattedMessage defaultMessage="Last modified:" />
         <span> {modified.toLocaleString()}</span>
         <span> - {thread}</span>
-        {item.detail.ipv6?<span> - IPv6</span>:""}
+        {item.detail.ipv6 ? <span> - IPv6</span> : ""}
       </div>
       {item["3h"] ? <MachineTaskChart item={item} name="3h" /> : ""}
       {item["30h"] ? <MachineTaskChart item={item} name="30h" /> : ""}

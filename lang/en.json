@@ -8,23 +8,41 @@
   "2/2yg+": {
     "defaultMessage": "Add"
   },
+  "23ueTR": {
+    "defaultMessage": "Network Error! Please refresh the page and try again."
+  },
+  "2WNcA8": {
+    "defaultMessage": "Server Error! Please refresh the page and try again."
+  },
+  "2n9biM": {
+    "defaultMessage": "Latency"
+  },
   "47bq0M": {
     "defaultMessage": "Token:"
+  },
+  "5q3qC0": {
+    "defaultMessage": "Download"
   },
   "5zD+wa": {
     "defaultMessage": "Threads (Optional):"
   },
-  "7129im": {
-    "defaultMessage": "or (for aarch64):"
-  },
   "7363TX": {
     "defaultMessage": "Last 30 hours"
+  },
+  "893eG/": {
+    "defaultMessage": "Create server list"
+  },
+  "89T/ze": {
+    "defaultMessage": "Invalid"
   },
   "8HJxXG": {
     "defaultMessage": "Sign up"
   },
   "AyGauy": {
     "defaultMessage": "Login"
+  },
+  "BnasDI": {
+    "defaultMessage": "My"
   },
   "C81/uG": {
     "defaultMessage": "Logout"
@@ -35,6 +53,9 @@
   "EcLAkj": {
     "defaultMessage": "Run with a search keywords for server:"
   },
+  "EmEt59": {
+    "defaultMessage": "Edit server"
+  },
   "F/6VqP": {
     "defaultMessage": "Server"
   },
@@ -44,6 +65,9 @@
   "GSuJjD": {
     "defaultMessage": "Last 360 days"
   },
+  "GkQzO9": {
+    "defaultMessage": "Create server"
+  },
   "IkMMKr": {
     "defaultMessage": "Last 10 days"
   },
@@ -52,6 +76,9 @@
   },
   "KR1oaB": {
     "defaultMessage": "Last modified:"
+  },
+  "KUJKsv": {
+    "defaultMessage": "Machine Task"
   },
   "NpuLmT": {
     "defaultMessage": "User Profile"
@@ -80,6 +107,9 @@
   "WUrxAG": {
     "defaultMessage": "Found 0 results for \"{query}\""
   },
+  "YMpg5G": {
+    "defaultMessage": "The two passwords do not match"
+  },
   "YgghdL": {
     "defaultMessage": "Usage:"
   },
@@ -89,6 +119,9 @@
   "aCFQ7D": {
     "defaultMessage": "Machine"
   },
+  "bGPG55": {
+    "defaultMessage": "id, name or readme"
+  },
   "bS4//q": {
     "defaultMessage": "Created:"
   },
@@ -97,6 +130,12 @@
   },
   "dN3l6r": {
     "defaultMessage": "Theads:"
+  },
+  "e2rg/b": {
+    "defaultMessage": "Not Found!"
+  },
+  "ezj61d": {
+    "defaultMessage": "Edit server list"
   },
   "gcl3C7": {
     "defaultMessage": "Found {count} results for \"{query}\""
@@ -109,6 +148,9 @@
   },
   "hagaYK": {
     "defaultMessage": "Password:"
+  },
+  "ilB4cL": {
+    "defaultMessage": "Server list"
   },
   "kJ5W29": {
     "defaultMessage": "You"
@@ -131,6 +173,12 @@
   "odzcz8": {
     "defaultMessage": "Readme:"
   },
+  "p4N05H": {
+    "defaultMessage": "Upload"
+  },
+  "pA/A17": {
+    "defaultMessage": "id, country code or name"
+  },
   "pGI8NW": {
     "defaultMessage": "You can specify the number of threads to be used by the client:"
   },
@@ -140,6 +188,9 @@
   "rR474Z": {
     "defaultMessage": "are creating a editable server"
   },
+  "v+3TzS": {
+    "defaultMessage": "Jitter"
+  },
   "wSZR47": {
     "defaultMessage": "Submit"
   },
@@ -148,6 +199,9 @@
   },
   "xkF2z2": {
     "defaultMessage": "Sponsor Name:"
+  },
+  "xmcVZ0": {
+    "defaultMessage": "Search"
   },
   "xpTPb3": {
     "defaultMessage": "Email:"

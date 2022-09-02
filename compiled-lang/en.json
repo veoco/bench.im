@@ -17,10 +17,34 @@
       "value": "Add"
     }
   ],
+  "23ueTR": [
+    {
+      "type": 0,
+      "value": "Network Error! Please refresh the page and try again."
+    }
+  ],
+  "2WNcA8": [
+    {
+      "type": 0,
+      "value": "Server Error! Please refresh the page and try again."
+    }
+  ],
+  "2n9biM": [
+    {
+      "type": 0,
+      "value": "Latency"
+    }
+  ],
   "47bq0M": [
     {
       "type": 0,
       "value": "Token:"
+    }
+  ],
+  "5q3qC0": [
+    {
+      "type": 0,
+      "value": "Download"
     }
   ],
   "5zD+wa": [
@@ -29,16 +53,22 @@
       "value": "Threads (Optional):"
     }
   ],
-  "7129im": [
-    {
-      "type": 0,
-      "value": "or (for aarch64):"
-    }
-  ],
   "7363TX": [
     {
       "type": 0,
       "value": "Last 30 hours"
+    }
+  ],
+  "893eG/": [
+    {
+      "type": 0,
+      "value": "Create server list"
+    }
+  ],
+  "89T/ze": [
+    {
+      "type": 0,
+      "value": "Invalid"
     }
   ],
   "8HJxXG": [
@@ -51,6 +81,12 @@
     {
       "type": 0,
       "value": "Login"
+    }
+  ],
+  "BnasDI": [
+    {
+      "type": 0,
+      "value": "My"
     }
   ],
   "C81/uG": [
@@ -71,6 +107,12 @@
       "value": "Run with a search keywords for server:"
     }
   ],
+  "EmEt59": [
+    {
+      "type": 0,
+      "value": "Edit server"
+    }
+  ],
   "F/6VqP": [
     {
       "type": 0,
@@ -87,6 +129,12 @@
     {
       "type": 0,
       "value": "Last 360 days"
+    }
+  ],
+  "GkQzO9": [
+    {
+      "type": 0,
+      "value": "Create server"
     }
   ],
   "IkMMKr": [
@@ -113,6 +161,12 @@
     {
       "type": 0,
       "value": "Last modified:"
+    }
+  ],
+  "KUJKsv": [
+    {
+      "type": 0,
+      "value": "Machine Task"
     }
   ],
   "NpuLmT": [
@@ -185,6 +239,12 @@
       "value": "\""
     }
   ],
+  "YMpg5G": [
+    {
+      "type": 0,
+      "value": "The two passwords do not match"
+    }
+  ],
   "YgghdL": [
     {
       "type": 0,
@@ -203,6 +263,12 @@
       "value": "Machine"
     }
   ],
+  "bGPG55": [
+    {
+      "type": 0,
+      "value": "id, name or readme"
+    }
+  ],
   "bS4//q": [
     {
       "type": 0,
@@ -219,6 +285,18 @@
     {
       "type": 0,
       "value": "Theads:"
+    }
+  ],
+  "e2rg/b": [
+    {
+      "type": 0,
+      "value": "Not Found!"
+    }
+  ],
+  "ezj61d": [
+    {
+      "type": 0,
+      "value": "Edit server list"
     }
   ],
   "gcl3C7": [
@@ -259,6 +337,12 @@
     {
       "type": 0,
       "value": "Password:"
+    }
+  ],
+  "ilB4cL": [
+    {
+      "type": 0,
+      "value": "Server list"
     }
   ],
   "kJ5W29": [
@@ -307,6 +391,18 @@
       "value": "Readme:"
     }
   ],
+  "p4N05H": [
+    {
+      "type": 0,
+      "value": "Upload"
+    }
+  ],
+  "pA/A17": [
+    {
+      "type": 0,
+      "value": "id, country code or name"
+    }
+  ],
   "pGI8NW": [
     {
       "type": 0,
@@ -323,6 +419,12 @@
     {
       "type": 0,
       "value": "are creating a editable server"
+    }
+  ],
+  "v+3TzS": [
+    {
+      "type": 0,
+      "value": "Jitter"
     }
   ],
   "wSZR47": [
@@ -349,6 +451,12 @@
     {
       "type": 0,
       "value": "Sponsor Name:"
+    }
+  ],
+  "xmcVZ0": [
+    {
+      "type": 0,
+      "value": "Search"
     }
   ],
   "xpTPb3": [

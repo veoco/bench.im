@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import useSWR from 'swr'
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import ServerListIdItems from "./server_list_id_items";
 
@@ -16,6 +16,7 @@ const ServerListCreate = () => {
     "dragFrom": -1
   })
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const logined = new Date(localStorage.getItem('logined'));
   const now = new Date();
@@ -26,9 +27,11 @@ const ServerListCreate = () => {
 
   useEffect(() => {
     if (searchParams.get("pk")) {
-      document.title = `Edit server list ${searchParams.get("pk")} - Bench.im`;
+      const title = intl.formatMessage({ defaultMessage: 'Edit server list' });
+      document.title = `${title} ${searchParams.get("pk")} - Bench.im`;
     } else {
-      document.title = `Create server list - Bench.im`;
+      const title = intl.formatMessage({ defaultMessage: 'Create server list' });
+      document.title = `${title} - Bench.im`;
     }
 
     if (!isLogin && searchParams.get("pk")) {
@@ -53,7 +56,7 @@ const ServerListCreate = () => {
           ...serverD,
           "serverIds": data.server_ids,
         }
-        for(let s of data.servers){
+        for (let s of data.servers) {
           d[s.pk] = s
         }
         return d;
@@ -90,10 +93,12 @@ const ServerListCreate = () => {
           for (let k in res.msg) {
             msg += k + " - " + res.msg[k];
           }
-          alert(`Invalid: ${msg}`);
+          const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+          alert(`${invalid} ${msg}`);
           return;
         }
-        alert("Server Error! Please refresh the page and try again.")
+        const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+        alert(server_error);
         return;
       }
       const res = await r.json();
@@ -101,7 +106,8 @@ const ServerListCreate = () => {
       navigate(`/server_list/${pk}/`);
     }
     catch (err) {
-      alert("Network Error! Please refresh the page and try again.")
+      const network_error = intl.formatMessage({ defaultMessage: "Network Error! Please refresh the page and try again." });
+      alert(network_error)
     }
   }
 

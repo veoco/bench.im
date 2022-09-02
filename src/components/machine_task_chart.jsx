@@ -1,14 +1,22 @@
-import { Chart, Legend, Axis, LineAdvance } from "bizcharts";
+import { Chart, Axis, LineAdvance } from "bizcharts";
 import DataSet from '@antv/data-set';
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 
 const MachineTaskChart = ({ item, name }) => {
+  const intl = useIntl();
+
   const data = [];
   const title = {
     "30h": <FormattedMessage defaultMessage="Last 30 hours" />,
     "10d": <FormattedMessage defaultMessage="Last 10 days" />,
     "360d": <FormattedMessage defaultMessage="Last 360 days" />
+  }
+  const fields = {
+    "Upload": intl.formatMessage({ defaultMessage: 'Upload' }),
+    "Download": intl.formatMessage({ defaultMessage: 'Download' }),
+    "Latency": intl.formatMessage({ defaultMessage: 'Latency' }),
+    "Jitter": intl.formatMessage({ defaultMessage: 'Jitter' })
   }
   const fmt = {
     "30h": "DD HH:mm",
@@ -87,7 +95,7 @@ const MachineTaskChart = ({ item, name }) => {
   const toolTip = ['hour*value*key', (hour, value, key) => {
     return {
       title: `${hour.toLocaleString()}`,
-      name: `${key}`,
+      name: `${fields[key]}`,
       value: key == "Latency" || key == "Jitter" ? `${value} ms` : `${value} Mbps`
     }
   }]

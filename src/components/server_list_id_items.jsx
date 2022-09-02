@@ -1,8 +1,10 @@
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import ServerItem from "./server_item"
 
 const ServerListIdItems = ({ serverDict, setServerDict }) => {
+  const intl = useIntl();
+
   const handleChange = (e) => {
     setServerDict((serverD) => {
       return {
@@ -22,15 +24,17 @@ const ServerListIdItems = ({ serverDict, setServerDict }) => {
 
     const r = await fetch(`/api/server/?pk=${serverDict.serverId}`);
     if (!r.ok) {
-      alert(`Network error or check your input.`)
+      const network_error = intl.formatMessage({ defaultMessage: 'Invalid' });
+      alert(`${network_error}`)
       return;
     }
     const res = await r.json();
     setServerDict((serverD) => {
-      let d = { 
+      let d = {
         ...serverD,
         serverId: "",
-        serverIds: [...serverD.serverIds, serverDict.serverId] };
+        serverIds: [...serverD.serverIds, serverDict.serverId]
+      };
       d[res.pk] = res;
       return d
     })

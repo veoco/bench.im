@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import useSWR from 'swr'
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
-import ServerListIdItems from "./server_list_id_items";
 
 const ServerCreate = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +13,7 @@ const ServerCreate = () => {
   const [ul, setUl] = useState('');
 
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const logined = new Date(localStorage.getItem('logined'));
   const now = new Date();
@@ -24,9 +24,11 @@ const ServerCreate = () => {
 
   useEffect(() => {
     if (searchParams.get("pk")) {
-      document.title = `Edit server ${searchParams.get("pk")} - Bench.im`;
+      const title = intl.formatMessage({ defaultMessage: 'Edit server' });
+      document.title = `${title} ${searchParams.get("pk")} - Bench.im`;
     } else {
-      document.title = `Create server - Bench.im`;
+      const title = intl.formatMessage({ defaultMessage: 'Create server' });
+      document.title = `${title} - Bench.im`;
     }
 
     if (!isLogin && searchParams.get("pk")) {
@@ -83,10 +85,12 @@ const ServerCreate = () => {
           for (let k in res.msg) {
             msg += k + " - " + res.msg[k];
           }
-          alert(`Invalid: ${msg}`);
+          const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+          alert(`${invalid} ${msg}`);
           return;
         }
-        alert("Server Error! Please refresh the page and try again.")
+        const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+        alert(server_error);
         return;
       }
       const res = await r.json();
@@ -94,7 +98,8 @@ const ServerCreate = () => {
       navigate(`/server/${pk}/`);
     }
     catch (err) {
-      alert("Network Error! Please refresh the page and try again.")
+      const network_error = intl.formatMessage({ defaultMessage: "Network Error! Please refresh the page and try again." });
+      alert(network_error)
     }
   }
 
@@ -114,7 +119,7 @@ const ServerCreate = () => {
           <label><FormattedMessage defaultMessage="Upload Url:" /><br /></label>
           <input className="w-full" type="text" value={ul} onChange={(e) => setUl(e.target.value)} />
           <label><FormattedMessage defaultMessage="IPv6:" /></label>
-        <input className="mx-2" type="checkbox" checked={ipv6} onChange={(e) => setIpv6(!ipv6)} />
+          <input className="mx-2" type="checkbox" checked={ipv6} onChange={(e) => setIpv6(!ipv6)} />
           <button className="w-full border border-gray-700 bg-white my-2 py-1" type="submit"><FormattedMessage defaultMessage="Submit" /></button>
         </form>
       </div>

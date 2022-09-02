@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useParams } from 'react-router-dom';
+import { useIntl } from "react-intl";
 import useSWR from 'swr'
 
 import MachineTaskItem from "./machine_task_item";
@@ -8,9 +9,11 @@ import MachineTaskItem from "./machine_task_item";
 const MachineTask = () => {
   const { uuid, taskId } = useParams();
   const { data, error } = useSWR(`/api/machine_task/?pk=${taskId}`);
+  const intl = useIntl();
 
   useEffect(() => {
-    document.title = `Machine Task - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'Machine Task' });
+    document.title = `${title} - Bench.im`;
   });
 
   if (error || !data) {

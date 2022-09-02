@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
 
 import Searchbar from "./searchbar";
@@ -12,8 +11,6 @@ const Home = () => {
           <h3 className="font-bold text-lg"><FormattedMessage defaultMessage="Usage:" /></h3>
           <p className="font-bold">1. <FormattedMessage defaultMessage="Download client:" /></p>
           <pre><code>wget https://bench.im/dl/linux/x86_64/bim</code></pre>
-          <p><FormattedMessage defaultMessage="or (for aarch64):" /></p>
-          <pre><code>wget https://bench.im/dl/linux/aarch64/bim</code></pre>
           <p><FormattedMessage defaultMessage="and then add execute permission:" /></p>
           <pre><code>chmod +x bim</code></pre>
           <p className="font-bold">2. <FormattedMessage defaultMessage="Run with a search keywords for server:" /></p>

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useSWRConfig } from 'swr'
 
 
 const MachineTaskCreate = ({ uuid, setShow }) => {
   const { mutate } = useSWRConfig()
+  const intl = useIntl();
 
   const [machineId, setMachineId] = useState(uuid);
   const [ipv6, setIpv6] = useState(false);
@@ -35,10 +36,12 @@ const MachineTaskCreate = ({ uuid, setShow }) => {
           for (let k in res.msg) {
             msg += k + " - " + res.msg[k];
           }
-          alert(`Invalid: ${msg}`);
+          const invalid = intl.formatMessage({ defaultMessage: 'Invalid' });
+          alert(`${invalid} ${msg}`);
           return;
         }
-        alert("Server Error! Please refresh the page and try again.")
+        const server_error = intl.formatMessage({ defaultMessage: "Server Error! Please refresh the page and try again." });
+        alert(server_error)
         return;
       }
       const res = await r.json();
@@ -47,7 +50,8 @@ const MachineTaskCreate = ({ uuid, setShow }) => {
       mutate(`/api/machine/?pk=${uuid}`);
     }
     catch (err) {
-      alert("Network Error! Please refresh the page and try again.")
+      const network_error = intl.formatMessage({ defaultMessage: "Network Error! Please refresh the page and try again." });
+      alert(network_error)
     }
   }
 

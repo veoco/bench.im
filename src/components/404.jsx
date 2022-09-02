@@ -1,7 +1,9 @@
-const NotFound = ()=>{
+import { FormattedMessage } from "react-intl";
+
+const NotFound = () => {
   return (
     <div className="text-center mt-8 text-4xl">
-      Not Found!
+      <FormattedMessage defaultMessage="Not Found!" />
     </div>
   )
 }

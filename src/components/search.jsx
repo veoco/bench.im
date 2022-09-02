@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import useSWR from 'swr'
 
 import Searchbar from "./searchbar";
@@ -9,6 +9,8 @@ import ServerListItem from "./server_list_item";
 
 
 const Search = () => {
+  const intl = useIntl();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const { data, error } = useSWR(`/api/search/?type=${searchParams.get("t")}&query=${searchParams.get("q")}`)
 
@@ -18,7 +20,8 @@ const Search = () => {
   );
 
   useEffect(() => {
-    document.title = `Search - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'Search' });
+    document.title = `${title} - Bench.im`;
   });
 
   if (error || !data) {

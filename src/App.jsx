@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import { IntlProvider, FormattedMessage } from "react-intl";
+import { IntlProvider } from "react-intl";
 
 import Home from "./components/home"
 import Search from "./components/search";
@@ -28,7 +28,7 @@ function loadLocaleData(locale) {
 }
 
 
-function App(props) {
+function App() {
   const [locale, setLocal] = useState(navigator.language.split('-')[0]);
   const [messages, setMessages] = useState(loadLocaleData(locale));
 

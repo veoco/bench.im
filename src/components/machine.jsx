@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from 'react-router-dom';
-import { FormattedMessage } from "react-intl";
+import { useParams } from 'react-router-dom';
+import { FormattedMessage, useIntl } from "react-intl";
 import useSWR from 'swr'
 
 import MachineItem from "./machine_item";
@@ -11,9 +11,11 @@ const Machine = () => {
   const { uuid } = useParams();
   const { data, error } = useSWR(`/api/machine/?pk=${uuid}`);
   const [show, setShow] = useState(false)
+  const intl = useIntl();
 
   useEffect(() => {
-    document.title = `Machine - Bench.im`;
+    const title = intl.formatMessage({ defaultMessage: 'Machine' });
+    document.title = `${title} - Bench.im`;
   });
 
   if (error || !data) {
