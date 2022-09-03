@@ -37,16 +37,24 @@ const MachineTaskChart = ({ item, name }) => {
       r[fields["download"]] = download;
       r[fields["latency"]] = latency;
       r[fields["jitter"]] = jitter;
-      yMax = yMax < 1000 && upload > 100 ? 1000 : yMax;
-      yMax = yMax < 10000 && upload > 1000 ? 10000 : yMax;
-      yMax = yMax < 1000 && download > 100 ? 1000 : yMax;
-      yMax = yMax < 10000 && download > 1000 ? 10000 : yMax;
-      yMax = yMax < 1000 && latency > 100 ? 1000 : yMax;
-      yMax = yMax < 10000 && latency > 1000 ? 10000 : yMax;
-      yMax = yMax < 1000 && jitter > 100 ? 1000 : yMax;
-      yMax = yMax < 10000 && jitter > 1000 ? 10000 : yMax;
+      yMax = yMax < upload ? upload : yMax;
+      yMax = yMax < download ? download : yMax;
+      yMax = yMax < latency ? latency : yMax;
+      yMax = yMax < jitter ? jitter : yMax;
     }
     data.push(r);
+  }
+
+  if (yMax < 100) {
+    yMax = 100;
+  } else if (yMax < 200) {
+    yMax = 200;
+  } else if (yMax < 500) {
+    yMax = 500;
+  } else if (yMax < 1000) {
+    yMax = 1000;
+  } else {
+    yMax = 10000;
   }
 
   const dv = new DataSet.View().source(data);
