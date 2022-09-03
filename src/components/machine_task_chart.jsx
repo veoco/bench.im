@@ -28,8 +28,8 @@ const MachineTaskChart = ({ item, name }) => {
     const hour = new Date(row[0] * 1000);
     const upload = row[1];
     const download = row[2];
-    const ping = row[3]
-    const latency = row[4]
+    const latency = row[3]
+    const jitter = row[4]
 
     const r = { "hour": hour };
     if (latency) {
