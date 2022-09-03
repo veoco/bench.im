@@ -13,10 +13,10 @@ const MachineTaskChart = ({ item, name }) => {
     "360d": <FormattedMessage defaultMessage="Last 360 days" />
   }
   const fields = {
-    "Upload": intl.formatMessage({ defaultMessage: 'Upload' }),
-    "Download": intl.formatMessage({ defaultMessage: 'Download' }),
-    "Latency": intl.formatMessage({ defaultMessage: 'Latency' }),
-    "Jitter": intl.formatMessage({ defaultMessage: 'Jitter' })
+    "upload": intl.formatMessage({ defaultMessage: 'Upload' }),
+    "download": intl.formatMessage({ defaultMessage: 'Download' }),
+    "latency": intl.formatMessage({ defaultMessage: 'Latency' }),
+    "jitter": intl.formatMessage({ defaultMessage: 'Jitter' })
   }
   const fmt = {
     "30h": "DD HH:mm",
@@ -29,20 +29,20 @@ const MachineTaskChart = ({ item, name }) => {
     const upload = row[1];
     const download = row[2];
     const ping = row[3]
-    const jitter = row[4]
+    const latency = row[4]
 
     const r = { "hour": hour };
-    if (ping) {
-      r.Upload = upload;
-      r.Download = download;
-      r.Latency = ping;
-      r.Jitter = jitter;
+    if (latency) {
+      r[fields["upload"]] = upload;
+      r[fields["download"]] = download;
+      r[fields["latency"]] = latency;
+      r[fields["jitter"]] = jitter;
       yMax = yMax < 1000 && upload > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && upload > 1000 ? 10000 : yMax;
       yMax = yMax < 1000 && download > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && download > 1000 ? 10000 : yMax;
-      yMax = yMax < 1000 && ping > 100 ? 1000 : yMax;
-      yMax = yMax < 10000 && ping > 1000 ? 10000 : yMax;
+      yMax = yMax < 1000 && latency > 100 ? 1000 : yMax;
+      yMax = yMax < 10000 && latency > 1000 ? 10000 : yMax;
       yMax = yMax < 1000 && jitter > 100 ? 1000 : yMax;
       yMax = yMax < 10000 && jitter > 1000 ? 10000 : yMax;
     }
@@ -52,7 +52,7 @@ const MachineTaskChart = ({ item, name }) => {
   const dv = new DataSet.View().source(data);
   dv.transform({
     type: "fold",
-    fields: ["Upload", "Download", "Latency", "Jitter"],
+    fields: [fields["upload"], fields["download"], fields["latency"], fields["jitter"]],
     key: "key",
     value: "value"
   });
@@ -95,8 +95,8 @@ const MachineTaskChart = ({ item, name }) => {
   const toolTip = ['hour*value*key', (hour, value, key) => {
     return {
       title: `${hour.toLocaleString()}`,
-      name: `${fields[key]}`,
-      value: key == "Latency" || key == "Jitter" ? `${value} ms` : `${value} Mbps`
+      name: `${key}`,
+      value: key == fields["latency"] || key == fields["jitter"] ? `${value} ms` : `${value} Mbps`
     }
   }]
 
