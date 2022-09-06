@@ -1,10 +1,12 @@
 import { Chart, Axis, LineAdvance } from "bizcharts";
 import DataSet from '@antv/data-set';
 import { FormattedMessage, useIntl } from "react-intl";
+import { useState } from "react";
 
 
 const MachineTaskChart = ({ item, name }) => {
   const intl = useIntl();
+  const [yMax, setYMax] = useState(1000);
 
   const data = [];
   const title = {
@@ -23,7 +25,7 @@ const MachineTaskChart = ({ item, name }) => {
     "10d": "MM/DD HH:mm",
     "360d": "YY MM/DD"
   }
-  let yMax = 100;
+
   for (const row of item[name]) {
     const hour = new Date(row[0] * 1000);
     const upload = row[1];
@@ -37,24 +39,8 @@ const MachineTaskChart = ({ item, name }) => {
       r[fields["download"]] = download;
       r[fields["latency"]] = latency;
       r[fields["jitter"]] = jitter;
-      yMax = yMax < upload ? upload : yMax;
-      yMax = yMax < download ? download : yMax;
-      yMax = yMax < latency ? latency : yMax;
-      yMax = yMax < jitter ? jitter : yMax;
     }
     data.push(r);
-  }
-
-  if (yMax < 100) {
-    yMax = 100;
-  } else if (yMax < 200) {
-    yMax = 200;
-  } else if (yMax < 500) {
-    yMax = 500;
-  } else if (yMax < 1000) {
-    yMax = 1000;
-  } else {
-    yMax = 10000;
   }
 
   const dv = new DataSet.View().source(data);
@@ -108,9 +94,24 @@ const MachineTaskChart = ({ item, name }) => {
     }
   }]
 
+  const handleSetYMax = (e) => {
+    e.preventDefault();
+
+    switch (yMax) {
+      case 1000: setYMax(10000); break;
+      case 10000: setYMax(100); break;
+      case 100: setYMax(200); break;
+      case 200: setYMax(500); break;
+      case 500: setYMax(1000); break;
+    }
+  }
+
   return (
     <div className="border border-gray-700 px-2 mt-2">
-      <h4 className="text-center my-1 text-sm text-gray-700">{title[name]}</h4>
+      <div className="flex my-1 group">
+        <h4 className="text-sm mx-auto text-gray-700">{title[name]}</h4>
+        <button className="text-xs px-1 invisible group-hover:visible" onClick={handleSetYMax}>🎯</button>
+      </div>
       <Chart height={200} data={dv.rows} scale={scale} autoFit>
         <Axis name="hour" {...axisConfig} />
         <Axis name="value" {...axisConfig} />
