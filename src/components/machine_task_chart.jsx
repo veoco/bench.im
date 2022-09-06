@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const MachineTaskChart = ({ item, name }) => {
   const intl = useIntl();
-  const [yMax, setYMax] = useState(1000);
+  const [yMax, setYMax] = useState(500);
 
   const data = [];
   const title = {
@@ -98,11 +98,11 @@ const MachineTaskChart = ({ item, name }) => {
     e.preventDefault();
 
     switch (yMax) {
+      case 500: setYMax(1000); break;
       case 1000: setYMax(10000); break;
       case 10000: setYMax(100); break;
       case 100: setYMax(200); break;
       case 200: setYMax(500); break;
-      case 500: setYMax(1000); break;
     }
   }
 
