@@ -6,7 +6,6 @@ import { useState } from "react";
 
 const MachineTaskChart = ({ item, name }) => {
   const intl = useIntl();
-  const [yMax, setYMax] = useState(500);
 
   const data = [];
   const title = {
@@ -26,6 +25,7 @@ const MachineTaskChart = ({ item, name }) => {
     "360d": "YY MM/DD"
   }
 
+  let y = 0;
   for (const row of item[name]) {
     const hour = new Date(row[0] * 1000);
     const upload = row[1];
@@ -39,9 +39,25 @@ const MachineTaskChart = ({ item, name }) => {
       r[fields["download"]] = download;
       r[fields["latency"]] = latency;
       r[fields["jitter"]] = jitter;
+      y = y < upload ? upload : y;
+      y = y < download ? download : y;
     }
     data.push(r);
   }
+
+  if (y < 100) {
+    y = 100;
+  } else if (y < 200) {
+    y = 200;
+  } else if (y < 500) {
+    y = 500;
+  } else if (y < 1000) {
+    y = 1000;
+  } else {
+    y = 10000;
+  }
+
+  const [yMax, setYMax] = useState(y);
 
   const dv = new DataSet.View().source(data);
   dv.transform({
