@@ -115,7 +115,7 @@ const MachineTaskChart = ({ item, name }) => {
       <Chart height={200} data={dv.rows} scale={scale} autoFit>
         <Axis name="hour" {...axisConfig} />
         <Axis name="value" {...axisConfig} />
-        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral", "lightgreen", "black"]]} tooltip={toolTip} area />
+        <LineAdvance type="interval" position="hour*value" color={["key", ["skyblue", "lightcoral", "lightgreen", "gray"]]} tooltip={toolTip} area />
       </Chart>
     </div>
   )
