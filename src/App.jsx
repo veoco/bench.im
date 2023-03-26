@@ -1,71 +1,39 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-import { IntlProvider } from "react-intl";
+import { useState } from 'react'
+import { Link, Router, Route, useLocation } from 'wouter'
 
-import Home from "./components/home"
-import Search from "./components/search";
-import Server from "./components/server";
-import ServerCreate from "./components/server_create";
-import ServerList from "./components/server_list";
-import ServerListCreate from "./components/server_list_create";
-import Login from "./components/login";
-import Signup from "./components/signup";
-import My from "./components/my";
-import Machine from "./components/machine";
-import MachineTaskCreate from "./components/machine_task_create";
-import MachineTask from "./components/machine_task";
-import NotFound from "./components/404";
-import ZH from "../compiled-lang/zh.json"
-import EN from "../compiled-lang/en.json"
+import './app.css'
 
-function loadLocaleData(locale) {
-  switch (locale) {
-    case "zh":
-      return ZH
-    default:
-      return EN
-  }
-}
-
+import IntroPage from './intro'
+import DetailPage from './detail'
+import NewPage from './new'
+import TasksPage from './tasks'
 
 function App() {
-  const [locale, setLocal] = useState(navigator.language.split('-')[0]);
-  const [messages, setMessages] = useState(loadLocaleData(locale));
+  const [token, setToken] = useState("")
+  const [location, setLocation] = useLocation();
 
-  useEffect(() => {
-    setMessages(loadLocaleData(locale));
-  })
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLocation(`/t/${token}`);
+  }
 
   return (
-    <IntlProvider
-      locale={locale}
-      defaultLocale="en"
-      messages={messages}
-    >
-      <div className="bg-stone-100 min-h-screen px-1 sm:px-0">
-        <h1 className="text-center text-4xl font-serif py-2 underline text-gray-600"><Link to="/">Bench.im</Link></h1>
-        <nav className="text-center">
-          <button className={"mx-2" + (locale == "zh" ? "" : " text-gray-400")} onClick={(e) => { setLocal("zh") }}>中文</button>
-          <button className={"mx-2" + (locale == "en" ? "" : " text-gray-400")} onClick={(e) => { setLocal("en") }}>English</button>
-        </nav>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/search/" element={<Search />} />
-          <Route path="/server/" element={<ServerCreate />} />
-          <Route path="/server/:serverId/" element={<Server />} />
-          <Route path="/server_list/" element={<ServerListCreate />} />
-          <Route path="/server_list/:serverListId/" element={<ServerList />} />
-          <Route path="/machine/:uuid/" element={<Machine />} />
-          <Route path="/machine/:uuid/task/" element={<MachineTaskCreate />} />
-          <Route path="/machine/:uuid/task/:taskId/" element={<MachineTask />} />
-          <Route path="/login/" element={<Login />} />
-          <Route path="/signup/" element={<Signup />} />
-          <Route path="/my/" element={<My />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-    </IntlProvider>
+    <div className='max-w-2xl  w-full mx-auto'>
+      <header className='bg-white shadow p-2 rounded-sm flex lg:my-2'>
+        <h1 className='font-bold underline text-lg'><Link href="/">Bench.im</Link></h1>
+        <form className='ml-auto' onSubmit={handleSubmit}>
+          <input className='px-1 py-0.5 text-xs shadow' type="text" value={token} onChange={(e) => setToken(e.target.value)} />
+        </form>
+      </header>
+      <main>
+        <Router>
+          <Route path="/" component={IntroPage} />
+          <Route path="/t/:token/servers/new" component={NewPage} />
+          <Route path="/t/:token/servers/:server/tasks" component={TasksPage} />
+          <Route path="/t/:token" component={DetailPage} />
+        </Router>
+      </main>
+    </div>
   )
 }
 

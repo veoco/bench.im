@@ -3,22 +3,12 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react({
-    babel: {
-      plugins: [
-        [
-          "formatjs",
-          {
-            "idInterpolationPattern": "[sha512:contenthash:base64:6]",
-            "ast": true
-          }
-        ]
-      ]
-    }
-  })],
+  plugins: [react()],
   server: {
+    host: "127.0.0.1",
     proxy: {
-      '/api': 'http://127.0.0.1:8000'
+      '/api': 'http://127.0.0.1:8000',
     }
   }
+
 })
