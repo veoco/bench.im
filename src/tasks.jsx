@@ -31,21 +31,21 @@ export default function TasksPage({ params }) {
           </thead>
           <tbody>
             {data.length > 0 ? data.map((item) => {
-              if (item.status == "Block") {
+              if (item.status == 1) {
                 return (
                   <tr className="text-right px-2">
                     <td className="text-left">{item.machine.name}</td>
                     <td className="text-center" colSpan={4}>等待中</td>
                   </tr>
                 )
-              } else if (item.status == "Ready") {
+              } else if (item.status == 2) {
                 return (
                   <tr className="text-right px-2">
                     <td className="text-left">{item.machine.name}</td>
                     <td className="text-center" colSpan={4}>进行中</td>
                   </tr>
                 )
-              } else if (item.status == "Timeout") {
+              } else if (item.status == 4) {
                 <tr className="text-right px-2">
                   <td className="text-left">{item.machine.name}</td>
                   <td className="text-center" colSpan={4}>超时，已取消</td>
