@@ -4,6 +4,8 @@ import { NewMachineBlock, NewServerBlock } from './components';
 export default function IntroPage({ token, setToken }) {
   const [location, setLocation] = useLocation();
 
+  const randomToken = Math.random().toString(36).slice(-8);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLocation(`/t/${token}`);
@@ -15,8 +17,8 @@ export default function IntroPage({ token, setToken }) {
       <form className='my-6' onSubmit={handleSubmit}>
         <input className='px-2 py-1 w-full shadow' type="text" value={token} placeholder={"输入地址"} onChange={(e) => setToken(e.target.value)} />
       </form>
-      <NewServerBlock />
-      <NewMachineBlock />
+      <NewServerBlock token={randomToken} />
+      <NewMachineBlock token={randomToken} />
     </div>
   )
 }
