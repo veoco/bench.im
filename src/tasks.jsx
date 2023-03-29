@@ -12,7 +12,8 @@ export default function TasksPage({ params }) {
   return (
     <>
       <aside className="p-1 my-2">
-        <div className="text-xl">地址：<Link className="underline" href={`/t/${params.token}`}>{params.token}</Link> - 测速目标：{first.server.name}</div>
+        <div className="text-xl">地址：<Link className="underline" href={`/t/${params.token}`}>{params.token}</Link></div>
+        <div className="mt-2">测速目标：{first.server.name}</div>
         <ul className="flex text-sm mt-2">
           <li className="mr-3">IPv6: {first.server.ipv6 ? "启用" : "关闭"}</li>
           <li>多线程: {first.server.multi ? "启用" : "关闭"}</li>
