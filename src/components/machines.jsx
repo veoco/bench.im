@@ -25,7 +25,7 @@ export default function MachinesBlock({ token }) {
             </div>
             <div className="flex text-xs items-center">
               <span className="mr-auto">更新于 {modified.toLocaleString()}</span>
-              <span className={"px-1 py-0.5 text-white" + (item.status == 0 ? " bg-gray-500" : "  bg-green-500")}>{item.status == "Offline" ? "离线" : "在线"}</span>
+              <span className={"px-1 py-0.5 text-white" + (item.status == 0 ? " bg-gray-500" : "  bg-green-500")}>{item.status == 0 ? "离线" : "在线"}</span>
             </div>
           </div>
         )
