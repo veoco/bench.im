@@ -10,8 +10,7 @@ export default function NewMachineBlock({ token }) {
       <input className='px-2 py-1 shadow w-full' type="text" value={name} placeholder={"输入名称"} onChange={(e) => setName(e.target.value)} />
       <p className='my-2'>测试使用（默认 x86_64，<a className='underline' href="https://github.com/veoco/bim" target="_blank">其他</a>）：</p>
       <div className="bg-gray-100 p-2 font-mono">
-        <p>wget https://bench.im/dl/bimc -O bimc</p>
-        <p>chmod +x bimc</p>
+        <p>wget https://bench.im/dl/bimc -O bimc && chmod +x bimc</p>
         <p>./bimc {token ? token : "tester"} {name ? `-n ${name}` : ""}</p>
       </div>
 

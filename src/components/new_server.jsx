@@ -10,8 +10,7 @@ export default function NewServerBlock({ token }) {
       <input className='px-2 py-1 shadow w-full' type="text" value={name} placeholder={"输入名称"} onChange={(e) => setName(e.target.value)} />
       <p className='my-2'>测试使用（默认 x86_64，<a className='underline' href="https://github.com/veoco/bim" target="_blank">其他</a>）：</p>
       <div className="bg-gray-100 p-2 font-mono">
-        <p>wget https://bench.im/dl/bim -O bim</p>
-        <p>chmod +x bim</p>
+        <p>wget https://bench.im/dl/bim -O bim && chmod +x bim</p>
         <p>./bim {token ? token : "tester"} {name ? `-n ${name}` : ""}</p>
       </div>
     </div>
