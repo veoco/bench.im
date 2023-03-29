@@ -3,8 +3,14 @@ import useSWR from "swr";
 export default function MachinesBlock({ token }) {
   const { data, error, isLoading } = useSWR(`/api/machines/?token=${token}`)
 
-  if (error) return <div>未找到</div>
-  if (isLoading) return <div>加载中</div>
+  if (error) return <div className="bg-white shadow rounded p-2">
+    <h3 className="font-bold pb-2">测速节点</h3>
+    <p>未找到</p>
+  </div>
+  if (isLoading) return <div className="bg-white shadow rounded p-2">
+    <h3 className="font-bold pb-2">测速节点</h3>
+    <p>加载中</p>
+  </div>
 
   return (
     <div className="bg-white shadow rounded p-2">

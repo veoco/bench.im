@@ -4,8 +4,20 @@ import { Link } from "wouter";
 export default function ServersBlock({ token }) {
   const { data, error, isLoading } = useSWR(`/api/servers/?token=${token}`)
 
-  if (error) return <div>未找到</div>
-  if (isLoading) return <div>加载中</div>
+  if (error) return <div className="bg-white shadow rounded p-2 mb-3">
+    <h3 className="font-bold pb-2 flex">
+      目标服务器
+      <Link className="ml-auto text-xs border border-gray-500 px-2 py-1" href={`/t/${token}/servers/new`}>新增</Link>
+    </h3>
+    <p>未找到</p>
+  </div>
+  if (isLoading) return <div className="bg-white shadow rounded p-2 mb-3">
+    <h3 className="font-bold pb-2 flex">
+      目标服务器
+      <Link className="ml-auto text-xs border border-gray-500 px-2 py-1" href={`/t/${token}/servers/new`}>新增</Link>
+    </h3>
+    <p>加载中</p>
+  </div>
 
   return (
     <div className="bg-white shadow rounded p-2 mb-3">

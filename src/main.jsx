@@ -6,7 +6,10 @@ import App from './App'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <SWRConfig value={{ fetcher: (resource, init) => fetch(resource, init).then(res => res.json()) }}>
+    <SWRConfig value={{
+      fetcher: (resource, init) => fetch(resource, init).then(res => res.json()),
+      refreshInterval: 3000
+    }}>
       <App />
     </SWRConfig>
   </React.StrictMode>,
