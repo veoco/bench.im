@@ -1,6 +1,4 @@
-import ServersBlock from "./servers";
-import MachinesBlock from "./machines";
-import NewMachineBlock from "./new_machine";
-import NewServerBlock from "./new_server";
+import MachineBlock from "./machine_block";
+import TcpPingBlock from "./tcpping_block";
 
-export {ServersBlock, MachinesBlock, NewMachineBlock, NewServerBlock}
+export {MachineBlock, TcpPingBlock}

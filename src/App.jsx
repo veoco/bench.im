@@ -1,29 +1,21 @@
-import { useState } from 'react'
-import { Link, Router, Route, useLocation } from 'wouter'
+import { Link, Router, Route } from 'wouter'
 
 import './app.css'
 
-import IntroPage from './intro'
-import DetailPage from './detail'
-import NewPage from './new'
-import TasksPage from './tasks'
+import MachinesPage from './machines_page'
+import MachinePage from './machine_page'
 
 function App() {
-  const [token, setToken] = useState("")
- 
+
   return (
-    <div className='max-w-2xl  w-full mx-auto'>
-      <header className='bg-white shadow p-2 rounded-sm flex lg:my-2'>
-        <h1 className='font-bold underline text-lg'><Link href="/">Bench.im</Link></h1>
+    <div>
+      <header className='p-2 bg-white shadow rounded-sm flex'>
+        <h1 className='font-bold text-lg underline'><Link href="/">Bench.im</Link></h1>
       </header>
-      <main>
+      <main className='w-full mx-auto p-2'>
         <Router>
-          <Route path="/">
-            <IntroPage token={token} setToken={setToken} />
-          </Route>
-          <Route path="/t/:token/servers/new" component={NewPage} />
-          <Route path="/t/:token/servers/:server/tasks" component={TasksPage} />
-          <Route path="/t/:token" component={DetailPage} />
+          <Route path="/" component={MachinesPage} />
+          <Route path="/m/:mid" component={MachinePage} />
         </Router>
       </main>
     </div>
