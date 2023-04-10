@@ -14,7 +14,7 @@ export default function TcpPingBlock({ mid, tid, fixedY }) {
         theme: 'classic',
         width: rect.width,
         height: rect.width / 3,
-        paddingLeft: 30,
+        paddingLeft: 40,
         paddingBottom: 25,
         paddingRight: 10,
         paddingTop: 10,
