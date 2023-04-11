@@ -37,12 +37,10 @@ export default function TcpPingBlock({ mid, tid, fixedY }) {
             "fail": current.ping_failed
           })
 
-          while(index < data.length){
+          while (index < data.length) {
             index += 1;
             const ct = new Date(data[index].created);
-            if(ct < i){
-              index += 1
-            }else{
+            if (ct >= i) {
               break;
             }
           }
