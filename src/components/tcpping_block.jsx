@@ -36,7 +36,16 @@ export default function TcpPingBlock({ mid, tid, fixedY }) {
             "avg": current.ping_min + current.ping_jitter,
             "fail": current.ping_failed
           })
-          index += 1
+
+          while(index < data.length){
+            index += 1;
+            const ct = new Date(data[index].created);
+            if(ct < i){
+              index += 1
+            }else{
+              break;
+            }
+          }
         } else {
           array.push({
             "time": time,
