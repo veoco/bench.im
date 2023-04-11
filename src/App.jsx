@@ -10,7 +10,7 @@ function App() {
   return (
     <div>
       <header className='p-2 bg-white shadow rounded-sm flex'>
-        <h1 className='font-bold text-lg underline'><Link href="/">Bench.im</Link></h1>
+        <h1 className='font-bold text-lg'><Link href="/">Bench.im</Link></h1>
       </header>
       <main className='w-full mx-auto p-2'>
         <Router>

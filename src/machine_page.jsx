@@ -28,7 +28,9 @@ export default function MachinePage({ params }) {
           return (
             <div className='bg-white border shadow rounded p-2' key={item.id}>
               <h3 className='font-bold text-lg'>{item.name}</h3>
-              <p className='text-sm text-gray-500'>{item.ipv6 ? "IPv6" : "IPv4"}</p>
+              <ul className="flex text-xs text-gray-400 items-center mb-1">
+                <li className="before:content-['#'] my-1 mr-1">{item.ipv6 ? "IPv6" : "IPv4"}</li>
+              </ul>
               <TcpPingBlock mid={params.mid} tid={item.id} fixedY={fixedY} />
             </div>
           )

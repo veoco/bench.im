@@ -1,10 +1,12 @@
-import { Link } from "wouter"
+import { useLocation } from "wouter"
 
-export default function MachineBlock({item}) {
+export default function MachineBlock({ item }) {
+  const [location, setLocation] = useLocation();
+
   return (
-    <div className='flex flex-col bg-white shadow rounded p-3'>
-      <h3 className="font-bold underline"><Link href={`/m/${item.id}`}>{item.name}</Link></h3>
-      <p>{item.ip}</p>
+    <div className='flex flex-col cursor-pointer bg-white shadow rounded p-3' onClick={() => setLocation(`/m/${item.id}`)}>
+      <h3 className="font-bold mb-1">{item.name}</h3>
+      <p className="text-xs text-gray-500">{item.ip}</p>
     </div>
   )
 }

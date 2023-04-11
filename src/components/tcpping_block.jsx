@@ -90,15 +90,15 @@ export default function TcpPingBlock({ mid, tid, fixedY }) {
             const t = d.toLocaleTimeString();
             return `${t.slice(0, t.length - 3)}`
           },
-          labelFilter: (datum, index, data) => index % (isWide ? 2 : 4) === 0,
-          tickFilter: (datum, index, data) => index % 12 === 0,
+          labelFilter: (datum, index, data) => index % (isWide ? 4 : 8) === 0,
+          tickFilter: (datum, index, data) => index % 6 === 0,
           tick: true,
           grid: true,
           style: {
             lineLineWidth: 1,
             lineStroke: "#000",
             lineStrokeOpacity: 1,
-            tickLength: 3,
+            tickLength: (datum, index, data) => index % 2 == 0 ? 6 : 3,
             tickLineWidth: 1,
             tickStroke: "#000",
             tickStrokeOpacity: 1,
