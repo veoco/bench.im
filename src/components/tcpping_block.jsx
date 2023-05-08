@@ -31,7 +31,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
 
       const array = [];
       for (let i = startTime; i <= endTime; i += 300 * 1000) {
-        const current = index < data.length ? data[index] : null;
+        const current = index < data.length - 1 ? data[index] : null;
         const time = new Date(i);
 
         if (current && new Date(current.created) < i) {
