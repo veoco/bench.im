@@ -75,21 +75,21 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
           nice: true
         })
         .tooltip({
-          title: (d) => d.time.toLocaleString(),
+          title: (d) => d ? d.time.toLocaleString() : undefined,
           items: [
             {
               name: "最低延迟",
-              valueFormatter: (d) => `${d.toFixed(1)}ms`,
+              valueFormatter: (d) => d ? `${d.toFixed(1)}ms` : undefined,
               field: "min"
             },
             {
               name: "平均延迟",
-              valueFormatter: (d) => `${d.toFixed(1)}ms`,
+              valueFormatter: (d) => d ? `${d.toFixed(1)}ms` : undefined,
               field: "avg"
             },
             {
               name: "连接失败",
-              valueFormatter: (d) => `${d}/20`,
+              valueFormatter: (d) => d ? `${d}/20` : "0/20",
               field: "fail"
             },
           ],
@@ -99,7 +99,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
           line: true,
           label: true,
           labelFormatter: (d) => {
-            if (dateRange == "7d"){
+            if (dateRange == "7d") {
               return `${d.getDate()}-${d.getHours()}`
             };
             const t = d.toLocaleTimeString();
@@ -144,7 +144,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
           },
         })
 
-      const container = chart.getContainer();tid
+      const container = chart.getContainer(); tid
       imgRef.current.appendChild(container);
       chart.render();
     }
