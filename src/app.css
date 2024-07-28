@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-100;
+.prose-custom {
+    @apply prose prose-neutral max-w-none prose-pre:rounded-none prose-pre:border prose-pre:bg-neutral-100 prose-pre:text-black;
 }

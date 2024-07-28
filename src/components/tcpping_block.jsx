@@ -13,11 +13,11 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
       const chart = new Chart({
         theme: 'classic',
         width: rect.width,
-        height: rect.width / 3,
-        paddingLeft: 40,
-        paddingBottom: 25,
-        paddingRight: 20,
-        paddingTop: 10,
+        height: rect.width / 2,
+        paddingLeft: 20,
+        paddingBottom: 10,
+        paddingRight: 0,
+        paddingTop: 0,
       });
 
       let index = 0;
@@ -151,10 +151,10 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
     return () => { imgRef.current && imgRef.current.firstChild ? imgRef.current.removeChild(imgRef.current.firstChild) : null };
   }, [data, fixedY, dateRange]);
 
-  if (error) return <div className="border border-gray-400"></div>
-  if (isLoading) return <div className="border border-gray-400"></div>
+  if (error) return <div></div>
+  if (isLoading) return <div></div>
 
   return (
-    <div className="border border-gray-400 font-bold w-full" ref={imgRef}></div>
+    <div className="font-bold w-full" ref={imgRef}></div>
   )
 }
