@@ -2,6 +2,7 @@ import { Link, Router, Route } from 'wouter'
 
 import './app.css'
 
+import IndexPage from './index_page'
 import MachinesPage from './machines_page'
 import MachinePage from './machine_page'
 
@@ -14,7 +15,8 @@ function App() {
       </header>
       <main className='w-full mx-auto p-2'>
         <Router>
-          <Route path="/" component={MachinesPage} />
+          <Route path="/" component={IndexPage} />
+          <Route path="/m/" component={MachinesPage} />
           <Route path="/m/:mid" component={MachinePage} />
         </Router>
       </main>
