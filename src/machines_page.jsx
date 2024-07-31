@@ -13,7 +13,7 @@ export default function MachinesPage() {
   </div>
 
   return (
-    <div className='pt-6 gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+    <div className='gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
       {data.map((item)=>{
         return <MachineBlock item={item} key={item.id} />
       })}

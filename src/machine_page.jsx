@@ -21,7 +21,7 @@ export default function MachinePage({ params }) {
   ipv6s.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className='pt-6'>
+    <div>
       <div className="border">
         <div className="flex items-baseline p-2">
           <h2 className='font-bold text-2xl mr-2'>{data.detail.nickname}</h2>
@@ -29,14 +29,14 @@ export default function MachinePage({ params }) {
         </div>
         <div className="flex p-2 bg-neutral-100 leading-4 text-sm border-t">
           <button className={`border border-neutral-600 shadow px-2 py-0.5 mr-2` + (fixedY ? ` bg-neutral-500 text-white` : ` bg-white`)} type="button" onClick={() => setFixedY(!fixedY)}>对齐y轴</button>
-          <select className="pl-2 py-0.5" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+          <select className="pl-2 py-0" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
             <option value="latest">最近 24 小时</option>
             <option value="7d">最近 7 天</option>
           </select>
         </div>
       </div>
 
-      <h3 className="mt-2 p-2 font-bold">IPv4</h3>
+      <h3 className="mt-3 font-bold">IPv4</h3>
       <div className='mt-3 gap-2 grid grid-cols-1 lg:grid-cols-2'>
         {ipv4s.map((item) => {
           return (
@@ -47,7 +47,7 @@ export default function MachinePage({ params }) {
           )
         })}
       </div>
-      <h3 className="mt-2 p-2 font-bold">IPv6</h3>
+      <h3 className="mt-3 font-bold">IPv6</h3>
       <div className='mt-3 gap-2 grid grid-cols-1 lg:grid-cols-2'>
         {ipv6s.map((item) => {
           return (
