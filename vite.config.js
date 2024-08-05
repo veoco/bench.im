@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     proxy: {
-      '/api': 'https://bench.im',
+      '/api': 'http://127.0.0.1:8000',
     }
   }
 

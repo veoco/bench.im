@@ -26,11 +26,12 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
       const endTime = nowTime - extra;
 
       let hours = 24;
-      if (dateRange == "7d") hours = 7 * 24;
+      let step = 300 * 1000;
+      if (dateRange == "7d") {hours = 7 * 24; step = 6 * 300 * 1000};
       const startTime = endTime - hours * 12 * 300 * 1000;
 
       const array = [];
-      for (let i = startTime; i <= endTime; i += 300 * 1000) {
+      for (let i = startTime; i <= endTime; i += step) {
         const current = index < data.length - 1 ? data[index] : null;
         const time = new Date(i);
 
