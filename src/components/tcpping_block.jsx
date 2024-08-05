@@ -27,7 +27,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
 
       let hours = 24;
       let step = 300 * 1000;
-      if (dateRange == "7d") {hours = 7 * 24; step = 6 * 300 * 1000};
+      if (dateRange == "7d") { hours = 7 * 24; step = 6 * 300 * 1000 };
       const startTime = endTime - hours * 12 * 300 * 1000;
 
       const array = [];
@@ -107,7 +107,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
             return `${t.slice(0, t.length - 3)}`
           },
           labelFilter: (datum, index, data) => index % (isWide ? 4 : 8) === 0,
-          tickFilter: (datum, index, data) => index % (hours / 4) === 0,
+          tickFilter: (datum, index, data) => index % (dateRange == "7d" ? hours / 28 : hours / 4) === 0,
           tick: true,
           grid: true,
           style: {
