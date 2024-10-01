@@ -23,7 +23,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
       let index = 0;
       const nowTime = new Date();
       const extra = nowTime % (300 * 1000);
-      const endTime = nowTime - extra;
+      const endTime = nowTime - extra + 300 * 1000;
 
       let hours = 24;
       let step = 300 * 1000;
@@ -145,7 +145,7 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
           },
         })
 
-      const container = chart.getContainer(); tid
+      const container = chart.getContainer();
       imgRef.current.appendChild(container);
       chart.render();
     }
