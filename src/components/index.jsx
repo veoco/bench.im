@@ -1,4 +1,4 @@
 import MachineBlock from "./machine_block";
-import TcpPingBlock from "./tcpping_block";
+import PingBlock from "./ping_block";
 
-export {MachineBlock, TcpPingBlock}
+export { MachineBlock, PingBlock }

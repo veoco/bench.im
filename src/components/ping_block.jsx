@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import useSWR from "swr";
 import { Chart } from '@antv/g2';
 
-export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
-  const { data, error, isLoading } = useSWR(`/api/machines/${mid}/targets/${tid}/${dateRange}`)
+export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
+  const { data, error, isLoading } = useSWR(`/api/machines/${mid}/targets/${tid}/${dateRange}` + (ipv6 ? "?ipv6=true" : ""));
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -35,17 +35,17 @@ export default function TcpPingBlock({ mid, tid, fixedY, dateRange }) {
         const current = index < data.length - 1 ? data[index] : null;
         const time = new Date(i);
 
-        if (current && new Date(current.created) < i) {
+        if (current && new Date(current.created * 1000) < i) {
           array.push({
             "time": time,
-            "min": current.ping_min,
-            "avg": current.ping_min + current.ping_jitter,
-            "fail": current.ping_failed
+            "min": current.min,
+            "avg": current.min + current.jitter,
+            "fail": current.failed
           })
 
           while (index < data.length - 1) {
             index += 1;
-            const ct = new Date(data[index].created);
+            const ct = new Date(data[index].created * 1000);
             if (ct >= i) {
               break;
             }

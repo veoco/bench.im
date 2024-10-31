@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
-export default function IndexPage({ params }) {
-  const target = params.slug ? `/api/pages/${params.slug}` : `/api/pages/`;
+export default function IndexPage() {
+  const target = `/content.html`;
   const { data, error, isLoading } = useSWR(target, (url) => fetch(url).then(res => res.text()))
 
   if (error) return <div>
