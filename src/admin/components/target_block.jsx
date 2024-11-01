@@ -11,7 +11,7 @@ export default function TargetBlock({ item }) {
         <span className="text-neutral-500 text-xs truncate">{item.ipv6}</span>
       </h3>
       <ul className="flex border-t p-2 bg-neutral-100 text-xs items-center">
-        <li className="mr-auto truncate">{item.domain}55555555555</li>
+        <li className="mr-auto truncate">{item.domain}</li>
         <li className="ml-1 shrink-0"><button className="border bg-sky-400 border-sky-500 text-white px-1 py-0.5 mr-1" onClick={() => setLocation(`/targets/${item.id}`)}>编辑</button></li>
         <li className="shrink-0"><button className="border bg-red-400 border-red-500 text-white px-1 py-0.5" onClick={() => setLocation(`/targets/${item.id}/delete`)}>删除</button></li>
       </ul>
