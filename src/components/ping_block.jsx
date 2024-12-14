@@ -14,7 +14,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
         theme: 'classic',
         width: rect.width,
         height: rect.width / 2,
-        paddingLeft: 20,
+        paddingLeft: 25,
         paddingBottom: 10,
         paddingRight: 0,
         paddingTop: 0,
@@ -39,7 +39,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
           array.push({
             "time": time,
             "min": current.min,
-            "avg": current.min + current.jitter,
+            "avg": current.min + current.jitter + (fixedY ? 5 : 0.1),
             "fail": current.failed
           })
 
@@ -80,12 +80,12 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
           items: [
             {
               name: "最低延迟",
-              valueFormatter: (d) => d ? `${d.toFixed(1)}ms` : undefined,
+              valueFormatter: (d) => d ? `${(fixedY ? d - 5 : d - 0.1).toFixed(1)}ms` : undefined,
               field: "min"
             },
             {
               name: "平均延迟",
-              valueFormatter: (d) => d ? `${d.toFixed(1)}ms` : undefined,
+              valueFormatter: (d) => d ? `${(fixedY ? d - 5 : d - 0.1).toFixed(1)}ms` : undefined,
               field: "avg"
             },
             {

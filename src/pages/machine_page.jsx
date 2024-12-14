@@ -34,7 +34,7 @@ export default function MachinePage({ params }) {
       </div>
 
       <h3 className="mt-3 font-bold">目标监测</h3>
-      <div className='mt-3 gap-2 grid grid-cols-1 lg:grid-cols-2'>
+      <div className='mt-3 gap-2 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'>
         {data.targets.map((item) => {
           return (
             <div className='bg-white border' key={item.id}>
