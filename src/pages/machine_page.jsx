@@ -18,23 +18,20 @@ export default function MachinePage({ params }) {
 
   return (
     <div>
-      <div className="border">
-        <div className="flex items-baseline p-2">
-          <h2 className='font-bold text-2xl mr-2'>{data.nickname}</h2>
-          <p className="text-neutral-500 text-sm">{data.ip}</p>
-        </div>
-        <div className="flex p-2 bg-neutral-100 leading-4 text-sm border-t">
-          <button className={`border border-neutral-600 shadow px-2 py-0.5 mr-2` + (fixedY ? ` bg-neutral-500 text-white` : ` bg-white`)} type="button" onClick={() => setFixedY(!fixedY)}>对齐y轴</button>
-          <button className={`border border-neutral-600 shadow px-2 py-0.5 mr-2` + (ipv6 ? ` bg-neutral-500 text-white` : ` bg-white`)} type="button" onClick={() => setIpv6(!ipv6)}>IPv6</button>
-          <select className="pl-2 py-0" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
-            <option value="24h">最近 24 小时</option>
-            <option value="7d">最近 7 天</option>
-          </select>
-        </div>
+      <div className="flex items-baseline p-2">
+        <h2 className='font-bold text-2xl mr-2'>{data.nickname}</h2>
+        <p className="text-neutral-500 text-sm">{data.ip}</p>
+      </div>
+      <div className="flex p-2 bg-neutral-100 leading-4 text-sm border-y border-neutral-400">
+        <button className={`border border-neutral-600 shadow px-2 py-0.5 mr-2` + (fixedY ? ` bg-neutral-500 text-white` : ` bg-white`)} type="button" onClick={() => setFixedY(!fixedY)}>对齐y轴</button>
+        <button className={`border border-neutral-600 shadow px-2 py-0.5 mr-2` + (ipv6 ? ` bg-neutral-500 text-white` : ` bg-white`)} type="button" onClick={() => setIpv6(!ipv6)}>IPv6</button>
+        <select className="pl-2 py-0" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+          <option value="24h">最近 24 小时</option>
+          <option value="7d">最近 7 天</option>
+        </select>
       </div>
 
-      <h3 className="mt-3 font-bold">目标监测</h3>
-      <div className='mt-3 gap-2 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'>
+      <div className='p-2 gap-2 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'>
         {data.targets.map((item) => {
           return (
             <div className='bg-white border' key={item.id}>

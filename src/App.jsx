@@ -18,16 +18,16 @@ function App() {
   }
 
   return (
-    <div className='mx-2 sm:mx-0'>
-      <header className='w-full max-w-7xl mx-auto'>
-        <h1 className='font-bold text-2xl my-3'><Link href="/">Bench.im</Link></h1>
-        <nav className='flex border bg-neutral-100 my-3'>
-          <Link className='px-4 py-2 hover:bg-neutral-200' href="/">首页</Link>
-          <Link className='px-4 py-2 hover:bg-neutral-200 mr-auto' href="/m/">机器</Link>
-          <Link className='px-4 py-2 hover:bg-neutral-200' href={isLogin ? "/admin/" : "/admin/login/"}>管理</Link>
+    <div className='flex flex-col sm:flex-row'>
+      <header className='w-full flex-shrink-0 sm:h-screen sm:border-r sm:border-neutral-500 sm:w-56 sm:sticky sm:top-0'>
+        <h1 className='font-bold text-2xl text-white bg-neutral-800 px-2 py-1.5'><Link href="/">Bench.im</Link></h1>
+        <nav className='flex flex-col bg-white'>
+          <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href="/">首页</Link>
+          <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href="/m/">机器</Link>
+          <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href={isLogin ? "/admin/" : "/admin/login/"}>管理</Link>
         </nav>
       </header>
-      <main className='w-full max-w-7xl mx-auto'>
+      <main className='w-full'>
         <Switch>
           <Route path="/" component={IndexPage} />
           <Route path="/m/" component={MachinesPage} />

@@ -17,7 +17,7 @@ export default function IndexPage() {
   </div>
 
   return (
-    <div>
+    <div className="p-2">
       <div className="flex border-b pb-2 items-center">
         <h2 className="text-lg font-bold mr-auto">机器列表</h2>
         <button

@@ -12,7 +12,7 @@ export default function IndexPage() {
   </div>
 
   return (
-    <div className='prose-custom' dangerouslySetInnerHTML={{ __html: data }}>
+    <div className='prose-custom px-2' dangerouslySetInnerHTML={{ __html: data }}>
     </div>
   )
 }
