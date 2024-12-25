@@ -31,6 +31,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
       const startTime = endTime - hours * 12 * 300 * 1000;
 
       const array = [];
+      const failedArray = [];
       for (let i = startTime; i <= endTime; i += step) {
         const current = index < data.length - 1 ? data[index] : null;
         const time = new Date(i);
@@ -56,6 +57,9 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             "min": null,
             "avg": null,
             "fail": null
+          })
+          failedArray.push({
+            "time": time,
           })
         }
       }
@@ -143,7 +147,24 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             gridStroke: "#000",
             gridStrokeOpacity: 0.2,
           },
+        });
+
+      chart.data(failedArray)
+        .lineX()
+        .encode('x', 'time')
+        .tooltip({
+          items: [
+            {
+              name: "数据缺失",
+              valueFormatter: (d) => d ? d.toLocaleString() : undefined,
+              field: "time"
+            },
+          ],
         })
+        .style('stroke', '#c9c9c9')
+        .style('strokeOpacity', 1)
+        .style('lineWidth', 1);
+
 
       const container = chart.getContainer();
       imgRef.current.appendChild(container);
