@@ -12,6 +12,10 @@ export default defineConfig({
         target: 'https://bench.im',
         changeOrigin: true,
       },
+      '/content.html': {
+        target: 'https://bench.im',
+        changeOrigin: true,
+      },
     }
   }
 })
