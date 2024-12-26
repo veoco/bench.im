@@ -9,11 +9,11 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
   useEffect(() => {
     if (data) {
       const rect = imgRef.current.getBoundingClientRect();
-      const isWide = rect.width > 480;
+      const isWide = rect.width >= 768;
       const chart = new Chart({
         theme: 'classic',
         width: rect.width,
-        height: rect.width / 2,
+        height: rect.height,
         paddingLeft: 25,
         paddingBottom: 10,
         paddingRight: 0,
@@ -173,10 +173,10 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
     return () => { imgRef.current && imgRef.current.firstChild ? imgRef.current.removeChild(imgRef.current.firstChild) : null };
   }, [data, fixedY, dateRange]);
 
-  if (error) return <div></div>
-  if (isLoading) return <div></div>
+  if (error) return <div className="w-full aspect-video"></div>
+  if (isLoading) return <div className="w-full aspect-video"></div>
 
   return (
-    <div className="font-bold w-full" ref={imgRef}></div>
+    <div className="w-full aspect-video" ref={imgRef}></div>
   )
 }
