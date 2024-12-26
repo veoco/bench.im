@@ -1,4 +1,4 @@
-import MachineBlock from "./machine_block";
 import PingBlock from "./ping_block";
+import MachinesBlock from "./machines_block";
 
-export { MachineBlock, PingBlock }
+export { PingBlock, MachinesBlock }
