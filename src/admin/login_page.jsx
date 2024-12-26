@@ -31,8 +31,8 @@ export default function LoginPage({ isLogin, setIsLogin }) {
   }
 
   return (
-    <div className="flex justify-center">
-      <form className="max-w-sm w-full mt-6 border bg-neutral-100 p-3" onSubmit={handleSubmit}>
+    <div className="flex justify-center p-2 items-center sm:h-screen">
+      <form className="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" onSubmit={handleSubmit}>
         <h2 className="text-center text-lg font-bold py-1">管理登录</h2>
         <input className="border my-3 p-2 w-full" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         <button className="w-full p-2 button" type="submit">登录</button>

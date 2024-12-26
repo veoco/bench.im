@@ -35,22 +35,22 @@ export default function DeleteMachinePage({ params }) {
   </div>
 
   return (
-    <div className="flex justify-center">
-      <form className="max-w-sm w-full mt-6 border bg-neutral-100 p-3" onSubmit={handleSubmit}>
+    <div className="flex justify-center p-2 items-center sm:h-screen">
+      <form className="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" onSubmit={handleSubmit}>
         <h2 className="text-center text-lg font-bold py-1">删除机器</h2>
         <table className="w-full my-3 bg-white">
           <tbody>
             <tr>
-              <td className="border px-2 py-1">名称</td>
-              <td className="border px-2 py-1">{data.name}</td>
+              <td className="border border-neutral-400 px-2 py-1">名称</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.name}</td>
             </tr>
             <tr>
-              <td className="border px-2 py-1">IP</td>
-              <td className="border px-2 py-1">{data.ip}</td>
+              <td className="border border-neutral-400 px-2 py-1">IP</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.ip}</td>
             </tr>
             <tr>
-              <td className="border px-2 py-1">昵称</td>
-              <td className="border px-2 py-1">{data.nickname}</td>
+              <td className="border border-neutral-400 px-2 py-1">昵称</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.nickname}</td>
             </tr>
           </tbody>
         </table>

@@ -47,8 +47,8 @@ export default function EditMachinePage({ params }) {
   }
 
   return (
-    <div className="flex justify-center">
-      <form className="max-w-sm w-full mt-6 border bg-neutral-100 p-3" onSubmit={handleSubmit}>
+    <div className="flex justify-center p-2 items-center sm:h-screen">
+      <form className="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" onSubmit={handleSubmit}>
         <h2 className="text-center text-lg font-bold py-1">{params.mid ? "编辑机器" : "新增机器"}</h2>
         <label htmlFor="name">名称：</label>
         <input className="border my-3 p-2 w-full" type="text" placeholder={name} value={name} onChange={(e) => setName(e.target.value)} />

@@ -35,26 +35,26 @@ export default function DeleteTargetPage({ params }) {
   </div>
 
   return (
-    <div className="flex justify-center">
-      <form className="max-w-sm w-full mt-6 border bg-neutral-100 p-3" onSubmit={handleSubmit}>
+    <div className="flex justify-center p-2 items-center sm:h-screen">
+      <form className="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" onSubmit={handleSubmit}>
         <h2 className="text-center text-lg font-bold py-1">删除目标</h2>
         <table className="w-full my-3 bg-white">
           <tbody>
             <tr>
-              <td className="border px-2 py-1">名称</td>
-              <td className="border px-2 py-1">{data.name}</td>
+              <td className="border border-neutral-400 px-2 py-1">名称</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.name}</td>
             </tr>
             <tr>
-              <td className="border px-2 py-1">域名</td>
-              <td className="border px-2 py-1">{data.domain}</td>
+              <td className="border border-neutral-400 px-2 py-1">域名</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.domain}</td>
             </tr>
             <tr>
-              <td className="border px-2 py-1">IPv4</td>
-              <td className="border px-2 py-1">{data.ipv4}</td>
+              <td className="border border-neutral-400 px-2 py-1">IPv4</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.ipv4}</td>
             </tr>
             <tr>
-              <td className="border px-2 py-1">IPv6</td>
-              <td className="border px-2 py-1">{data.ipv6}</td>
+              <td className="border border-neutral-400 px-2 py-1">IPv6</td>
+              <td className="border border-neutral-400 px-2 py-1">{data.ipv6}</td>
             </tr>
           </tbody>
         </table>
