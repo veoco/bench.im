@@ -20,10 +20,10 @@ export default function EditTargetPage({ params }) {
       })
         .then(res => res.json())
         .then(res => {
-          setName(res.name)
-          setDomain(res.domain)
-          setIpv4(res.ipv4)
-          setIpv6(res.ipv6)
+          setName(res.name || '')
+          setDomain(res.domain || '')
+          setIpv4(res.ipv4 || '')
+          setIpv6(res.ipv6 || '')
         })
     }
   }, [params.tid])
