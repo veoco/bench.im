@@ -161,8 +161,8 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             },
           ],
         })
-        .style('stroke', '#c9c9c9')
-        .style('strokeOpacity', 1)
+        .style('stroke', '#000')
+        .style('strokeOpacity', 0.3)
         .style('lineWidth', 1);
 
 
