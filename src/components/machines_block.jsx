@@ -14,7 +14,7 @@ export default function MachinesBlock() {
   return (
     <>
       {data.map((item) => {
-        return <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href={`/m/${item.id}`}>{item.nickname}</Link>
+        return <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href={`/m/${item.id}`} key={item.id}>{item.nickname}</Link>
       })}
     </>
   )
