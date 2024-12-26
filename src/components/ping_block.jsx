@@ -58,9 +58,11 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             "avg": null,
             "fail": null
           })
-          failedArray.push({
-            "time": time,
-          })
+          if (index < data.length - 1) {
+            failedArray.push({
+              "time": time,
+            })
+          }
         }
       }
 
