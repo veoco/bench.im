@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Switch, Route } from 'wouter'
+import { Link, Switch, Route, useLocation } from 'wouter'
 
 import './app.css'
 
@@ -13,6 +13,7 @@ import Admin from "./admin";
 function App() {
   const [isLogin, setIsLogin] = useState(false);
   const [isShow, setIsShow] = useState(false);
+  const [location, setLocation] = useLocation();
   const token = sessionStorage.getItem('token');
 
   if (!isLogin && token) {
@@ -30,11 +31,11 @@ function App() {
             </svg>
           </button>
         </div>
-        <div className='relative'>
-          <nav className={'top-0 left-0 w-full absolute flex-col bg-white sm:flex' + (isShow ? ' flex' : ' hidden')}>
-            <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href="/">首页</Link>
-            <Link className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' href={isLogin ? "/admin/" : "/admin/login/"}>管理</Link>
-            <MachinesBlock />
+        <div className='relative sm:static'>
+          <nav className={'top-0 left-0 w-full absolute flex-col bg-white sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
+            <button className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(`/`); setIsShow(false) }}>首页</button>
+            <button className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(isLogin ? "/admin/" : "/admin/login/"); setIsShow(false) }}>管理</button>
+            <MachinesBlock setIsShow={setIsShow} setLocation={setLocation} />
           </nav>
         </div>
       </header>
