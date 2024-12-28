@@ -33,8 +33,8 @@ function App() {
         </div>
         <div className='relative sm:static'>
           <nav className={'top-0 left-0 w-full absolute flex-col bg-white sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
-            <button className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(`/`); setIsShow(false) }}>首页</button>
-            <button className='px-4 py-2 border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(isLogin ? "/admin/" : "/admin/login/"); setIsShow(false) }}>管理</button>
+            <button className='px-4 py-2 text-left border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(`/`); setIsShow(false) }}>首页</button>
+            <button className='px-4 py-2 text-left border-b border-neutral-500 hover:bg-neutral-200' onClick={() => { setLocation(isLogin ? "/admin/" : "/admin/login/"); setIsShow(false) }}>管理</button>
             <MachinesBlock setIsShow={setIsShow} setLocation={setLocation} />
           </nav>
         </div>
