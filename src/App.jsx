@@ -22,7 +22,7 @@ function App() {
 
   return (
     <div className='flex flex-col sm:flex-row'>
-      <header className='w-full flex-shrink-0 z-50 sticky top-0 sm:h-screen sm:border-r sm:border-neutral-500 sm:w-56'>
+      <header className='w-full shrink-0 z-50 sticky top-0 sm:h-screen sm:border-r sm:border-neutral-500 sm:w-56'>
         <div className='flex bg-neutral-800 px-2 py-1.5'>
           <h1 className='font-bold text-2xl text-white'><Link href="/">Bench.im</Link></h1>
           <button className='ml-auto bg-white px-1 sm:hidden' onClick={() => setIsShow(!isShow)}>

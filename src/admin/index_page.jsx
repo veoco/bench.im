@@ -21,7 +21,7 @@ export default function IndexPage() {
       <div className="flex border-b border-neutral-400 bg-neutral-100 p-2 items-center">
         <h2 className="text-lg font-bold mr-3">机器列表</h2>
         <button
-          className="text-sm shadow border border-neutral-600 bg-white px-2 py-1"
+          className="text-sm shadow-sm border border-neutral-600 bg-white px-2 py-1"
           onClick={() => setLocation('/machines/new')}
         >新增机器</button>
       </div>
@@ -31,7 +31,7 @@ export default function IndexPage() {
       <div className="flex border-y border-neutral-400 bg-neutral-100 p-2 items-center">
         <h2 className="text-lg font-bold mr-3">目标列表</h2>
         <button
-          className="text-sm shadow border border-neutral-600 bg-white px-2 py-1"
+          className="text-sm shadow-sm border border-neutral-600 bg-white px-2 py-1"
           onClick={() => setLocation('/targets/new')}
         >新增目标</button>
       </div>
