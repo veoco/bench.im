@@ -33,20 +33,20 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
       const array = [];
       const failedArray = [];
       for (let i = startTime; i <= endTime; i += step) {
-        const current = index < data.length - 1 ? data[index] : null;
+        const current = index < data.results.length - 1 ? data.results[index] : null;
         const time = new Date(i);
 
-        if (current && new Date(current.created * 1000) < i) {
+        if (current && new Date(current[0]) < i) {
           array.push({
             "time": time,
-            "min": current.min,
-            "avg": current.min + current.jitter + (fixedY ? 3 : 0.1),
-            "fail": current.failed
+            "min": current[1],
+            "avg": current[2] + (fixedY ? 3 : 0.1),
+            "fail": current[3]
           })
 
-          while (index < data.length - 1) {
+          while (index < data.results.length - 1) {
             index += 1;
-            const ct = new Date(data[index].created * 1000);
+            const ct = new Date(data.results[index][0]);
             if (ct >= i) {
               break;
             }
@@ -58,7 +58,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             "avg": null,
             "fail": null
           })
-          if (index < data.length - 1) {
+          if (index < data.results.length - 1) {
             failedArray.push({
               "time": time,
             })
