@@ -155,7 +155,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
                 const y1 = u.valToPos(u.scales.y.min, "y", true);
                 const y2 = u.valToPos(u.scales.y.max, "y", true);
 
-                ctx.strokeStyle = "#ddd";
+                ctx.strokeStyle = "#999";
                 ctx.lineWidth = barW;
                 ctx.beginPath();
                 ctx.moveTo(x, y1);
