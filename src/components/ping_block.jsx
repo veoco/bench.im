@@ -131,9 +131,8 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             const umin = u.scales.y.min;
             const umax = u.scales.y.max;
             const minh = (umax - umin) / 100;
-            console.log(minh)
 
-            const barW = Math.max(2, Math.floor((rect.width / xdata.length) * 0.6));
+            const barW = Math.max(2, Math.ceil(rect.width / xdata.length));
 
             for (let i = 0; i < xdata.length; i++) {
               if (ymin[i] != null && ymax[i] != null) {
