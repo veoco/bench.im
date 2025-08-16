@@ -28,3 +28,7 @@
 .button {
     @apply border border-neutral-600 shadow-sm bg-white hover:bg-neutral-200;
 }
+
+button {
+    @apply cursor-pointer;
+}
