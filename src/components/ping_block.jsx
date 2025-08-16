@@ -79,7 +79,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
       width: rect.width,
       height: rect.height,
       legend: { show: false },
-      padding: [12, 12, -24, -6],
+      padding: [12, 12, 0, 0],
       scales: {
         x: { time: true },
         y: {
@@ -88,6 +88,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
       },
       axes: [
         {
+          size: 26,
           ticks: { stroke: "#aaa", width: 1, size: 6 },
           grid: { stroke: "#aaa", width: 1, dash: [2, 2] },
           splits: (u, ai, min, max) => {
@@ -112,6 +113,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
           },
         },
         {
+          size: 44,
           ticks: { stroke: "#aaa", width: 1, size: 4 },
           grid: { stroke: "#aaa", width: 1, dash: [2, 2] },
         },
