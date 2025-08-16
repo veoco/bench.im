@@ -19,7 +19,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
     const nowMs = Date.now();
     const baseStepMs = 300 * 1000;
     const extra = nowMs % baseStepMs;
-    const endTime = nowMs - extra + baseStepMs;
+    const endTime = nowMs - extra - baseStepMs;
 
     let hours = 24;
     let step = baseStepMs;
@@ -27,7 +27,7 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
       hours = 7 * 24;
       step = 6 * baseStepMs;
     }
-    const startTime = endTime - hours * 12 * baseStepMs;
+    const startTime = endTime - hours * 12 * baseStepMs + 3 * baseStepMs;
 
     const times = [];
     const mins = [];
