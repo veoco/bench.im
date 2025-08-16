@@ -193,8 +193,8 @@ export default function PingBlock({ mid, tid, fixedY, dateRange, ipv6 }) {
             const tw = tt.offsetWidth;
             const th = tt.offsetHeight;
 
-            let xPos = u.cursor.left + u.bbox.left - 18 + offset;
-            let yPos = u.cursor.top + u.bbox.top - 8 + offset;
+            let xPos = u.cursor.left + u.over.offsetLeft + offset;
+            let yPos = u.cursor.top + u.over.offsetTop + offset;
 
             if (xPos + tw >= cw) xPos = xPos - tw - 2 * offset;
             if (yPos + th >= ch) yPos = yPos - th - 2 * offset;
