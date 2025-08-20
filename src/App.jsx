@@ -35,7 +35,7 @@ function App() {
           </button>
         </div>
         <div className='relative flex flex-col flex-grow sm:static'>
-          <nav className={'top-0 left-0 absolute w-full flex-col flex-grow border-b border-neutral-500 bg-neutral-100 sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
+          <nav className={'top-0 left-0 absolute w-full flex-col flex-grow border-b border-neutral-500 bg-neutral-100 sm:border-0 sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
             <MachinesBlock setIsShow={setIsShow} setLocation={setLocation} />
           </nav>
         </div>
