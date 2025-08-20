@@ -22,7 +22,7 @@ function App() {
 
   return (
     <div className='flex flex-col sm:flex-row'>
-      <header className='w-full shrink-0 z-50 sticky top-0 sm:h-screen sm:border-r sm:border-neutral-500 sm:w-56'>
+      <header className='w-full flex flex-col shrink-0 z-50 sticky top-0 sm:h-screen sm:border-r sm:border-neutral-500 sm:w-56'>
         <div className='flex bg-neutral-800 px-2 py-1.5 items-center'>
           <h1 className='font-bold text-2xl text-white'><Link href="/">Bench.im</Link></h1>
           <button className='ml-auto w-6' onClick={() => { setLocation(isLogin ? "/admin/" : "/admin/login/"); setIsShow(false) }}>
@@ -34,8 +34,8 @@ function App() {
             </svg>
           </button>
         </div>
-        <div className='relative sm:static'>
-          <nav className={'top-0 left-0 w-full absolute flex-col bg-white sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
+        <div className='relative flex flex-col flex-grow sm:static'>
+          <nav className={'top-0 left-0 absolute w-full flex-col flex-grow border-b border-neutral-500 bg-neutral-100 sm:flex sm:static' + (isShow ? ' flex' : ' hidden')}>
             <MachinesBlock setIsShow={setIsShow} setLocation={setLocation} />
           </nav>
         </div>

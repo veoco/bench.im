@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-@plugin '@tailwindcss/typography';
 @plugin '@tailwindcss/forms';
 
 /*
@@ -12,6 +11,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -21,14 +21,10 @@
   }
 }
 
-.prose-custom {
-    @apply prose prose-neutral max-w-3xl mx-auto prose-pre:rounded-none prose-pre:border prose-pre:bg-neutral-100 prose-pre:text-black;
-}
-
 .button {
-    @apply border border-neutral-600 shadow-sm bg-white hover:bg-neutral-200;
+  @apply border border-neutral-600 shadow-sm bg-white hover:bg-neutral-200;
 }
 
 button {
-    @apply cursor-pointer;
+  @apply cursor-pointer;
 }
