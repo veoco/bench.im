@@ -19,7 +19,7 @@ export default function MachinePage({ params }) {
   return (
     <div>
       <div className="flex items-baseline p-2">
-        <h2 className='font-bold text-2xl mr-2'>{data.nickname}</h2>
+        <h2 className='font-bold text-2xl mr-2'>{data.name}</h2>
         <p className="text-neutral-500 text-sm">{data.ip}</p>
       </div>
       <div className="flex p-2 bg-neutral-100 leading-4 text-sm border-y border-neutral-400">

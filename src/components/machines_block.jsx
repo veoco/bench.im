@@ -18,7 +18,7 @@ export default function MachinesBlock({ setIsShow, setLocation }) {
         return (
           <button className='p-2 flex border-b border-neutral-500 hover:bg-neutral-200 last:border-0' onClick={() => { setLocation(`/m/${item.id}`); setIsShow(false) }} key={item.id}>
             <svg className="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3H20C20.5523 3 21 3.44772 21 4V11H3V4C3 3.44772 3.44772 3 4 3ZM3 13H21V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13ZM7 16V18H10V16H7ZM7 6V8H10V6H7Z"></path></svg>
-            {item.nickname}
+            {item.name}
             <LightBlock updated={item.updated} />
           </button>)
       })}

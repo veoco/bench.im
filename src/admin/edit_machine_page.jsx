@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 export default function EditMachinePage({ params }) {
   const [name, setName] = useState("")
   const [ip, setIp] = useState("")
-  const [nickname, setNickname] = useState("")
+  const [key, setKey] = useState("");
 
   const [location, setLocation] = useLocation();
   const token = sessionStorage.getItem("token");
@@ -21,7 +21,7 @@ export default function EditMachinePage({ params }) {
         .then(res => {
           setName(res.name)
           setIp(res.ip)
-          setNickname(res.nickname)
+          setKey(res.key)
         })
     }
   }, [params.mid])
@@ -36,7 +36,7 @@ export default function EditMachinePage({ params }) {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name, ip, nickname })
+      body: JSON.stringify({ name, ip, key })
     })
     if (!r.ok) {
       alert(params.mid ? "编辑失败" : "新增失败")
@@ -54,8 +54,8 @@ export default function EditMachinePage({ params }) {
         <input className="border my-3 p-2 w-full" type="text" placeholder={name} value={name} onChange={(e) => setName(e.target.value)} />
         <label htmlFor="ip">IP:</label>
         <input className="border my-3 p-2 w-full" type="text" placeholder={ip} value={ip} onChange={(e) => setIp(e.target.value)} />
-        <label htmlFor="nickname">昵称:</label>
-        <input className="border my-3 p-2 w-full" type="text" placeholder={nickname} value={nickname} onChange={(e) => setNickname(e.target.value)} />
+        <label htmlFor="key">密钥:</label>
+        <input className="border my-3 p-2 w-full" type="text" placeholder={key} value={key} onChange={(e) => setKey(e.target.value)} />
         <button className="w-full p-2 button" type="submit">{params.mid ? "编辑" : "新增"}</button>
       </form>
     </div>
