@@ -18,3 +18,7 @@ cd bim
 npm i
 npm build
 ```
+
+## 部署方法
+
+请将 index.html 和 assets 放入 bim-server 文件同级的 static 下。
