@@ -48,10 +48,6 @@ export default function DeleteMachinePage({ params }) {
               <td className="border border-neutral-400 px-2 py-1">IP</td>
               <td className="border border-neutral-400 px-2 py-1">{data.ip}</td>
             </tr>
-            <tr>
-              <td className="border border-neutral-400 px-2 py-1">昵称</td>
-              <td className="border border-neutral-400 px-2 py-1">{data.nickname}</td>
-            </tr>
           </tbody>
         </table>
         <button className="w-full p-2 button" type="submit">确认删除</button>
