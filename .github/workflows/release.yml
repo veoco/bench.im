@@ -73,7 +73,7 @@ jobs:
         run: |
           mkdir -p ./build/release
           cross build --target ${{ matrix.target }} --release
-          cp ./target/${{ matrix.target }}/release/bim-server ./build/release/bim-server
+          cp ../../target/${{ matrix.target }}/release/bim-server ./build/release/bim-server
 
       - name: UPX
         uses: crazy-max/ghaction-upx@v2
@@ -110,7 +110,7 @@ jobs:
         run: |
           cargo build --release
           mkdir -p ./build/release
-          cp ./target/release/bim-server.exe ./build/release/bim-server.exe
+          cp ../../target/release/bim-server.exe ./build/release/bim-server.exe
 
       - name: Upload Release Asset
         uses: actions/upload-artifact@v4
@@ -135,7 +135,7 @@ jobs:
         run: |
           cargo build --release
           mkdir -p ./build/release
-          cp ./target/release/bim-server ./build/release/bim-server
+          cp ../../target/release/bim-server ./build/release/bim-server
 
       - name: Tar Artifacts
         working-directory: server/build/release
@@ -177,7 +177,7 @@ jobs:
         run: |
           mkdir -p build/release
           cross build --target ${{ matrix.target }} --release
-          cp target/${{ matrix.target }}/release/bim build/release/bim
+          cp ../../target/${{ matrix.target }}/release/bim build/release/bim
 
       - name: UPX Compress
         uses: crazy-max/ghaction-upx@v2
@@ -217,7 +217,7 @@ jobs:
         run: |
           cargo build --release
           mkdir build\release
-          copy target\release\bim.exe build\release\bim.exe
+          copy ..\..\target\release\bim.exe build\release\bim.exe
 
       - name: Upload Release Asset
         uses: actions/upload-artifact@v4
@@ -244,7 +244,7 @@ jobs:
         run: |
           cargo build --release
           mkdir -p build/release
-          cp target/release/bim build/release/bim
+          cp ../../target/release/bim build/release/bim
 
       - name: Tar Artifacts
         working-directory: client/build/release
