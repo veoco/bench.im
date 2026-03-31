@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22.x
           cache: npm
@@ -26,199 +26,66 @@ jobs:
           npm run build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web
           path: web/dist/*
 
-  build-server-linux:
+  build-linux-x86_64:
     runs-on: ubuntu-latest
     env:
       RUST_BACKTRACE: full
-
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
+      TARGET: x86_64-unknown-linux-musl
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ env.TARGET }}
 
       - name: Install cross
         run: cargo install cross
 
-      - name: Build ${{ matrix.target }}
+      - name: Build Server
         timeout-minutes: 15
         working-directory: server
         run: |
           mkdir -p ./build/release
-          cross build --target ${{ matrix.target }} --release
-          cp ../../target/${{ matrix.target }}/release/bim-server ./build/release/bim-server
+          cross build --target ${{ env.TARGET }} --release
+          cp ../../target/${{ env.TARGET }}/release/bim-server ./build/release/bim-server
 
-      - name: UPX
+      - name: UPX Server
         uses: crazy-max/ghaction-upx@v2
         with:
           version: latest
           files: ./server/build/release/bim-server
           args: --best --lzma
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Server Artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: server-${{ matrix.target }}
+          name: server-${{ env.TARGET }}
           path: server/build/release/bim-server
 
-  build-server-windows:
-    runs-on: windows-latest
-    env:
-      RUST_BACKTRACE: full
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@nightly
-
-      - name: Build
-        timeout-minutes: 15
-        working-directory: server
-        run: |
-          cargo build --release
-          mkdir -p ./build/release
-          cp ../../target/release/bim-server.exe ./build/release/bim-server.exe
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-windows
-          path: server/build/release/bim-server.exe
-
-  build-server-macos:
-    runs-on: macos-latest
-    env:
-      RUST_BACKTRACE: full
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@nightly
-
-      - name: Build
-        timeout-minutes: 120
-        working-directory: server
-        run: |
-          cargo build --release
-          mkdir -p ./build/release
-          cp ../../target/release/bim-server ./build/release/bim-server
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-macos
-          path: server/build/release/bim-server
-
-  build-client-linux:
-    runs-on: ubuntu-latest
-    env:
-      RUST_BACKTRACE: full
-
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-          target: ${{ matrix.target }}
-
-      - name: Install cross
-        run: cargo install cross
-
-      - name: Build ${{ matrix.target }}
+      - name: Build Client
         timeout-minutes: 15
         working-directory: client
         run: |
           mkdir -p build/release
-          cross build --target ${{ matrix.target }} --release
-          cp ../../target/${{ matrix.target }}/release/bim build/release/bim
+          cross build --target ${{ env.TARGET }} --release
+          cp ../../target/${{ env.TARGET }}/release/bim build/release/bim
 
-      - name: UPX Compress
+      - name: UPX Client
         uses: crazy-max/ghaction-upx@v2
         with:
           version: latest
-          files: |
-            client/build/release/bim
+          files: ./client/build/release/bim
           args: --best --lzma
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Client Artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: client-${{ matrix.target }}
-          path: client/build/release/*
-
-  build-client-windows:
-    runs-on: windows-latest
-    env:
-      RUST_BACKTRACE: full
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-
-      - name: Build
-        timeout-minutes: 15
-        working-directory: client
-        run: |
-          cargo build --release
-          mkdir build\release
-          copy ..\..\target\release\bim.exe build\release\bim.exe
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: client-windows
-          path: client/build/release/*
-
-  build-client-macos:
-    runs-on: macos-latest
-    env:
-      RUST_BACKTRACE: full
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-
-      - name: Build
-        timeout-minutes: 15
-        working-directory: client
-        run: |
-          cargo build --release
-          mkdir -p build/release
-          cp ../../target/release/bim build/release/bim
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: client-macos
+          name: client-${{ env.TARGET }}
           path: client/build/release/*
