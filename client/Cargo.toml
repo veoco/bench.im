@@ -1,0 +1,25 @@
+[package]
+name = "bim"
+version = "0.1.0"
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["rustls-tls", "json", "charset", "http2", "macos-system-configuration"], default-features = false }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+getopts = "0.2"
+url = "2"
+regex = "1"
+
+log = "0.4"
+env_logger = "0.9"
+
+[profile.release]
+opt-level = 'z'
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

@@ -1,0 +1,23 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+pub struct Target {
+    pub id: i32,
+    pub name: String,
+    pub domain: Option<String>,
+    pub ipv4: Option<String>,
+    pub ipv6: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PingData {
+    pub ipv6: bool,
+    pub min: u16,
+    pub avg: u16,
+    pub fail: u8,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Message {
+    pub msg: String,
+}
