@@ -11,6 +11,9 @@ web/dist
 web/dist-ssr
 *.local
 
+# Test environment
+/test/
+
 # Rust / Cargo
 server/target/
 client/target/
