@@ -49,9 +49,10 @@ cleanup() {
         if [ -n "$SERVER_PID_VAL" ] && kill -0 "$SERVER_PID_VAL" 2>/dev/null; then
             log_info "停止服务器 (PID: $SERVER_PID_VAL)..."
             kill "$SERVER_PID_VAL" 2>/dev/null || true
-            sleep 2
+            wait "$SERVER_PID_VAL" 2>/dev/null || true
             if kill -0 "$SERVER_PID_VAL" 2>/dev/null; then
                 kill -9 "$SERVER_PID_VAL" 2>/dev/null || true
+                wait "$SERVER_PID_VAL" 2>/dev/null || true
             fi
         fi
         rm -f "$SERVER_PID"
@@ -62,9 +63,10 @@ cleanup() {
         if [ -n "$CLIENT_PID_VAL" ] && kill -0 "$CLIENT_PID_VAL" 2>/dev/null; then
             log_info "停止客户端 (PID: $CLIENT_PID_VAL)..."
             kill "$CLIENT_PID_VAL" 2>/dev/null || true
-            sleep 2
+            wait "$CLIENT_PID_VAL" 2>/dev/null || true
             if kill -0 "$CLIENT_PID_VAL" 2>/dev/null; then
                 kill -9 "$CLIENT_PID_VAL" 2>/dev/null || true
+                wait "$CLIENT_PID_VAL" 2>/dev/null || true
             fi
         fi
         rm -f "$CLIENT_PID"
@@ -125,51 +127,92 @@ init_database() {
 generate_mock_data() {
     log_info "生成模拟数据..."
 
-    TARGETS=(
-        "百度|baidu.com||110.242.68.66|"
-        "腾讯|qq.com||183.3.226.35|"
-        "哔哩哔哩|bilibili.com||110.242.68.66|"
-        "114DNS|114DNS||114.114.114.114|"
-        "阿里云DNS|阿里云DNS||223.5.5.5|"
-    )
-
     NOW=$(date +%s)
     SEVEN_DAYS_AGO=$((NOW - 7 * 24 * 60 * 60))
 
-    sqlite3 "$TEST_DB" <<SQL
-INSERT INTO machine (name, ip, created, updated, key)
-VALUES ('test-machine', '127.0.0.1', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch'), '$MACHINE_KEY');
-SQL
-
-    MACHINE_ID=$(sqlite3 "$TEST_DB" "SELECT id FROM machine WHERE name = 'test-machine';")
+    MACHINE_ID=1
     echo "$MACHINE_ID" > "$MACHINE_ID_FILE"
 
-    for TARGET in "${TARGETS[@]}"; do
-        IFS='|' read -r NAME DOMAIN IPV4 IPV6 <<< "$TARGET"
+    log_info "执行 CTE 批量数据生成..."
 
-        sqlite3 "$TEST_DB" <<SQL
+    sqlite3 "$TEST_DB" <<SQL
+BEGIN TRANSACTION;
+
+WITH RECURSIVE machine_series(n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM machine_series WHERE n < 11
+)
+INSERT INTO machine (name, ip, created, updated, key)
+SELECT 
+    'machine-' || printf('%02d', n),
+    '192.168.' || ((n - 1) / 256) || '.' || ((n - 1) % 256),
+    datetime($SEVEN_DAYS_AGO, 'unixepoch'),
+    datetime($NOW, 'unixepoch'),
+    '$MACHINE_KEY'
+FROM machine_series;
+
+WITH RECURSIVE target_series(n) AS (
+    SELECT 6
+    UNION ALL
+    SELECT n + 1 FROM target_series WHERE n < 32
+)
 INSERT INTO target (name, domain, ipv4, ipv6, created, updated)
-VALUES ('$NAME', '$DOMAIN', '$IPV4', '$IPV6', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch'));
-SQL
+VALUES 
+    ('百度', 'baidu.com', '110.242.68.66', '2400:da00:2::29', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch')),
+    ('腾讯', 'qq.com', '183.3.226.35', '2402:4e00:1020:1000:0:9227:4a71:30e9', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch')),
+    ('哔哩哔哩', 'bilibili.com', '110.242.68.66', '2400:da00:200a:1::1', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch')),
+    ('114DNS', '114DNS', '114.114.114.114', '2400:3800::2001:da8:1', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch')),
+    ('阿里云DNS', '阿里云DNS', '223.5.5.5', '2400:3200::1', datetime($SEVEN_DAYS_AGO, 'unixepoch'), datetime($NOW, 'unixepoch'))
+UNION ALL
+SELECT 
+    'target-' || printf('%02d', n),
+    'target' || n || '.example.com',
+    '10.' || ((n - 1) / 256 / 256 % 256) || '.' || ((n - 1) / 256 % 256) || '.' || ((n - 1) % 256),
+    'fd00::' || printf('%x', n),
+    datetime($SEVEN_DAYS_AGO, 'unixepoch'),
+    datetime($NOW, 'unixepoch')
+FROM target_series;
 
-        TARGET_ID=$(sqlite3 "$TEST_DB" "SELECT id FROM target WHERE name = '$NAME';")
-
-        log_info "生成 $NAME 的 ping 数据..."
-
-        CURRENT_TIME=$SEVEN_DAYS_AGO
-        while [ $CURRENT_TIME -le $NOW ]; do
-            MIN=$((RANDOM % 50 + 10))
-            AVG=$((MIN + RANDOM % 30))
-            FAIL=$((RANDOM % 3))
-
-            sqlite3 "$TEST_DB" <<SQL
+WITH RECURSIVE time_series(ts) AS (
+    SELECT $SEVEN_DAYS_AGO
+    UNION ALL
+    SELECT ts + 300 FROM time_series WHERE ts < $NOW
+),
+machine_ids AS (
+    SELECT id FROM machine
+),
+target_ids AS (
+    SELECT id FROM target
+),
+ip_versions AS (
+    SELECT 0 AS is_ipv6 UNION ALL SELECT 1
+)
 INSERT INTO ping (machine_id, target_id, ipv6, created, min, avg, fail)
-VALUES ($MACHINE_ID, $TARGET_ID, 0, datetime($CURRENT_TIME, 'unixepoch'), $MIN, $AVG, $FAIL);
-SQL
+SELECT 
+    m.id,
+    t.id,
+    iv.is_ipv6,
+    datetime(ts.ts, 'unixepoch'),
+    CASE 
+        WHEN iv.is_ipv6 = 0 THEN abs(random() % 50 + 10)
+        ELSE abs(random() % 60 + 15)
+    END,
+    CASE 
+        WHEN iv.is_ipv6 = 0 THEN abs(random() % 50 + 10) + abs(random() % 30)
+        ELSE abs(random() % 60 + 15) + abs(random() % 35)
+    END,
+    CASE 
+        WHEN iv.is_ipv6 = 0 THEN abs(random() % 3)
+        ELSE abs(random() % 4)
+    END
+FROM time_series ts
+CROSS JOIN machine_ids m
+CROSS JOIN target_ids t
+CROSS JOIN ip_versions iv;
 
-            CURRENT_TIME=$((CURRENT_TIME + 300))
-        done
-    done
+COMMIT;
+SQL
 
     PING_COUNT=$(sqlite3 "$TEST_DB" "SELECT COUNT(*) FROM ping;")
     log_success "模拟数据生成完成！共 $PING_COUNT 条 ping 记录"
@@ -187,12 +230,25 @@ start_server() {
     echo $SERVER_PID_VAL > "$SERVER_PID"
 
     log_info "等待服务器启动..."
-    sleep 5
-
-    if ! kill -0 $SERVER_PID_VAL 2>/dev/null; then
-        log_error "服务器启动失败，查看日志: $SERVER_LOG"
-        exit 1
-    fi
+    TIMEOUT=10
+    ELAPSED=0
+    while [ $ELAPSED -lt $TIMEOUT ]; do
+        if ! kill -0 $SERVER_PID_VAL 2>/dev/null; then
+            log_error "服务器启动失败，查看日志: $SERVER_LOG"
+            exit 1
+        fi
+        if command -v nc &> /dev/null; then
+            if nc -z 127.0.0.1 3000 2>/dev/null; then
+                break
+            fi
+        elif command -v python3 &> /dev/null; then
+            if python3 -c "import socket; sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM); sock.settimeout(1); result = sock.connect_ex(('127.0.0.1', 3000)); sock.close(); exit(0 if result == 0 else 1)" 2>/dev/null; then
+                break
+            fi
+        fi
+        sleep 0.5
+        ELAPSED=$((ELAPSED + 1))
+    done
 
     log_success "服务器已启动 (PID: $SERVER_PID_VAL, http://127.0.0.1:3000)"
 }
