@@ -6,7 +6,7 @@ mod m20241030_000003_create_ping;
 mod m20250812_134214_modify_ping;
 mod m20250820_074013_add_updated;
 mod m20250822_124135_add_key;
-
+mod m20250823_000000_add_ping_indexes;
 
 
 pub struct Migrator;
@@ -21,6 +21,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20250812_134214_modify_ping::Migration),
             Box::new(m20250820_074013_add_updated::Migration),
             Box::new(m20250822_124135_add_key::Migration),
+            Box::new(m20250823_000000_add_ping_indexes::Migration),
         ]
     }
 }
