@@ -1,3 +1,3 @@
 fn main() {
-    server_api::main();
+    server_web::main();
 }

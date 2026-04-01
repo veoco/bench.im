@@ -6,24 +6,16 @@ echo "========================================="
 echo "Building bench.im Monorepo"
 echo "========================================="
 
-# Build Web
+# Build Server (includes web via rust-embed)
 echo ""
-echo "[1/3] Building Web Frontend..."
-cd web
-npm ci
-npm run build
-cd ..
-
-# Build Server
-echo ""
-echo "[2/3] Building Server..."
+echo "[1/2] Building Server (includes embedded web assets)..."
 cd server
 cargo build --release
 cd ..
 
 # Build Client
 echo ""
-echo "[3/3] Building Client..."
+echo "[2/2] Building Client..."
 cd client
 cargo build --release
 cd ..
@@ -34,6 +26,5 @@ echo "Build Complete!"
 echo "========================================="
 echo ""
 echo "Output locations:"
-echo "  - Web:     web/dist/"
-echo "  - Server:  target/release/bim-server"
+echo "  - Server:  target/release/bim-server (includes embedded web assets)"
 echo "  - Client:  target/release/bim"

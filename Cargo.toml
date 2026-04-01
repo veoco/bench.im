@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "server",
-    "server/api",
+    "server/web",
     "server/entity",
     "server/migration",
     "server/service",

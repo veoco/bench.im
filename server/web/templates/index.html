@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Bench.im - 网络监控{% endblock %}
+
+{% block content %}
+<div class="m-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6" id="targetsGrid">
+    {% for target in targets %}
+    <div class="p-2 flex border bg-neutral-100 border-neutral-500 target-card" data-id="{{ target.id }}">
+        <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M5 11H19V5H5V11ZM21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4ZM19 13H5V19H19V13ZM7 15H10V17H7V15ZM7 7H10V9H7V7Z"></path>
+        </svg>
+        {{ target.name }}
+        <span class="flex items-center ml-auto status-light" data-updated="{{ target.updated }}">
+            <span class="w-2 h-2 rounded-full mr-2 bg-gray-400"></span>
+        </span>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatusLights();
+    setInterval(updateStatusLights, 30000);
+});
+
+function updateStatusLights() {
+    document.querySelectorAll('.status-light').forEach(light => {
+        const updated = parseInt(light.dataset.updated) || 0;
+        const currentTime = Date.now();
+        const updatedTime = updated * 1000;
+        const diff = currentTime - updatedTime;
+        
+        const dot = light.querySelector('span');
+        let color = 'bg-gray-400';
+        if (updated === 0) {
+            color = 'bg-gray-400';
+        } else if (diff < 5 * 60 * 1000) {
+            color = 'bg-green-500';
+        } else if (diff < 10 * 60 * 1000) {
+            color = 'bg-yellow-500';
+        } else {
+            color = 'bg-red-500';
+        }
+        dot.className = 'w-2 h-2 rounded-full mr-2 ' + color;
+    });
+}
+</script>
+{% endblock %}

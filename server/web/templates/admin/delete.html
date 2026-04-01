@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+
+{% block title %}删除{{ item_type }} - Bench.im{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-2 items-center sm:h-screen">
+    <form class="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" id="deleteForm">
+        <h2 class="text-center text-lg font-bold py-1">删除{{ item_type }}</h2>
+        <table class="w-full my-3 bg-white">
+            <tbody>
+                <tr>
+                    <td class="border border-neutral-400 px-2 py-1">名称</td>
+                    <td class="border border-neutral-400 px-2 py-1">{{ name }}</td>
+                </tr>
+                {% if ip != "" %}
+                <tr>
+                    <td class="border border-neutral-400 px-2 py-1">IP</td>
+                    <td class="border border-neutral-400 px-2 py-1">{{ ip }}</td>
+                </tr>
+                {% endif %}
+                {% if domain != "" %}
+                <tr>
+                    <td class="border border-neutral-400 px-2 py-1">域名</td>
+                    <td class="border border-neutral-400 px-2 py-1">{{ domain }}</td>
+                </tr>
+                {% endif %}
+                {% if ipv4 != "" %}
+                <tr>
+                    <td class="border border-neutral-400 px-2 py-1">IPv4</td>
+                    <td class="border border-neutral-400 px-2 py-1">{{ ipv4 }}</td>
+                </tr>
+                {% endif %}
+                {% if ipv6 != "" %}
+                <tr>
+                    <td class="border border-neutral-400 px-2 py-1">IPv6</td>
+                    <td class="border border-neutral-400 px-2 py-1">{{ ipv6 }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <button class="w-full p-2 button bg-red-500 text-white" type="submit">确认删除</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const url = window.location.pathname.replace('/delete', '');
+    const apiUrl = '/api' + url;
+    
+    try {
+        await apiFetch(apiUrl, { method: 'DELETE' });
+        window.location.href = '/admin/';
+    } catch (err) {
+        alert('删除失败');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if is_edit %}编辑{% else %}新增{% endif %}机器 - Bench.im{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-2 items-center sm:h-screen">
+    <form class="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" id="machineForm" data-mid="{{ id }}">
+        <h2 class="text-center text-lg font-bold py-1">{% if is_edit %}编辑{% else %}新增{% endif %}机器</h2>
+        
+        <label class="block text-sm">名称：</label>
+        <input class="border my-2 p-2 w-full" type="text" id="name" value="{{ name }}" required />
+        
+        <label class="block text-sm">IP:</label>
+        <input class="border my-2 p-2 w-full" type="text" id="ip" value="{{ ip }}" />
+        
+        <label class="block text-sm">密钥:</label>
+        <input class="border my-2 p-2 w-full" type="text" id="key" value="{{ key }}" />
+        
+        <button class="w-full p-2 button bg-neutral-800 text-white mt-3" type="submit">
+            {% if is_edit %}编辑{% else %}新增{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('machineForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const mid = this.dataset.mid;
+    const data = {
+        name: document.getElementById('name').value,
+        ip: document.getElementById('ip').value,
+        key: document.getElementById('key').value
+    };
+    
+    try {
+        const url = mid ? `/api/admin/machines/${mid}` : '/api/admin/machines/';
+        const res = await apiFetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        if (res) {
+            window.location.href = '/admin/';
+        }
+    } catch (err) {
+        alert(mid ? '编辑失败' : '新增失败');
+    }
+});
+</script>
+{% endblock %}

@@ -52,6 +52,17 @@ impl Query {
             .await
     }
 
+    pub async fn find_targets_by_machine_id(
+        db: &DbConn,
+        _mid: i32,
+    ) -> Result<Vec<target::Model>, DbErr> {
+        // 暂时返回所有目标，可以通过关联表查询特定机器的目标
+        Target::find()
+            .order_by_asc(target::Column::Name)
+            .all(db)
+            .await
+    }
+
     pub async fn find_pings_by_machine_id_and_target_id(
         db: &DbConn,
         mid: i32,

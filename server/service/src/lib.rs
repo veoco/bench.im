@@ -1,7 +1,7 @@
 mod forms;
 mod models;
 mod mutation;
-mod query;
+pub mod query;
 
 pub use forms::*;
 pub use models::*;

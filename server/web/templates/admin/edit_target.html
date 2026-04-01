@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if is_edit %}编辑{% else %}新增{% endif %}目标 - Bench.im{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-2 items-center sm:h-screen">
+    <form class="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" id="targetForm" data-tid="{{ id }}">
+        <h2 class="text-center text-lg font-bold py-1">{% if is_edit %}编辑{% else %}新增{% endif %}目标</h2>
+        
+        <label class="block text-sm">名称：</label>
+        <input class="border my-2 p-2 w-full" type="text" id="name" value="{{ name }}" required />
+        
+        <label class="block text-sm">域名:</label>
+        <input class="border my-2 p-2 w-full" type="text" id="domain" value="{{ domain }}" />
+        
+        <label class="block text-sm">IPv4:</label>
+        <input class="border my-2 p-2 w-full" type="text" id="ipv4" value="{{ ipv4 }}" />
+        
+        <label class="block text-sm">IPv6:</label>
+        <input class="border my-2 p-2 w-full" type="text" id="ipv6" value="{{ ipv6 }}" />
+        
+        <button class="w-full p-2 button bg-neutral-800 text-white mt-3" type="submit">
+            {% if is_edit %}编辑{% else %}新增{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('targetForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const tid = this.dataset.tid;
+    const data = { name: document.getElementById('name').value };
+    
+    const domain = document.getElementById('domain').value;
+    if (domain) data.domain = domain;
+    
+    const ipv4 = document.getElementById('ipv4').value;
+    if (ipv4) data.ipv4 = ipv4;
+    
+    const ipv6 = document.getElementById('ipv6').value;
+    if (ipv6) data.ipv6 = ipv6;
+    
+    try {
+        const url = tid ? `/api/admin/targets/${tid}` : '/api/admin/targets/';
+        const res = await apiFetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        if (res) {
+            window.location.href = '/admin/';
+        }
+    } catch (err) {
+        alert(tid ? '编辑失败' : '新增失败');
+    }
+});
+</script>
+{% endblock %}

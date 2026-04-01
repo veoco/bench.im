@@ -6,7 +6,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 TEST_DIR="$PROJECT_ROOT/test"
 TEST_DB="$TEST_DIR/test-db.sqlite3"
-TEST_STATIC="$TEST_DIR/static"
 SERVER_PID="$TEST_DIR/server.pid"
 CLIENT_PID="$TEST_DIR/client.pid"
 SERVER_LOG="$TEST_DIR/server.log"
@@ -92,51 +91,11 @@ check_dependencies() {
     fi
     log_success "Rust: $(cargo --version)"
 
-    if ! command -v node &> /dev/null; then
-        log_error "未找到 node，请安装 Node.js"
-        exit 1
-    fi
-    log_success "Node.js: $(node --version)"
-
-    if ! command -v npm &> /dev/null; then
-        log_error "未找到 npm，请安装 npm"
-        exit 1
-    fi
-    log_success "npm: $(npm --version)"
-
     if ! command -v sqlite3 &> /dev/null; then
         log_error "未找到 sqlite3，请安装 sqlite3"
         exit 1
     fi
     log_success "sqlite3: $(sqlite3 --version)"
-}
-
-build_web() {
-    log_info "构建 Web 前端..."
-
-    cd "$PROJECT_ROOT/web"
-    npm ci
-    npm run build
-    cd "$PROJECT_ROOT"
-
-    log_success "Web 前端构建完成！"
-}
-
-prepare_static_files() {
-    log_info "准备静态文件..."
-
-    mkdir -p "$TEST_STATIC"
-    rm -rf "$TEST_STATIC"/*
-
-    if [ -d "$PROJECT_ROOT/web/dist" ]; then
-        cp -r "$PROJECT_ROOT/web/dist"/* "$TEST_STATIC"/
-        log_success "静态文件已复制到 $TEST_STATIC"
-    else
-        log_warn "web/dist 目录不存在，先构建 Web 前端"
-        build_web
-        cp -r "$PROJECT_ROOT/web/dist"/* "$TEST_STATIC"/
-        log_success "静态文件已复制到 $TEST_STATIC"
-    fi
 }
 
 compile_project() {
@@ -223,7 +182,6 @@ start_server() {
     DATABASE_URL="sqlite:$TEST_DB?mode=rwc" \
     ADMIN_PASSWORD="test-admin-123" \
     LISTEN_ADDRESS="127.0.0.1:3000" \
-    STATIC_ROOT="$TEST_STATIC" \
         cargo run -p bim-server > "$SERVER_LOG" 2>&1 &
     SERVER_PID_VAL=$!
     echo $SERVER_PID_VAL > "$SERVER_PID"
@@ -324,8 +282,6 @@ main() {
 
     check_dependencies
     compile_project
-    build_web
-    prepare_static_files
     init_database
 
     if [ $QUICK_MODE -eq 0 ]; then
@@ -356,7 +312,6 @@ SQL
     echo ""
     echo "测试目录: $TEST_DIR"
     echo "数据库: $TEST_DB"
-    echo "静态文件: $TEST_STATIC"
     echo "服务器: http://127.0.0.1:3000"
     echo "管理密码: test-admin-123"
     echo ""

@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block title %}管理登录 - Bench.im{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-2 items-center sm:h-screen">
+    <form class="max-w-sm w-full mt-6 border border-neutral-400 bg-neutral-100 p-3 sm:mt-0" id="loginForm">
+        <h2 class="text-center text-lg font-bold py-1">管理登录</h2>
+        <input class="border my-3 p-2 w-full" type="password" id="password" placeholder="请输入密码" required />
+        <button class="w-full p-2 button bg-neutral-800 text-white" type="submit">登录</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    
+    try {
+        const res = await fetch('/api/admin/machines/', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + password
+            }
+        });
+        
+        if (res.status === 200) {
+            sessionStorage.setItem('token', password);
+            window.location.href = '/admin/';
+        } else {
+            alert('密码错误');
+        }
+    } catch (err) {
+        alert('登录失败: ' + err.message);
+    }
+});
+</script>
+{% endblock %}
