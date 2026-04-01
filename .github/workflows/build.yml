@@ -23,6 +23,13 @@ jobs:
       - name: Install musl-tools
         run: sudo apt-get update && sudo apt-get install -y musl-tools
 
+      - name: Install TailwindCSS
+        run: |
+          cd server/web
+          curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+          chmod +x tailwindcss-linux-x64
+          mv tailwindcss-linux-x64 tailwindcss
+
       - name: Build Server (includes embedded web)
         timeout-minutes: 15
         run: |

@@ -37,6 +37,19 @@ jobs:
       - name: Install cross
         run: cargo install cross
 
+      - name: Install TailwindCSS
+        run: |
+          cd server/web
+          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-musl" ]; then
+            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64
+            chmod +x tailwindcss-linux-arm64
+            mv tailwindcss-linux-arm64 tailwindcss
+          else
+            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+            chmod +x tailwindcss-linux-x64
+            mv tailwindcss-linux-x64 tailwindcss
+          fi
+
       - name: Build ${{ matrix.target }}
         timeout-minutes: 15
         working-directory: server
@@ -98,6 +111,13 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
+
+      - name: Install TailwindCSS
+        run: |
+          cd server/web
+          curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+          chmod +x tailwindcss-macos-arm64
+          mv tailwindcss-macos-arm64 tailwindcss
 
       - name: Build
         timeout-minutes: 120
