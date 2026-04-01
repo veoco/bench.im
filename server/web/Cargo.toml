@@ -32,3 +32,5 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 validator = { version = "0.20", features = ["derive"] }
 thiserror = "1.0"
+futures = "0.3"
+sea-orm = { version = "1" }

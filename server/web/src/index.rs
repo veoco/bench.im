@@ -5,6 +5,7 @@ use axum::{
     routing::get,
     Router,
 };
+use futures::future::try_join_all;
 use std::sync::Arc;
 
 use crate::{
@@ -21,14 +22,25 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let targets: Vec<Target> = match Query::find_targets(&state.conn).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|t| Target {
-                id: t.id,
-                name: t.name,
-                updated: 0,
-            })
-            .collect(),
+        Ok(list) => {
+            let futures = list.into_iter().map(|t| {
+                let conn = state.conn.clone();
+                async move {
+                    let updated = Query::find_latest_ping_by_target_id(&conn, t.id)
+                        .await
+                        .ok()
+                        .flatten()
+                        .map(|dt| dt.and_utc().timestamp())
+                        .unwrap_or(0);
+                    Ok::<Target, sea_orm::DbErr>(Target {
+                        id: t.id,
+                        name: t.name,
+                        updated,
+                    })
+                }
+            });
+            try_join_all(futures).await.unwrap_or_default()
+        }
         Err(_) => vec![],
     };
 
@@ -53,14 +65,26 @@ async fn machine_page(
     };
 
     let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|t| Target {
-                id: t.id,
-                name: t.name,
-                updated: 0,
-            })
-            .collect(),
+        Ok(list) => {
+            let futures = list.into_iter().map(|t| {
+                let conn = state.conn.clone();
+                let machine_id = mid;
+                async move {
+                    let updated = Query::find_latest_ping_by_machine_and_target(&conn, machine_id, t.id)
+                        .await
+                        .ok()
+                        .flatten()
+                        .map(|dt| dt.and_utc().timestamp())
+                        .unwrap_or(0);
+                    Ok::<Target, sea_orm::DbErr>(Target {
+                        id: t.id,
+                        name: t.name,
+                        updated,
+                    })
+                }
+            });
+            try_join_all(futures).await.unwrap_or_default()
+        }
         Err(_) => vec![],
     };
 

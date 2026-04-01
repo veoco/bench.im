@@ -8,18 +8,18 @@
         <h2 class="text-center text-lg font-bold py-1">{% if is_edit %}编辑{% else %}新增{% endif %}目标</h2>
         
         <label class="block text-sm">名称：</label>
-        <input class="border my-2 p-2 w-full" type="text" id="name" value="{{ name }}" required />
+        <input class="input my-2" type="text" id="name" value="{{ name }}" required />
         
         <label class="block text-sm">域名:</label>
-        <input class="border my-2 p-2 w-full" type="text" id="domain" value="{{ domain }}" />
+        <input class="input my-2" type="text" id="domain" value="{{ domain }}" />
         
         <label class="block text-sm">IPv4:</label>
-        <input class="border my-2 p-2 w-full" type="text" id="ipv4" value="{{ ipv4 }}" />
+        <input class="input my-2" type="text" id="ipv4" value="{{ ipv4 }}" />
         
         <label class="block text-sm">IPv6:</label>
-        <input class="border my-2 p-2 w-full" type="text" id="ipv6" value="{{ ipv6 }}" />
+        <input class="input my-2" type="text" id="ipv6" value="{{ ipv6 }}" />
         
-        <button class="w-full p-2 button bg-neutral-800 text-white mt-3" type="submit">
+        <button class="w-full p-2 button-primary mt-3" type="submit">
             {% if is_edit %}编辑{% else %}新增{% endif %}
         </button>
     </form>
@@ -30,7 +30,7 @@
 <script>
 document.getElementById('targetForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const tid = this.dataset.tid;
+    const tid = parseInt(this.dataset.tid) || 0;
     const data = { name: document.getElementById('name').value };
     
     const domain = document.getElementById('domain').value;

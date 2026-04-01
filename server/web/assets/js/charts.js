@@ -243,16 +243,29 @@ class PingChart {
     
     setFixedY(fixed) {
         this.fixedY = fixed;
+        // 销毁现有图表并重新渲染，因为 fixedY 改变需要更新 scales.y.range 配置
+        if (this.plot) {
+            this.plot.destroy();
+            this.plot = null;
+        }
         this.loadData();
     }
     
     setIpv6(ipv6) {
         this.ipv6 = ipv6;
+        if (this.plot) {
+            this.plot.destroy();
+            this.plot = null;
+        }
         this.loadData();
     }
     
     setDateRange(range) {
         this.dateRange = range;
+        if (this.plot) {
+            this.plot.destroy();
+            this.plot = null;
+        }
         this.loadData();
     }
 }

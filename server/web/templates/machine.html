@@ -13,9 +13,9 @@
         <p class="text-neutral-500 text-sm">{{ machine.ip }}</p>
     </div>
     <div class="flex p-2 bg-neutral-100 leading-4 text-sm border-y border-neutral-400">
-        <button class="border border-neutral-600 shadow-sm px-2 py-0.5 mr-2 bg-white" id="btnFixedY" type="button">对齐y轴</button>
-        <button class="border border-neutral-600 shadow-sm px-2 py-0.5 mr-2 bg-white" id="btnIpv6" type="button">IPv6</button>
-        <select class="pl-2 py-0 shadow-sm" id="dateRange">
+        <button class="toggle-button px-2 py-0.5 mr-2" id="btnFixedY" type="button">对齐y轴</button>
+        <button class="toggle-button px-2 py-0.5 mr-2" id="btnIpv6" type="button">IPv6</button>
+        <select class="border border-neutral-600 shadow-sm px-2 py-0.5 bg-white cursor-pointer" id="dateRange">
             <option value="24h">最近 24 小时</option>
             <option value="7d">最近 7 天</option>
         </select>
@@ -54,15 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('btnFixedY').addEventListener('click', function() {
         fixedY = !fixedY;
-        this.classList.toggle('bg-neutral-500');
-        this.classList.toggle('text-white');
+        this.classList.toggle('active');
         Object.values(charts).forEach(chart => chart.setFixedY(fixedY));
     });
     
     document.getElementById('btnIpv6').addEventListener('click', function() {
         ipv6 = !ipv6;
-        this.classList.toggle('bg-neutral-500');
-        this.classList.toggle('text-white');
+        this.classList.toggle('active');
         Object.values(charts).forEach(chart => chart.setIpv6(ipv6));
     });
     

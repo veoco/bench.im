@@ -85,4 +85,32 @@ impl Query {
             .all(db)
             .await
     }
+
+    /// 获取指定 target 的最新 ping 记录时间（用于首页状态显示）
+    pub async fn find_latest_ping_by_target_id(
+        db: &DbConn,
+        tid: i32,
+    ) -> Result<Option<NaiveDateTime>, DbErr> {
+        Ping::find()
+            .filter(ping::Column::TargetId.eq(tid))
+            .order_by_desc(ping::Column::Created)
+            .one(db)
+            .await
+            .map(|ping| ping.map(|p| p.created))
+    }
+
+    /// 获取指定机器和目标的最新 ping 记录时间（用于 machine 页面状态显示）
+    pub async fn find_latest_ping_by_machine_and_target(
+        db: &DbConn,
+        mid: i32,
+        tid: i32,
+    ) -> Result<Option<NaiveDateTime>, DbErr> {
+        Ping::find()
+            .filter(ping::Column::MachineId.eq(mid))
+            .filter(ping::Column::TargetId.eq(tid))
+            .order_by_desc(ping::Column::Created)
+            .one(db)
+            .await
+            .map(|ping| ping.map(|p| p.created))
+    }
 }

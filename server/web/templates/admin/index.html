@@ -6,17 +6,17 @@
 <div>
     <div class="flex border-b border-neutral-400 bg-neutral-100 p-2 items-center">
         <h2 class="text-lg font-bold mr-3">机器列表</h2>
-        <button class="text-sm shadow-sm border border-neutral-600 bg-white px-2 py-1" onclick="location.href='/admin/machines/new'">
+        <button class="button text-sm px-2 py-1" onclick="location.href='/admin/machines/new'">
             新增机器
         </button>
     </div>
-    <div class="w-full p-2" id="machinesList">
+    <div class="w-full p-2" id="adminMachinesList">
         <div class="text-neutral-500">加载中...</div>
     </div>
     
     <div class="flex border-y border-neutral-400 bg-neutral-100 p-2 items-center">
         <h2 class="text-lg font-bold mr-3">目标列表</h2>
-        <button class="text-sm shadow-sm border border-neutral-600 bg-white px-2 py-1" onclick="location.href='/admin/targets/new'">
+        <button class="button text-sm px-2 py-1" onclick="location.href='/admin/targets/new'">
             新增目标
         </button>
     </div>
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const machines = await apiFetch('/api/admin/machines/');
         renderMachines(machines);
     } catch (err) {
-        document.getElementById('machinesList').innerHTML = '<div class="text-red-500">加载失败</div>';
+        document.getElementById('adminMachinesList').innerHTML = '<div class="text-red-500">加载失败</div>';
     }
     
     // 加载目标列表
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 function renderMachines(machines) {
-    const container = document.getElementById('machinesList');
+    const container = document.getElementById('adminMachinesList');
     if (!machines || machines.length === 0) {
         container.innerHTML = '<div class="text-neutral-500">暂无机器</div>';
         return;
@@ -70,10 +70,10 @@ function renderMachines(machines) {
                 <ul class="flex border-t border-neutral-400 p-2 bg-neutral-100 text-xs items-center">
                     <li class="mr-auto truncate"></li>
                     <li class="ml-1 shrink-0">
-                        <button class="border shadow-sm bg-sky-400 border-sky-500 text-white px-1 py-0.5 mr-1" onclick="location.href='/admin/machines/${m.id}'">编辑</button>
+                        <button class="button-info text-xs px-1 py-0.5 mr-1" onclick="location.href='/admin/machines/${m.id}'">编辑</button>
                     </li>
                     <li class="shrink-0">
-                        <button class="border shadow-sm bg-red-400 border-red-500 text-white px-1 py-0.5" onclick="location.href='/admin/machines/${m.id}/delete'">删除</button>
+                        <button class="button-danger text-xs px-1 py-0.5" onclick="location.href='/admin/machines/${m.id}/delete'">删除</button>
                     </li>
                 </ul>
             </div>
@@ -98,10 +98,10 @@ function renderTargets(targets) {
                 <ul class="flex border-t border-neutral-400 p-2 bg-neutral-100 text-xs items-center">
                     <li class="mr-auto truncate">${t.domain || ''}</li>
                     <li class="ml-1 shrink-0">
-                        <button class="border shadow-sm bg-sky-400 border-sky-500 text-white px-1 py-0.5 mr-1" onclick="location.href='/admin/targets/${t.id}'">编辑</button>
+                        <button class="button-info text-xs px-1 py-0.5 mr-1" onclick="location.href='/admin/targets/${t.id}'">编辑</button>
                     </li>
                     <li class="shrink-0">
-                        <button class="border shadow-sm bg-red-400 border-red-500 text-white px-1 py-0.5" onclick="location.href='/admin/targets/${t.id}/delete'">删除</button>
+                        <button class="button-danger text-xs px-1 py-0.5" onclick="location.href='/admin/targets/${t.id}/delete'">删除</button>
                     </li>
                 </ul>
             </div>
