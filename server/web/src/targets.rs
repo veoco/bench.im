@@ -180,6 +180,7 @@ pub async fn delete_target_admin(
 async fn new_target_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
     let template = EditTargetTemplate {
+        site_name: state.site_name.clone(),
         is_edit: false,
         id: 0,
         name: "".to_string(),
@@ -199,6 +200,7 @@ async fn edit_target_page(
     let machines = fetch_machines_for_list(&state).await;
     let template = match target_result {
         Ok(Some(t)) => EditTargetTemplate {
+            site_name: state.site_name.clone(),
             is_edit: true,
             id: t.id,
             name: t.name,
@@ -223,6 +225,7 @@ async fn delete_target_page(
     let machines = fetch_machines_for_list(&state).await;
     let template = match target_result {
         Ok(Some(t)) => DeleteTemplate {
+            site_name: state.site_name.clone(),
             item_type: "目标".to_string(),
             name: t.name,
             ip: "".to_string(),

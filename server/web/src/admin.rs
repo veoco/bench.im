@@ -35,12 +35,12 @@ async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
-    let template = AdminLoginTemplate { machines };
+    let template = AdminLoginTemplate { site_name: state.site_name.clone(), machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
 async fn admin_index_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
-    let template = AdminIndexTemplate { machines };
+    let template = AdminIndexTemplate { site_name: state.site_name.clone(), machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

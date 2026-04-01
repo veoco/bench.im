@@ -28,6 +28,7 @@ mod templates;
 pub struct AppState {
     pub conn: DatabaseConnection,
     pub admin_password: String,
+    pub site_name: String,
 }
 
 async fn shutdown_signal() {
@@ -94,6 +95,7 @@ async fn start() -> anyhow::Result<()> {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
     let addr = env::var("LISTEN_ADDRESS").unwrap_or(String::from("127.0.0.1:3000"));
     let admin_password = env::var("ADMIN_PASSWORD").unwrap_or(String::from("fake-admin-password"));
+    let site_name = env::var("SITE_NAME").unwrap_or(String::from("Bench.im"));
 
     info!("Listening on http://{addr}/");
 
@@ -106,6 +108,7 @@ async fn start() -> anyhow::Result<()> {
     let state = Arc::new(AppState {
         conn,
         admin_password,
+        site_name,
     });
 
     tokio::spawn(clean_database(state.clone()));

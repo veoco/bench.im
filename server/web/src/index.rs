@@ -57,7 +57,7 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = IndexTemplate { targets, machines };
+    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -100,6 +100,6 @@ async fn machine_page(
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = MachineTemplate { machine, targets, machines };
+    let template = MachineTemplate { site_name: state.site_name.clone(), machine, targets, machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

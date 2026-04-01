@@ -189,6 +189,7 @@ pub async fn delete_machine_by_mid_admin(
 async fn new_machine_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
     let template = EditMachineTemplate {
+        site_name: state.site_name.clone(),
         is_edit: false,
         id: 0,
         name: "".to_string(),
@@ -207,6 +208,7 @@ async fn edit_machine_page(
     let machines = fetch_machines_for_list(&state).await;
     let template = match machine_result {
         Ok(Some(m)) => EditMachineTemplate {
+            site_name: state.site_name.clone(),
             is_edit: true,
             id: m.id,
             name: m.name,
@@ -230,6 +232,7 @@ async fn delete_machine_page(
     let machines = fetch_machines_for_list(&state).await;
     let template = match machine_result {
         Ok(Some(m)) => DeleteTemplate {
+            site_name: state.site_name.clone(),
             item_type: "机器".to_string(),
             name: m.name,
             ip: m.ip,

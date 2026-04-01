@@ -225,6 +225,7 @@ start_server() {
     DATABASE_URL="sqlite:$TEST_DB?mode=rwc" \
     ADMIN_PASSWORD="test-admin-123" \
     LISTEN_ADDRESS="127.0.0.1:3000" \
+    SITE_NAME="BimTest" \
         cargo run -p bim-server > "$SERVER_LOG" 2>&1 &
     SERVER_PID_VAL=$!
     echo $SERVER_PID_VAL > "$SERVER_PID"

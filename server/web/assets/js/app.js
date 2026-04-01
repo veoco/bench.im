@@ -1,5 +1,3 @@
-// Bench.im 核心 JavaScript
-
 // API 请求封装
 const API = {
     async fetchJSON(url, options = {}) {

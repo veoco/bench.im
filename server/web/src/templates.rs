@@ -25,6 +25,7 @@ pub struct MachineForList {
 #[derive(Template)]
 #[template(path = "index.html")]
 pub struct IndexTemplate {
+    pub site_name: String,
     pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
 }
@@ -32,6 +33,7 @@ pub struct IndexTemplate {
 #[derive(Template)]
 #[template(path = "machine.html")]
 pub struct MachineTemplate {
+    pub site_name: String,
     pub machine: Machine,
     pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
@@ -40,18 +42,21 @@ pub struct MachineTemplate {
 #[derive(Template)]
 #[template(path = "admin/login.html")]
 pub struct AdminLoginTemplate {
+    pub site_name: String,
     pub machines: Vec<MachineForList>,
 }
 
 #[derive(Template)]
 #[template(path = "admin/index.html")]
 pub struct AdminIndexTemplate {
+    pub site_name: String,
     pub machines: Vec<MachineForList>,
 }
 
 #[derive(Template)]
 #[template(path = "admin/edit_machine.html")]
 pub struct EditMachineTemplate {
+    pub site_name: String,
     pub is_edit: bool,
     pub id: i32,
     pub name: String,
@@ -63,6 +68,7 @@ pub struct EditMachineTemplate {
 #[derive(Template)]
 #[template(path = "admin/edit_target.html")]
 pub struct EditTargetTemplate {
+    pub site_name: String,
     pub is_edit: bool,
     pub id: i32,
     pub name: String,
@@ -75,6 +81,7 @@ pub struct EditTargetTemplate {
 #[derive(Template)]
 #[template(path = "admin/delete.html")]
 pub struct DeleteTemplate {
+    pub site_name: String,
     pub item_type: String,
     pub name: String,
     pub ip: String,
