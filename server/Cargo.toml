@@ -5,9 +5,3 @@ edition = "2024"
 
 [dependencies]
 server-web = { path = "web" }
-
-
-[profile.release]
-strip = true
-lto = true
-codegen-units = 1
