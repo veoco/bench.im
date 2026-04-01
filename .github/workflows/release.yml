@@ -46,7 +46,7 @@ jobs:
           cp ../../target/${{ matrix.target }}/release/bim-server ./build/release/bim-server
 
       - name: UPX
-        uses: crazy-max/ghaction-upx@v2
+        uses: crazy-max/ghaction-upx@v4
         with:
           version: latest
           files: ./server/build/release/bim-server
@@ -150,7 +150,7 @@ jobs:
           cp ../../target/${{ matrix.target }}/release/bim build/release/bim
 
       - name: UPX Compress
-        uses: crazy-max/ghaction-upx@v2
+        uses: crazy-max/ghaction-upx@v4
         with:
           version: latest
           files: |

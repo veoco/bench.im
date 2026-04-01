@@ -31,7 +31,7 @@ jobs:
           cp target/${{ env.TARGET }}/release/bim-server server/build/release/bim-server
 
       - name: UPX Server
-        uses: crazy-max/ghaction-upx@v2
+        uses: crazy-max/ghaction-upx@v4
         with:
           version: latest
           files: ./server/build/release/bim-server
@@ -51,7 +51,7 @@ jobs:
           cp target/${{ env.TARGET }}/release/bim client/build/release/bim
 
       - name: UPX Client
-        uses: crazy-max/ghaction-upx@v2
+        uses: crazy-max/ghaction-upx@v4
         with:
           version: latest
           files: ./client/build/release/bim
