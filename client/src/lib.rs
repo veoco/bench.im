@@ -1,10 +1,12 @@
 mod models;
+mod ping_native;
+mod ping_system;
 
+use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use regex::Regex;
-use tokio::process::Command;
+use surge_ping::Client;
 use tokio::sync::Semaphore;
 
 pub use models::{Message, PingData, Target};
@@ -102,74 +104,73 @@ impl BimClient {
     }
 }
 
-pub async fn ping(
-    target: String,
-    ipv6: bool,
-    s: Arc<Semaphore>,
-    target_id: i32,
-    cc: Arc<BimClient>,
-) {
-    let permit = match s.acquire().await {
-        Ok(p) => p,
-        _ => {
-            debug!("Acquire semaphore failed");
+#[derive(Clone)]
+pub enum PingMode {
+    Native(Arc<Client>),
+    System,
+}
 
-            return;
+impl PingMode {
+    pub async fn detect() -> Self {
+        // 尝试创建 surge-ping client
+        match Client::new(&Default::default()) {
+            Ok(client) => {
+                // 测试是否能实际 ping 通（权限验证）
+                let test_client = Arc::new(client);
+                let ident = surge_ping::PingIdentifier(0);
+                let mut pinger = test_client.pinger(
+                    IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)),
+                    ident
+                ).await;
+                
+                match pinger.ping(surge_ping::PingSequence(0), &[]).await {
+                    Ok(_) => PingMode::Native(test_client),
+                    Err(_) => PingMode::System,
+                }
+            }
+            Err(_) => PingMode::System,
         }
-    };
+    }
 
-    let (net_arg, count_arg) = if cfg!(target_os = "windows") {
-        if ipv6 { ("-6", "-n") } else { ("-4", "-n") }
-    } else {
-        if ipv6 { ("-6", "-c") } else { ("-4", "-c") }
-    };
-
-    let output = Command::new("ping")
-        .arg(count_arg)
-        .arg("20")
-        .arg(net_arg)
-        .arg(target)
-        .output()
-        .await
-        .expect("Failed to execute ping command");
-
-    drop(permit);
-
-    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-    let mut ping_times = Vec::new();
-    let mut ping_success = 0;
-
-    let time_regex = Regex::new(r"=([\d.]+) ?ms").unwrap();
-    let mut line_count = 0;
-    for line in stdout.lines() {
-        if let Some(caps) = time_regex.captures(line) {
-            if let Ok(time) = caps[1].parse::<f32>() {
-                ping_times.push(time as u16);
-                ping_success += 1;
+    pub async fn ping(
+        &self,
+        target_ip: IpAddr,
+        ipv6: bool,
+        semaphore: Arc<Semaphore>,
+        target_id: i32,
+        cc: Arc<BimClient>,
+    ) -> Option<PingData> {
+        match self {
+            PingMode::Native(client) => {
+                ping_native::ping_native(client, target_ip, ipv6, semaphore, target_id, cc).await
+            }
+            PingMode::System => {
+                ping_system::ping_system(target_ip, ipv6, semaphore, target_id, cc).await
             }
         }
-
-        if line_count > 0 && line.is_empty() {
-            break;
-        }
-
-        line_count += 1;
     }
+}
 
-    if ping_success == 0 {
-        return;
-    }
-
-    let ping_min = ping_times.iter().min().cloned().unwrap_or(0);
-    let ping_avg = ping_times.iter().sum::<u16>() / ping_success as u16;
-    let ping_fail = 20 - ping_success;
-
-    let data = PingData {
-        ipv6,
-        min: ping_min,
-        avg: ping_avg,
-        fail: ping_fail,
-    };
-
-    cc.post_target_data(target_id, data).await;
+/// 域名解析，分别获取 IPv4 和 IPv6 地址
+pub async fn resolve_domain(domain: &str) -> Result<(Option<IpAddr>, Option<IpAddr>), String> {
+    use tokio::net::lookup_host;
+    
+    let addrs: Vec<_> = lookup_host(format!("{}:0", domain))
+        .await
+        .map_err(|e| e.to_string())?
+        .collect();
+    
+    let v4 = addrs.iter()
+        .find_map(|sa| match sa.ip() {
+            IpAddr::V4(v4) => Some(IpAddr::V4(v4)),
+            _ => None,
+        });
+    
+    let v6 = addrs.iter()
+        .find_map(|sa| match sa.ip() {
+            IpAddr::V6(v6) => Some(IpAddr::V6(v6)),
+            _ => None,
+        });
+    
+    Ok((v4, v6))
 }

@@ -9,7 +9,7 @@ pub struct Target {
     pub ipv6: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PingData {
     pub ipv6: bool,
     pub min: u16,

@@ -7,7 +7,7 @@ use log::{debug, info};
 use tokio::sync::Semaphore;
 use tokio::time;
 
-use bim::{BimClient, ping};
+use bim::{BimClient, PingMode, resolve_domain};
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} [options]", program);
@@ -77,6 +77,14 @@ fn main() {
 
 #[tokio::main]
 async fn run(mid: i32, token: String, server_url: String) {
+    // 启动时检测 ping 模式
+    info!("Detecting ping mode...");
+    let ping_mode = PingMode::detect().await;
+    match &ping_mode {
+        PingMode::Native(_) => info!("Using native ping (surge-ping)"),
+        PingMode::System => info!("Using system ping fallback"),
+    }
+
     let mut interval = time::interval(Duration::from_secs(300));
     let semaphore = Arc::new(Semaphore::new(64));
 
@@ -107,35 +115,43 @@ async fn run(mid: i32, token: String, server_url: String) {
 
         for target in targets {
             let target_id = target.id;
-            let s = semaphore.clone();
-            let cc = c.clone();
-
-            if target.domain.is_some() {
-                let domain = target.domain.unwrap();
-
-                let target = domain.clone();
-                let task = tokio::spawn(async move { ping(target, false, s, target_id, cc).await });
-                tasks.push(task);
-
-                let s = semaphore.clone();
-                let cc = c.clone();
-                let target = domain.clone();
-                let task = tokio::spawn(async move { ping(target, true, s, target_id, cc).await });
-                tasks.push(task);
+            
+            // 域名解析，获取 IPv4 和 IPv6 地址
+            let (v4_addr, v6_addr) = if let Some(domain) = &target.domain {
+                match resolve_domain(domain).await {
+                    Ok((v4, v6)) => (v4, v6),
+                    Err(e) => {
+                        debug!("Failed to resolve domain {}: {}", domain, e);
+                        (None, None)
+                    }
+                }
             } else {
-                if let Some(ipv4) = target.ipv4 {
-                    let task =
-                        tokio::spawn(async move { ping(ipv4, false, s, target_id, cc).await });
-                    tasks.push(task);
-                }
+                // 解析已有的 IP 字符串
+                let v4 = target.ipv4.and_then(|s| s.parse().ok());
+                let v6 = target.ipv6.and_then(|s| s.parse().ok());
+                (v4, v6)
+            };
 
-                if let Some(ipv6) = target.ipv6 {
-                    let s = semaphore.clone();
-                    let cc = c.clone();
-                    let task =
-                        tokio::spawn(async move { ping(ipv6, true, s, target_id, cc).await });
-                    tasks.push(task);
-                }
+            // 创建 IPv4 任务
+            if let Some(addr) = v4_addr {
+                let pm = ping_mode.clone();
+                let sem = semaphore.clone();
+                let cc = c.clone();
+                let task = tokio::spawn(async move {
+                    pm.ping(addr, false, sem, target_id, cc).await;
+                });
+                tasks.push(task);
+            }
+
+            // 创建 IPv6 任务
+            if let Some(addr) = v6_addr {
+                let pm = ping_mode.clone();
+                let sem = semaphore.clone();
+                let cc = c.clone();
+                let task = tokio::spawn(async move {
+                    pm.ping(addr, true, sem, target_id, cc).await;
+                });
+                tasks.push(task);
             }
         }
 
