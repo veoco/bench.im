@@ -87,17 +87,17 @@ async fn server_index(State(state): State<Arc<AppState>>, request: Request) -> i
 fn build_app(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/api/machines/", get(list_machines))
-        .route("/api/machines/:mid", get(get_machine_by_mid))
-        .route("/api/machines/:mid/targets/:tid/:delta", get(list_pings))
+        .route("/api/machines/{mid}", get(get_machine_by_mid))
+        .route("/api/machines/{mid}/targets/{tid}/{delta}", get(list_pings))
         .route("/api/targets/", get(list_targets))
         .route("/api/client/targets/", get(list_targets_client))
-        .route("/api/client/targets/:tid", post(create_ping_client))
+        .route("/api/client/targets/{tid}", post(create_ping_client))
         .route(
             "/api/admin/machines/",
             post(create_machine_admin).get(list_machines_admin),
         )
         .route(
-            "/api/admin/machines/:mid",
+            "/api/admin/machines/{mid}",
             get(get_machine_by_mid_admin)
                 .post(edit_machine_admin)
                 .delete(delete_machine_by_mid_admin),
@@ -107,13 +107,13 @@ fn build_app(state: Arc<AppState>) -> Router {
             post(create_target_admin).get(list_targets_admin),
         )
         .route(
-            "/api/admin/targets/:tid",
+            "/api/admin/targets/{tid}",
             get(get_target_by_tid_admin)
                 .post(edit_target_admin)
                 .delete(delete_target_admin),
         )
         .route("/m/", get(server_index))
-        .route("/m/:mid", get(server_index))
+        .route("/m/{mid}", get(server_index))
         .route("/admin/", get(server_index))
         .route("/admin/login", get(server_index))
         .nest_service("", ServeDir::new(state.static_root.clone()))

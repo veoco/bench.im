@@ -1,7 +1,7 @@
 [package]
 name = "server-service"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [dependencies]
@@ -9,7 +9,7 @@ entity = { path = "../entity" }
 
 serde = "1"
 chrono = "0.4"
-validator = { version = "0.18", features = ["derive"] }
+validator = { version = "0.20", features = ["derive"] }
 
 [dependencies.sea-orm]
 version = "1"

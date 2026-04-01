@@ -1,34 +1,41 @@
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{
-    extract::{Path, Query, State},
+    extract::{ConnectInfo, Path, Query, State},
     http::StatusCode,
     Json,
 };
-use axum_client_ip::InsecureClientIp;
 use axum_valid::Valid;
 use serde_json::{json, Value};
 
-use crate::extractors::ApiClient;
+use crate::extractors::{ApiClient, ClientIp};
 use crate::AppState;
 use server_service::{Mutation as MutationCore, PingCreate, PingFilter, Query as QueryCore};
 
 pub async fn create_ping_client(
     State(state): State<Arc<AppState>>,
     ApiClient(machine): ApiClient,
-    InsecureClientIp(ip): InsecureClientIp,
+    ClientIp(ip): ClientIp,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Path(tid): Path<i32>,
     Valid(Json(ping_create)): Valid<Json<PingCreate>>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
     let mut status = StatusCode::INTERNAL_SERVER_ERROR;
 
+    let client_ip = if ip.is_empty() {
+        addr.ip().to_string()
+    } else {
+        ip
+    };
+
     if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, machine.id).await {
         if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
             if let Ok(_) =
                 MutationCore::create_ping(&state.conn, ping_create, machine.id, target.id).await
             {
-                let _ = MutationCore::update_machine(&state.conn, machine.id, ip.to_string()).await;
+                let _ = MutationCore::update_machine(&state.conn, machine.id, client_ip).await;
                 let _ = MutationCore::update_target(&state.conn, target.id).await;
                 res = json!({"msg": "success"});
                 status = StatusCode::OK;
