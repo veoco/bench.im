@@ -13,12 +13,26 @@ use serde_json::{json, Value};
 
 use crate::extractors::{AdminUser, ApiClient};
 use crate::{
-    templates::{DeleteTemplate, EditTargetTemplate},
+    templates::{DeleteTemplate, EditTargetTemplate, MachineForList},
     AppState,
 };
 use server_service::{
     Mutation as MutationCore, Query as QueryCore, TargetCreateAdmin, TargetPublic,
 };
+
+async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
+    match QueryCore::find_machines(&state.conn).await {
+        Ok(list) => list
+            .into_iter()
+            .map(|m| MachineForList {
+                id: m.id,
+                name: m.name,
+                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
+            })
+            .collect(),
+        Err(_) => vec![],
+    }
+}
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -163,7 +177,8 @@ pub async fn delete_target_admin(
 }
 
 // 页面 handlers
-async fn new_target_page() -> Html<String> {
+async fn new_target_page(State(state): State<Arc<AppState>>) -> Html<String> {
+    let machines = fetch_machines_for_list(&state).await;
     let template = EditTargetTemplate {
         is_edit: false,
         id: 0,
@@ -171,6 +186,7 @@ async fn new_target_page() -> Html<String> {
         domain: "".to_string(),
         ipv4: "".to_string(),
         ipv6: "".to_string(),
+        machines,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -180,6 +196,7 @@ async fn edit_target_page(
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
+    let machines = fetch_machines_for_list(&state).await;
     let template = match target_result {
         Ok(Some(t)) => EditTargetTemplate {
             is_edit: true,
@@ -188,6 +205,7 @@ async fn edit_target_page(
             domain: t.domain.unwrap_or_default(),
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
+            machines,
         },
         _ => {
             return Html("Target not found".to_string());
@@ -202,6 +220,7 @@ async fn delete_target_page(
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
+    let machines = fetch_machines_for_list(&state).await;
     let template = match target_result {
         Ok(Some(t)) => DeleteTemplate {
             item_type: "目标".to_string(),
@@ -210,6 +229,7 @@ async fn delete_target_page(
             domain: t.domain.unwrap_or_default(),
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
+            machines,
         },
         _ => {
             return Html("Target not found".to_string());

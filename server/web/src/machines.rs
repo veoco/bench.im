@@ -13,13 +13,27 @@ use serde_json::{json, Value};
 
 use crate::extractors::AdminUser;
 use crate::{
-    templates::{DeleteTemplate, EditMachineTemplate},
+    templates::{DeleteTemplate, EditMachineTemplate, MachineForList},
     AppState,
 };
 use server_service::{
     MachineCreateAdmin, MachinePublic, MachineTargetsPublic, Mutation as MutationCore,
     Query as QueryCore, TargetPublic,
 };
+
+async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
+    match QueryCore::find_machines(&state.conn).await {
+        Ok(list) => list
+            .into_iter()
+            .map(|m| MachineForList {
+                id: m.id,
+                name: m.name,
+                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
+            })
+            .collect(),
+        Err(_) => vec![],
+    }
+}
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -172,13 +186,15 @@ pub async fn delete_machine_by_mid_admin(
 }
 
 // 页面 handlers
-async fn new_machine_page() -> Html<String> {
+async fn new_machine_page(State(state): State<Arc<AppState>>) -> Html<String> {
+    let machines = fetch_machines_for_list(&state).await;
     let template = EditMachineTemplate {
         is_edit: false,
         id: 0,
         name: "".to_string(),
         ip: "".to_string(),
         key: "".to_string(),
+        machines,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -188,6 +204,7 @@ async fn edit_machine_page(
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
     let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
+    let machines = fetch_machines_for_list(&state).await;
     let template = match machine_result {
         Ok(Some(m)) => EditMachineTemplate {
             is_edit: true,
@@ -195,6 +212,7 @@ async fn edit_machine_page(
             name: m.name,
             ip: m.ip,
             key: m.key,
+            machines,
         },
         _ => {
             return Html("Machine not found".to_string());
@@ -209,6 +227,7 @@ async fn delete_machine_page(
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
     let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
+    let machines = fetch_machines_for_list(&state).await;
     let template = match machine_result {
         Ok(Some(m)) => DeleteTemplate {
             item_type: "机器".to_string(),
@@ -217,6 +236,7 @@ async fn delete_machine_page(
             domain: "".to_string(),
             ipv4: "".to_string(),
             ipv6: "".to_string(),
+            machines,
         },
         _ => {
             return Html("Machine not found".to_string());

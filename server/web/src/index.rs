@@ -8,7 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, Target},
+    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target},
     AppState,
 };
 use server_service::query::Query;
@@ -17,6 +17,20 @@ pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(index_page))
         .route("/m/{mid}", get(machine_page))
+}
+
+pub async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
+    match Query::find_machines(&state.conn).await {
+        Ok(list) => list
+            .into_iter()
+            .map(|m| MachineForList {
+                id: m.id,
+                name: m.name,
+                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
+            })
+            .collect(),
+        Err(_) => vec![],
+    }
 }
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
@@ -41,7 +55,9 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
         Err(_) => vec![],
     };
 
-    let template = IndexTemplate { targets };
+    let machines = fetch_machines_for_list(&state).await;
+
+    let template = IndexTemplate { targets, machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -82,6 +98,8 @@ async fn machine_page(
         Err(_) => vec![],
     };
 
-    let template = MachineTemplate { machine, targets };
+    let machines = fetch_machines_for_list(&state).await;
+
+    let template = MachineTemplate { machine, targets, machines };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

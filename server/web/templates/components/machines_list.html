@@ -1,3 +1,17 @@
 <div class="m-2 flex flex-col bg-white border border-neutral-500" id="machinesList">
-    <div class="px-4 py-2 text-neutral-500">加载中...</div>
+    {% if machines.is_empty() %}
+    <div class="px-4 py-2 text-neutral-500">暂无机器</div>
+    {% else %}
+        {% for m in machines %}
+        <a href="/m/{{ m.id }}" class="p-2 flex items-center border-b border-neutral-500 hover:bg-neutral-200 last:border-0 machine-item" data-updated="{{ m.updated }}">
+            <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 3H20C20.5523 3 21 3.44772 21 4V11H3V4C3 3.44772 3.44772 3 4 3ZM3 13H21V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13ZM7 16V18H10V16H7ZM7 6V8H10V6H7Z"></path>
+            </svg>
+            {{ m.name }}
+            <span class="flex items-center ml-auto">
+                <span class="w-2 h-2 rounded-full mr-2 status-dot bg-gray-400"></span>
+            </span>
+        </a>
+        {% endfor %}
+    {% endif %}
 </div>
