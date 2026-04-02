@@ -81,7 +81,7 @@ async fn run(mid: i32, token: String, server_url: String) {
     info!("Detecting ping mode...");
     let ping_mode = PingMode::detect().await;
     match &ping_mode {
-        PingMode::Native(_) => info!("Using native ping (surge-ping)"),
+        PingMode::Native { .. } => info!("Using native ping (surge-ping)"),
         PingMode::System => info!("Using system ping fallback"),
     }
 

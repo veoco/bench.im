@@ -11,13 +11,15 @@ use crate::BimClient;
 use crate::models::PingData;
 
 pub async fn ping_native(
-    client: &Arc<Client>,
+    v4_client: &Arc<Client>,
+    v6_client: &Arc<Client>,
     target_ip: IpAddr,
     ipv6: bool,
     _semaphore: Arc<Semaphore>,
     target_id: i32,
     cc: Arc<BimClient>,
 ) -> Option<PingData> {
+    let client = if ipv6 { v6_client } else { v4_client };
     let ident = PingIdentifier(random());
     let mut pinger = client.pinger(target_ip, ident).await;
     pinger.timeout(Duration::from_secs(2));

@@ -6,7 +6,7 @@ use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use surge_ping::Client;
+use surge_ping::{Client, Config, ICMP};
 use tokio::sync::Semaphore;
 
 pub use models::{Message, PingData, Target};
@@ -106,29 +106,52 @@ impl BimClient {
 
 #[derive(Clone)]
 pub enum PingMode {
-    Native(Arc<Client>),
+    Native {
+        v4_client: Arc<Client>,
+        v6_client: Arc<Client>,
+    },
     System,
 }
 
 impl PingMode {
     pub async fn detect() -> Self {
-        // 尝试创建 surge-ping client
-        match Client::new(&Default::default()) {
-            Ok(client) => {
-                // 测试是否能实际 ping 通（权限验证）
-                let test_client = Arc::new(client);
-                let ident = surge_ping::PingIdentifier(0);
-                let mut pinger = test_client.pinger(
-                    IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)),
-                    ident
-                ).await;
-                
-                match pinger.ping(surge_ping::PingSequence(0), &[]).await {
-                    Ok(_) => PingMode::Native(test_client),
-                    Err(_) => PingMode::System,
-                }
-            }
-            Err(_) => PingMode::System,
+        // 创建 IPv4 Client（默认配置）
+        let v4_client = match Client::new(&Default::default()) {
+            Ok(client) => Arc::new(client),
+            Err(_) => return PingMode::System,
+        };
+
+        // 创建 IPv6 Client
+        let v6_config = Config::builder().kind(ICMP::V6).build();
+        let v6_client = match Client::new(&v6_config) {
+            Ok(client) => Arc::new(client),
+            Err(_) => return PingMode::System,
+        };
+
+        // 测试 IPv4 回环地址
+        let ident = surge_ping::PingIdentifier(0);
+        let mut v4_pinger = v4_client
+            .pinger(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), ident)
+            .await;
+
+        if v4_pinger.ping(surge_ping::PingSequence(0), &[]).await.is_err() {
+            return PingMode::System;
+        }
+
+        // 测试 IPv6 回环地址
+        let ident = surge_ping::PingIdentifier(0);
+        let mut v6_pinger = v6_client
+            .pinger(IpAddr::V6(std::net::Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)), ident)
+            .await;
+
+        if v6_pinger.ping(surge_ping::PingSequence(0), &[]).await.is_err() {
+            return PingMode::System;
+        }
+
+        // IPv4 和 IPv6 都测试通过
+        PingMode::Native {
+            v4_client,
+            v6_client,
         }
     }
 
@@ -141,8 +164,14 @@ impl PingMode {
         cc: Arc<BimClient>,
     ) -> Option<PingData> {
         match self {
-            PingMode::Native(client) => {
-                ping_native::ping_native(client, target_ip, ipv6, semaphore, target_id, cc).await
+            PingMode::Native {
+                v4_client,
+                v6_client,
+            } => {
+                ping_native::ping_native(
+                    v4_client, v6_client, target_ip, ipv6, semaphore, target_id, cc,
+                )
+                .await
             }
             PingMode::System => {
                 ping_system::ping_system(target_ip, ipv6, semaphore, target_id, cc).await
