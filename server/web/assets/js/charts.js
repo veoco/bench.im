@@ -14,9 +14,7 @@ class PingChart {
     }
     
     async init() {
-        await this.loadData();
-        
-        // 创建 tooltip
+        // 先创建 tooltip
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'ping-tooltip';
         this.tooltip.style.cssText = `
@@ -33,6 +31,9 @@ class PingChart {
             z-index: 10;
         `;
         this.container.appendChild(this.tooltip);
+
+        // 再加载数据
+        await this.loadData();
     }
     
     async loadData() {
