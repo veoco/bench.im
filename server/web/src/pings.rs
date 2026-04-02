@@ -18,6 +18,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/api/client/targets/{tid}", post(create_ping_client))
         .route("/api/machines/{mid}/targets/{tid}/{delta}", get(list_pings))
+        .route("/api/targets/{tid}/machines/{mid}/{delta}", get(list_pings_by_target))
 }
 
 pub async fn create_ping_client(
@@ -64,6 +65,41 @@ pub async fn list_pings(
 
     if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, mid).await {
         if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
+            if let Ok(pings) = QueryCore::find_pings_by_machine_id_and_target_id(
+                &state.conn,
+                machine.id,
+                target.id,
+                &delta,
+                ipv6,
+            )
+            .await
+            {
+                let mut outputs = vec![];
+                for p in pings {
+                    outputs.push((p.created.and_utc().timestamp(), p.min, p.avg, p.fail));
+                }
+                res = json!({
+                    "results": outputs,
+                });
+                status = StatusCode::OK;
+            }
+        }
+    }
+    (status, Json(res))
+}
+
+pub async fn list_pings_by_target(
+    State(state): State<Arc<AppState>>,
+    Path((tid, mid, delta)): Path<(i32, i32, String)>,
+    Query(form): Query<PingFilter>,
+) -> (StatusCode, Json<Value>) {
+    let mut res = json!({"msg": "failed"});
+    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
+
+    let ipv6 = form.ipv6.unwrap_or(false);
+
+    if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
+        if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, mid).await {
             if let Ok(pings) = QueryCore::find_pings_by_machine_id_and_target_id(
                 &state.conn,
                 machine.id,

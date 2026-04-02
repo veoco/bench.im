@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ target.name }} - {{ site_name }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/uplot.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <div class="flex items-baseline mb-4">
+        <h2 class="font-bold text-2xl mr-3 text-neutral-800">{{ target.name }}</h2>
+    </div>
+    <div class="flex items-center mb-4 gap-2 p-3 bg-white rounded-sm shadow-sm">
+        <button class="toggle-button px-3 py-1.5 text-sm font-medium" id="btnFixedY" type="button">对齐Y轴</button>
+        <button class="toggle-button px-3 py-1.5 text-sm font-medium" id="btnIpv6" type="button">IPv6</button>
+        <select class="bg-neutral-100 rounded-sm px-3 py-1.5 cursor-pointer text-sm focus:ring-2 focus:ring-sky-500/20 outline-none transition-all" id="dateRange">
+            <option value="24h">最近 24 小时</option>
+            <option value="7d">最近 7 天</option>
+        </select>
+    </div>
+
+    {% if target_machines.is_empty() %}
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+        <svg class="w-16 h-16 text-neutral-300 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 3H20C20.5523 3 21 3.44772 21 4V11H3V4C3 3.44772 3.44772 3 4 3ZM3 13H21V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13ZM7 16V18H10V16H7ZM7 6V8H10V6H7Z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-neutral-600 mb-2">暂无监控机器</h3>
+        <p class="text-sm text-neutral-400 mb-4">当前目标没有配置监控机器</p>
+        <a href="/admin" class="button-primary px-4 py-2 text-sm">前往管理后台添加</a>
+    </div>
+    {% else %}
+    <div class="gap-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid" data-tid="{{ target.id }}">
+        {% for machine in target_machines %}
+        <div class="bg-white rounded-sm shadow-sm chart-container overflow-hidden" data-mid="{{ machine.id }}">
+            <h3 class="px-4 py-2 bg-neutral-50 font-semibold text-sm text-neutral-700">{{ machine.name }}</h3>
+            <div class="w-full h-64 relative chart-wrapper" id="chart-{{ machine.id }}">
+                <div class="chart-skeleton absolute inset-0">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-xs text-neutral-400">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/uplot.iife.min.js"></script>
+<script src="/static/js/charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tid = parseInt(document.getElementById('chartsGrid').dataset.tid);
+    const charts = {};
+    
+    // 初始化所有图表（从 API 异步加载数据）
+    document.querySelectorAll('.chart-container').forEach(container => {
+        const mid = parseInt(container.dataset.mid);
+        const wrapper = container.querySelector('.chart-wrapper');
+        charts[mid] = new TargetPingChart(wrapper, mid, tid);
+    });
+    
+    // 控制按钮
+    let fixedY = false;
+    let ipv6 = false;
+    let dateRange = '24h';
+    
+    document.getElementById('btnFixedY').addEventListener('click', function() {
+        fixedY = !fixedY;
+        this.classList.toggle('active');
+        Object.values(charts).forEach(chart => chart.setFixedY(fixedY));
+    });
+    
+    document.getElementById('btnIpv6').addEventListener('click', function() {
+        ipv6 = !ipv6;
+        this.classList.toggle('active');
+        Object.values(charts).forEach(chart => chart.setIpv6(ipv6));
+    });
+    
+    document.getElementById('dateRange').addEventListener('change', function() {
+        dateRange = this.value;
+        Object.values(charts).forEach(chart => chart.setDateRange(dateRange));
+    });
+});
+</script>
+{% endblock %}

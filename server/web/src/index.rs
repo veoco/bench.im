@@ -8,7 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target},
+    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target, TargetTemplate},
     AppState,
 };
 use server_service::{query::Query, MachinePublic};
@@ -17,6 +17,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(index_page))
         .route("/m/{mid}", get(machine_page))
+        .route("/t/{tid}", get(target_page))
 }
 
 pub async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
@@ -107,5 +108,46 @@ async fn machine_page(
     let machines = fetch_machines_for_list(&state).await;
 
     let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id };
+    Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
+}
+
+async fn target_page(
+    Path(tid): Path<i32>,
+    State(state): State<Arc<AppState>>,
+) -> Html<String> {
+    let target_result = Query::find_target_by_id(&state.conn, tid).await;
+    let target = match target_result {
+        Ok(Some(t)) => Target {
+            id: t.id,
+            name: t.name,
+            updated: t.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
+        },
+        _ => {
+            return Html("Target not found".to_string());
+        }
+    };
+
+    let machines: Vec<Machine> = match Query::find_machines(&state.conn).await {
+        Ok(list) => {
+            list.into_iter().map(|m| {
+                Machine {
+                    id: m.id,
+                    name: m.name,
+                    ip: m.ip,
+                }
+            }).collect()
+        }
+        Err(_) => vec![],
+    };
+
+    let machines_for_list = fetch_machines_for_list(&state).await;
+
+    let template = TargetTemplate {
+        site_name: state.site_name.clone(),
+        target: target.clone(),
+        machines: machines_for_list.clone(),  // 用于侧边栏
+        target_machines: machines,            // 用于图表
+        current_machine_id: 0,
+    };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

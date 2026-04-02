@@ -60,6 +60,16 @@ pub struct MachineTemplate {
 }
 
 #[derive(Template)]
+#[template(path = "target.html")]
+pub struct TargetTemplate {
+    pub site_name: String,
+    pub target: Target,
+    pub machines: Vec<MachineForList>, // 用于侧边栏机器列表
+    pub target_machines: Vec<Machine>, // 用于目标页面的机器列表（显示图表）
+    pub current_machine_id: i32,
+}
+
+#[derive(Template)]
 #[template(path = "admin/login.html")]
 pub struct AdminLoginTemplate {
     pub site_name: String,

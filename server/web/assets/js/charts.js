@@ -305,4 +305,19 @@ class PingChart {
     }
 }
 
+// 用于 target 页面的图表类（按目标查看所有机器）
+class TargetPingChart extends PingChart {
+    async loadData() {
+        try {
+            const url = `/api/targets/${this.tid}/machines/${this.mid}/${this.dateRange}` + 
+                       (this.ipv6 ? '?ipv6=true' : '');
+            const data = await apiFetch(url);
+            this.render(data);
+        } catch (err) {
+            console.error('Failed to load ping data:', err);
+        }
+    }
+}
+
 window.PingChart = PingChart;
+window.TargetPingChart = TargetPingChart;
