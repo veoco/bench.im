@@ -11,7 +11,7 @@ use crate::{
     templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target},
     AppState,
 };
-use server_service::query::Query;
+use server_service::{query::Query, MachinePublic};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -67,11 +67,15 @@ async fn machine_page(
 ) -> Html<String> {
     let machine_result = Query::find_machine_by_id(&state.conn, mid).await;
     let machine = match machine_result {
-        Ok(Some(m)) => Machine {
-            id: m.id,
-            name: m.name,
-            ip: m.ip,
-        },
+        Ok(Some(m)) => {
+            // 使用 MachinePublic 的模糊处理逻辑对 IP 进行脱敏
+            let machine_public = MachinePublic::from(m);
+            Machine {
+                id: machine_public.id,
+                name: machine_public.name,
+                ip: machine_public.ip,
+            }
+        }
         _ => {
             return Html("Machine not found".to_string());
         }
