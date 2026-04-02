@@ -46,6 +46,10 @@ button {
   border: none;
 }
 
+.toggle-button.active {
+  @apply bg-neutral-800 text-white hover:bg-neutral-700;
+}
+
 /* 目标卡片 - 带左侧状态条 */
 .target-card {
   @apply bg-white rounded-sm transition-all duration-200 cursor-pointer;
