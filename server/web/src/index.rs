@@ -33,24 +33,6 @@ pub async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForLis
     }
 }
 
-fn calculate_status_color(updated: i64) -> String {
-    if updated == 0 {
-        return "gray".to_string();
-    }
-    let current_time = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs() as i64;
-    let diff = current_time - updated;
-    if diff < 5 * 60 {
-        "green".to_string()
-    } else if diff < 10 * 60 {
-        "yellow".to_string()
-    } else {
-        "red".to_string()
-    }
-}
-
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let targets: Vec<Target> = match Query::find_targets(&state.conn).await {
         Ok(list) => {
@@ -63,12 +45,10 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
                 let updated = latest_pings.get(&t.id)
                     .map(|dt| dt.and_utc().timestamp())
                     .unwrap_or(0);
-                let status_color = calculate_status_color(updated);
                 Target {
                     id: t.id,
                     name: t.name,
                     updated,
-                    status_color,
                 }
             }).collect()
         }
@@ -119,8 +99,7 @@ async fn machine_page(
                 let updated = latest_pings.get(&t.id)
                     .map(|dt| dt.and_utc().timestamp())
                     .unwrap_or(0);
-                let status_color = calculate_status_color(updated);
-                
+
                 // 从批量查询结果中获取图表数据
                 let chart_data = chart_data_map.get(&t.id)
                     .map(|pings| pings.iter().map(|p| {
@@ -132,12 +111,11 @@ async fn machine_page(
                         )
                     }).collect())
                     .unwrap_or_default();
-                
+
                 TargetWithChartData {
                     id: t.id,
                     name: t.name,
                     updated,
-                    status_color,
                     chart_data,
                 }
             }).collect()
