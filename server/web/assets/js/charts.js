@@ -9,7 +9,8 @@ class PingChart {
         this.fixedY = false;
         this.ipv6 = false;
         this.dateRange = '24h';
-        this.initialData = initialData; // 服务端嵌入的初始数据
+        this.initialData = initialData;
+        this.skeleton = container.querySelector('.chart-skeleton');
         
         this.init();
     }
@@ -78,6 +79,11 @@ class PingChart {
     
     render(data) {
         if (!data || !data.results) return;
+
+        if (this.skeleton) {
+            this.skeleton.remove();
+            this.skeleton = null;
+        }
 
         const size = this.getContainerSize();
         

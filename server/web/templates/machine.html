@@ -31,31 +31,22 @@
         <a href="/admin" class="button-primary px-4 py-2 text-sm">前往管理后台添加</a>
     </div>
     {% else %}
-    <div class="gap-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid">
+    <div class="gap-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid" data-mid="{{ machine.id }}">
         {% for target in targets %}
         <div class="bg-white rounded-sm shadow-sm chart-container overflow-hidden" data-tid="{{ target.id }}">
             <h3 class="px-4 py-2 bg-neutral-50 font-semibold text-sm text-neutral-700">{{ target.name }}</h3>
-            <div class="w-full h-64 relative chart-wrapper" id="chart-{{ target.id }}"></div>
+            <div class="w-full h-64 relative chart-wrapper" id="chart-{{ target.id }}">
+                <div class="chart-skeleton absolute inset-0">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-xs text-neutral-400">加载中...</span>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 </div>
-
-<!-- 嵌入图表数据 -->
-<script id="chartData" type="application/json">
-{
-    "mid": {{ machine.id }},
-    "targets": [
-        {% for target in targets %}
-        {
-            "id": {{ target.id }},
-            "data": {{ target.chart_data|json }}
-        }{% if !loop.last %},{% endif %}
-        {% endfor %}
-    ]
-}
-</script>
 {% endblock %}
 
 {% block scripts %}
@@ -63,17 +54,14 @@
 <script src="/static/js/charts.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const chartDataEl = document.getElementById('chartData');
-    const chartData = JSON.parse(chartDataEl.textContent);
-    const mid = chartData.mid;
+    const mid = parseInt(document.getElementById('chartsGrid').dataset.mid);
     const charts = {};
     
-    // 初始化所有图表（使用服务端嵌入的数据）
-    chartData.targets.forEach(target => {
-        const container = document.querySelector(`.chart-container[data-tid="${target.id}"]`);
-        if (!container) return;
+    // 初始化所有图表（从 API 异步加载数据）
+    document.querySelectorAll('.chart-container').forEach(container => {
+        const tid = parseInt(container.dataset.tid);
         const wrapper = container.querySelector('.chart-wrapper');
-        charts[target.id] = new PingChart(wrapper, mid, target.id, target.data);
+        charts[tid] = new PingChart(wrapper, mid, tid);
     });
     
     // 控制按钮

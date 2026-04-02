@@ -8,7 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target, TargetWithChartData},
+    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target},
     AppState,
 };
 use server_service::{query::Query, MachinePublic};
@@ -81,42 +81,23 @@ async fn machine_page(
         }
     };
 
-    let targets: Vec<TargetWithChartData> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
+    let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
         Ok(list) => {
             let target_ids: Vec<i32> = list.iter().map(|t| t.id).collect();
             
-            // 批量查询：一次性获取所有目标的最新 ping 时间和图表数据
-            let (latest_pings, chart_data_map) = tokio::join!(
-                Query::find_latest_pings_for_machine_targets(&state.conn, mid, target_ids.clone()),
-                Query::find_pings_for_machine_targets(&state.conn, mid, target_ids, "24h", false)
-            );
+            let latest_pings = Query::find_latest_pings_for_machine_targets(&state.conn, mid, target_ids)
+                .await
+                .unwrap_or_default();
             
-            let latest_pings = latest_pings.unwrap_or_default();
-            let chart_data_map = chart_data_map.unwrap_or_default();
-            
-            // 构建目标数据（无需单独查询）
             list.into_iter().map(|t| {
                 let updated = latest_pings.get(&t.id)
                     .map(|dt| dt.and_utc().timestamp())
                     .unwrap_or(0);
 
-                // 从批量查询结果中获取图表数据
-                let chart_data = chart_data_map.get(&t.id)
-                    .map(|pings| pings.iter().map(|p| {
-                        (
-                            p.created.and_utc().timestamp(),
-                            p.min as f32,
-                            p.avg as f32,
-                            p.fail,
-                        )
-                    }).collect())
-                    .unwrap_or_default();
-
-                TargetWithChartData {
+                Target {
                     id: t.id,
                     name: t.name,
                     updated,
-                    chart_data,
                 }
             }).collect()
         }

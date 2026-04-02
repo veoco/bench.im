@@ -8,15 +8,6 @@ pub struct Target {
     pub updated: i64,
 }
 
-// Machine 页面使用的目标结构（包含图表数据）
-#[derive(Serialize, Clone)]
-pub struct TargetWithChartData {
-    pub id: i32,
-    pub name: String,
-    pub updated: i64,
-    pub chart_data: Vec<(i64, f32, f32, i32)>, // (timestamp, min, avg, fails)
-}
-
 // Admin 页面使用的机器结构（包含完整信息）
 #[derive(Serialize, Clone)]
 pub struct AdminMachine {
@@ -63,7 +54,7 @@ pub struct IndexTemplate {
 pub struct MachineTemplate {
     pub site_name: String,
     pub machine: Machine,
-    pub targets: Vec<TargetWithChartData>,
+    pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
 }
