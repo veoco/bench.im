@@ -10,45 +10,198 @@
   }
 }
 
-/* 统一输入框样式 */
+/* 统一输入框样式 - 纯扁平 */
 .input {
-  @apply border border-neutral-400 bg-white p-2 w-full;
+  @apply bg-neutral-100 p-3 w-full rounded-sm transition-all duration-200;
+  @apply focus:bg-white focus:ring-2 focus:ring-sky-500/20 focus:outline-none;
+  @apply hover:bg-neutral-50;
+  border: none;
 }
 
-/* 基础按钮 */
+/* 输入框错误状态 */
+.input-error {
+  @apply bg-red-50 focus:bg-white focus:ring-red-500/20;
+}
+
+/* 输入框成功状态 */
+.input-success {
+  @apply bg-green-50 focus:bg-white focus:ring-green-500/20;
+}
+
+/* 基础按钮 - 纯扁平 */
 .button {
-  @apply border border-neutral-600 shadow-sm bg-white hover:bg-neutral-200;
+  @apply bg-neutral-200 hover:bg-neutral-300 text-neutral-700 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 /* 主要按钮 - 深色背景 */
 .button-primary {
-  @apply border border-neutral-600 shadow-sm bg-neutral-800 text-white hover:bg-neutral-700;
+  @apply bg-neutral-800 text-white hover:bg-neutral-700 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 /* 成功按钮 - 绿色 */
 .button-success {
-  @apply border border-green-500 shadow-sm bg-green-500 text-white hover:bg-green-600;
+  @apply bg-green-500 text-white hover:bg-green-600 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 /* 危险按钮 - 红色 */
 .button-danger {
-  @apply border border-red-500 shadow-sm bg-red-500 text-white hover:bg-red-600;
+  @apply bg-red-500 text-white hover:bg-red-600 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 /* 信息按钮 - 蓝色 */
 .button-info {
-  @apply border border-sky-500 shadow-sm bg-sky-500 text-white hover:bg-sky-600;
+  @apply bg-sky-500 text-white hover:bg-sky-600 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 button {
   @apply cursor-pointer;
 }
 
-/* 切换按钮 - 有按下/未按下两种状态 */
+/* 切换按钮 - 纯扁平 */
 .toggle-button {
-  @apply border border-neutral-600 shadow-sm bg-white hover:bg-neutral-200 transition-colors;
+  @apply bg-neutral-100 hover:bg-neutral-200 rounded-sm transition-all duration-150;
+  border: none;
 }
 
 .toggle-button.active {
-  @apply bg-neutral-800 text-white border-neutral-800 hover:bg-neutral-700;
+  @apply bg-neutral-800 text-white hover:bg-neutral-700;
+}
+
+/* 目标卡片 - 带左侧状态条 */
+.target-card {
+  @apply bg-white rounded-sm transition-all duration-200 cursor-pointer;
+  @apply hover:bg-neutral-50;
+}
+
+/* 机器列表项 - 浅色侧边栏 */
+.machine-item {
+  @apply transition-all duration-150;
+}
+
+.machine-item:hover {
+  @apply bg-neutral-200;
+}
+
+.machine-item.active {
+  @apply bg-neutral-300 border-l-3 border-neutral-800;
+}
+
+/* Admin 卡片 - 悬停显示操作（简化动画） */
+.admin-card {
+  @apply bg-white rounded-sm overflow-hidden transition-all duration-200;
+  @apply hover:shadow-sm;
+}
+
+.admin-card-actions {
+  @apply opacity-0 transition-opacity duration-150;
+}
+
+.admin-card:hover .admin-card-actions {
+  @apply opacity-100;
+}
+
+/* 图标背景 */
+.icon-bg {
+  @apply w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0;
+}
+
+/* 骨架屏动画 */
+.skeleton {
+  @apply bg-neutral-200 animate-pulse rounded-sm;
+}
+
+.skeleton-text {
+  @apply bg-neutral-200 h-4 rounded-sm w-3/4;
+}
+
+.skeleton-text-sm {
+  @apply bg-neutral-200 h-3 rounded-sm w-1/2;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  @apply inline-block w-5 h-5 border-2 border-neutral-300 border-t-sky-500 rounded-full;
+  animation: spin 0.8s linear infinite;
+}
+
+/* 状态灯脉冲动画 */
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
+  }
+}
+
+.status-pulse-green {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+/* Toast 通知 - 纯扁平 */
+.toast-container {
+  @apply fixed bottom-4 right-4 z-50 flex flex-col gap-2;
+}
+
+.toast {
+  @apply px-4 py-3 rounded-sm text-sm font-medium transform transition-all duration-300;
+  @apply translate-x-full opacity-0;
+  border: none;
+}
+
+.toast.show {
+  @apply translate-x-0 opacity-100;
+}
+
+.toast-success {
+  @apply bg-green-500 text-white;
+}
+
+.toast-error {
+  @apply bg-red-500 text-white;
+}
+
+.toast-info {
+  @apply bg-sky-500 text-white;
+}
+
+/* 卡片基础样式 - 纯扁平 */
+.card {
+  @apply bg-white rounded-sm overflow-hidden;
+}
+
+.card-header {
+  @apply bg-neutral-50 p-3;
+}
+
+.card-body {
+  @apply p-3;
+}
+
+/* 状态条颜色 */
+.status-bar-green {
+  @apply border-l-3 border-green-500;
+}
+
+.status-bar-yellow {
+  @apply border-l-3 border-yellow-500;
+}
+
+.status-bar-red {
+  @apply border-l-3 border-red-500;
+}
+
+.status-bar-gray {
+  @apply border-l-3 border-neutral-300;
 }

@@ -8,7 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target},
+    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target, TargetWithChartData},
     AppState,
 };
 use server_service::{query::Query, MachinePublic};
@@ -33,6 +33,24 @@ pub async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForLis
     }
 }
 
+fn calculate_status_color(updated: i64) -> String {
+    if updated == 0 {
+        return "gray".to_string();
+    }
+    let current_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs() as i64;
+    let diff = current_time - updated;
+    if diff < 5 * 60 {
+        "green".to_string()
+    } else if diff < 10 * 60 {
+        "yellow".to_string()
+    } else {
+        "red".to_string()
+    }
+}
+
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let targets: Vec<Target> = match Query::find_targets(&state.conn).await {
         Ok(list) => {
@@ -45,10 +63,12 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
                 let updated = latest_pings.get(&t.id)
                     .map(|dt| dt.and_utc().timestamp())
                     .unwrap_or(0);
+                let status_color = calculate_status_color(updated);
                 Target {
                     id: t.id,
                     name: t.name,
                     updated,
+                    status_color,
                 }
             }).collect()
         }
@@ -57,7 +77,7 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines };
+    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines, current_machine_id: 0 };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -81,21 +101,44 @@ async fn machine_page(
         }
     };
 
-    let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
+    let targets: Vec<TargetWithChartData> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
         Ok(list) => {
             let target_ids: Vec<i32> = list.iter().map(|t| t.id).collect();
-            let latest_pings = Query::find_latest_pings_for_machine_targets(&state.conn, mid, target_ids)
-                .await
-                .unwrap_or_default();
             
+            // 批量查询：一次性获取所有目标的最新 ping 时间和图表数据
+            let (latest_pings, chart_data_map) = tokio::join!(
+                Query::find_latest_pings_for_machine_targets(&state.conn, mid, target_ids.clone()),
+                Query::find_pings_for_machine_targets(&state.conn, mid, target_ids, "24h", false)
+            );
+            
+            let latest_pings = latest_pings.unwrap_or_default();
+            let chart_data_map = chart_data_map.unwrap_or_default();
+            
+            // 构建目标数据（无需单独查询）
             list.into_iter().map(|t| {
                 let updated = latest_pings.get(&t.id)
                     .map(|dt| dt.and_utc().timestamp())
                     .unwrap_or(0);
-                Target {
+                let status_color = calculate_status_color(updated);
+                
+                // 从批量查询结果中获取图表数据
+                let chart_data = chart_data_map.get(&t.id)
+                    .map(|pings| pings.iter().map(|p| {
+                        (
+                            p.created.and_utc().timestamp(),
+                            p.min as f32,
+                            p.avg as f32,
+                            p.fail,
+                        )
+                    }).collect())
+                    .unwrap_or_default();
+                
+                TargetWithChartData {
                     id: t.id,
                     name: t.name,
                     updated,
+                    status_color,
+                    chart_data,
                 }
             }).collect()
         }
@@ -104,6 +147,6 @@ async fn machine_page(
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = MachineTemplate { site_name: state.site_name.clone(), machine, targets, machines };
+    let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

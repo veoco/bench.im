@@ -196,6 +196,7 @@ async fn new_machine_page(State(state): State<Arc<AppState>>) -> Html<String> {
         ip: "".to_string(),
         key: "".to_string(),
         machines,
+        current_machine_id: 0,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -215,6 +216,7 @@ async fn edit_machine_page(
             ip: m.ip,
             key: m.key,
             machines,
+            current_machine_id: m.id,
         },
         _ => {
             return Html("Machine not found".to_string());
@@ -240,6 +242,7 @@ async fn delete_machine_page(
             ipv4: "".to_string(),
             ipv6: "".to_string(),
             machines,
+            current_machine_id: m.id,
         },
         _ => {
             return Html("Machine not found".to_string());

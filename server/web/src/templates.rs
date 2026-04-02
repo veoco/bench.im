@@ -6,6 +6,35 @@ pub struct Target {
     pub id: i32,
     pub name: String,
     pub updated: i64,
+    pub status_color: String, // "green", "yellow", "red", "gray"
+}
+
+// Machine 页面使用的目标结构（包含图表数据）
+#[derive(Serialize, Clone)]
+pub struct TargetWithChartData {
+    pub id: i32,
+    pub name: String,
+    pub updated: i64,
+    pub status_color: String,
+    pub chart_data: Vec<(i64, f32, f32, i32)>, // (timestamp, min, avg, fails)
+}
+
+// Admin 页面使用的机器结构（包含完整信息）
+#[derive(Serialize, Clone)]
+pub struct AdminMachine {
+    pub id: i32,
+    pub name: String,
+    pub ip: String,
+}
+
+// Admin 页面使用的目标结构（包含完整信息）
+#[derive(Serialize, Clone)]
+pub struct AdminTarget {
+    pub id: i32,
+    pub name: String,
+    pub domain: String,
+    pub ipv4: String,
+    pub ipv6: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -28,6 +57,7 @@ pub struct IndexTemplate {
     pub site_name: String,
     pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }
 
 #[derive(Template)]
@@ -35,8 +65,9 @@ pub struct IndexTemplate {
 pub struct MachineTemplate {
     pub site_name: String,
     pub machine: Machine,
-    pub targets: Vec<Target>,
+    pub targets: Vec<TargetWithChartData>,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }
 
 #[derive(Template)]
@@ -44,13 +75,17 @@ pub struct MachineTemplate {
 pub struct AdminLoginTemplate {
     pub site_name: String,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }
 
 #[derive(Template)]
 #[template(path = "admin/index.html")]
 pub struct AdminIndexTemplate {
     pub site_name: String,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineForList>, // 用于侧边栏
+    pub current_machine_id: i32,
+    pub admin_machines: Vec<AdminMachine>, // 用于管理列表
+    pub admin_targets: Vec<AdminTarget>,   // 用于管理列表
 }
 
 #[derive(Template)]
@@ -63,6 +98,7 @@ pub struct EditMachineTemplate {
     pub ip: String,
     pub key: String,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }
 
 #[derive(Template)]
@@ -76,6 +112,7 @@ pub struct EditTargetTemplate {
     pub ipv4: String,
     pub ipv6: String,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }
 
 #[derive(Template)]
@@ -89,4 +126,5 @@ pub struct DeleteTemplate {
     pub ipv4: String,
     pub ipv6: String,
     pub machines: Vec<MachineForList>,
+    pub current_machine_id: i32,
 }

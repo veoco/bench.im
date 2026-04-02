@@ -1,6 +1,6 @@
 // Ping 图表类
 class PingChart {
-    constructor(container, mid, tid) {
+    constructor(container, mid, tid, initialData = null) {
         this.container = container;
         this.mid = mid;
         this.tid = tid;
@@ -9,6 +9,7 @@ class PingChart {
         this.fixedY = false;
         this.ipv6 = false;
         this.dateRange = '24h';
+        this.initialData = initialData; // 服务端嵌入的初始数据
         
         this.init();
     }
@@ -32,8 +33,27 @@ class PingChart {
         `;
         this.container.appendChild(this.tooltip);
 
-        // 再加载数据
-        await this.loadData();
+        // 如果有初始数据，直接使用；否则从 API 加载
+        if (this.initialData) {
+            this.renderFromData(this.initialData);
+        } else {
+            await this.loadData();
+        }
+    }
+    
+    // 获取容器实际可用尺寸（减去 padding）
+    getContainerSize() {
+        // 使用 clientWidth/clientHeight，不包含 padding
+        const style = window.getComputedStyle(this.container);
+        const paddingLeft = parseFloat(style.paddingLeft) || 0;
+        const paddingRight = parseFloat(style.paddingRight) || 0;
+        const paddingTop = parseFloat(style.paddingTop) || 0;
+        const paddingBottom = parseFloat(style.paddingBottom) || 0;
+        
+        return {
+            width: this.container.clientWidth - paddingLeft - paddingRight,
+            height: this.container.clientHeight - paddingTop - paddingBottom
+        };
     }
     
     async loadData() {
@@ -47,10 +67,19 @@ class PingChart {
         }
     }
     
+    // 从服务端嵌入的原始数据渲染
+    renderFromData(rawData) {
+        // rawData 格式: [[timestamp, min, avg, fails], ...]
+        const data = {
+            results: rawData.map(row => [row[0], row[1], row[2], row[3]])
+        };
+        this.render(data);
+    }
+    
     render(data) {
         if (!data || !data.results) return;
-        
-        const rect = this.container.getBoundingClientRect();
+
+        const size = this.getContainerSize();
         
         const nowMs = Date.now();
         const baseStepMs = 300 * 1000;
@@ -99,9 +128,11 @@ class PingChart {
         this.avgs = avgs;
         this.fails = fails;
         
+        const self = this;
+        
         const opts = {
-            width: rect.width,
-            height: rect.height,
+            width: size.width,
+            height: size.height,
             legend: { show: false },
             padding: [12, 12, 0, 0],
             scales: {
@@ -116,7 +147,7 @@ class PingChart {
                     ticks: { stroke: '#aaa', width: 1, size: 6 },
                     grid: { stroke: '#aaa', width: 1, dash: [2, 2] },
                     splits: (u, ai, min, max) => {
-                        const stepSmall = this.dateRange === '7d' ? 8 * 60 * 60 : 1 * 60 * 60;
+                        const stepSmall = self.dateRange === '7d' ? 8 * 60 * 60 : 1 * 60 * 60;
                         const arr = [];
                         for (let t = Math.ceil(min / stepSmall) * stepSmall; t <= max; t += stepSmall) {
                             arr.push(t);
@@ -124,11 +155,11 @@ class PingChart {
                         return arr;
                     },
                     values: (u, splits) => {
-                        const bigStep = this.dateRange === '7d' ? 24 * 60 * 60 : 4 * 60 * 60;
+                        const bigStep = self.dateRange === '7d' ? 24 * 60 * 60 : 4 * 60 * 60;
                         return splits.map(t => {
                             if (t % bigStep === 0) {
                                 const d = new Date(t * 1000);
-                                return this.dateRange === '7d'
+                                return self.dateRange === '7d'
                                     ? `${d.getDate()}-${String(d.getHours()).padStart(2, '0')}`
                                     : d.toTimeString().slice(0, 5);
                             }
@@ -158,7 +189,7 @@ class PingChart {
                         const umax = u.scales.y.max;
                         const minh = (umax - umin) / 100;
                         
-                        const barW = Math.max(2, Math.ceil(rect.width / xdata.length));
+                        const barW = Math.max(2, Math.ceil(size.width / xdata.length));
                         
                         for (let i = 0; i < xdata.length; i++) {
                             if (ymin[i] != null && ymax[i] != null) {
@@ -167,8 +198,8 @@ class PingChart {
                                 const y2 = u.valToPos(ymax[i] + minh, 'y', true);
                                 
                                 let color = '#2ecc71';
-                                if (this.fails[i] >= 3) color = '#ee0000';
-                                else if (this.fails[i] >= 1) color = '#f1c40f';
+                                if (self.fails[i] >= 3) color = '#ee0000';
+                                else if (self.fails[i] >= 1) color = '#f1c40f';
                                 
                                 ctx.strokeStyle = color;
                                 ctx.lineWidth = barW;
@@ -194,16 +225,16 @@ class PingChart {
                 setCursor: [
                     (u) => {
                         const idx = u.cursor.idx;
-                        const tt = this.tooltip;
-                        if (idx == null || idx < 0 || idx >= this.times.length) {
+                        const tt = self.tooltip;
+                        if (idx == null || idx < 0 || idx >= self.times.length) {
                             tt.style.display = 'none';
                             return;
                         }
                         
-                        const time = new Date(this.times[idx] * 1000);
-                        const min = this.mins[idx];
-                        const avg = this.avgs[idx];
-                        const fail = this.fails[idx];
+                        const time = new Date(self.times[idx] * 1000);
+                        const min = self.mins[idx];
+                        const avg = self.avgs[idx];
+                        const fail = self.fails[idx];
                         
                         tt.innerHTML = `
                             <div>${time.toLocaleString()}</div>
@@ -213,8 +244,8 @@ class PingChart {
                         `;
                         
                         const offset = 16;
-                        const cw = this.container.clientWidth;
-                        const ch = this.container.clientHeight;
+                        const cw = self.container.clientWidth;
+                        const ch = self.container.clientHeight;
                         const tw = tt.offsetWidth;
                         const th = tt.offsetHeight;
                         
@@ -236,7 +267,11 @@ class PingChart {
         
         if (this.plot) {
             this.plot.setData(uplotData);
-            this.plot.setSize({ width: rect.width, height: rect.height });
+            this.plot.setSize({ width: size.width, height: size.height });
+            // 重新应用 Y 轴范围配置（防止被 setData 重置）
+            if (this.fixedY) {
+                this.plot.setScale('y', { min: 0, max: 300 });
+            }
         } else {
             this.plot = new uPlot(opts, uplotData, this.container);
         }
@@ -244,30 +279,23 @@ class PingChart {
     
     setFixedY(fixed) {
         this.fixedY = fixed;
-        // 销毁现有图表并重新渲染，因为 fixedY 改变需要更新 scales.y.range 配置
+        // 使用 setScale 动态更新 Y 轴范围，不销毁图表
         if (this.plot) {
-            this.plot.destroy();
-            this.plot = null;
+            const yRange = fixed ? [0, 300] : [];
+            this.plot.setScale('y', { min: yRange[0], max: yRange[1] });
         }
-        this.loadData();
     }
     
-    setIpv6(ipv6) {
+    async setIpv6(ipv6) {
         this.ipv6 = ipv6;
-        if (this.plot) {
-            this.plot.destroy();
-            this.plot = null;
-        }
-        this.loadData();
+        // 保持旧图表可见，等待新数据到达后平滑更新
+        await this.loadData();
     }
     
-    setDateRange(range) {
+    async setDateRange(range) {
         this.dateRange = range;
-        if (this.plot) {
-            this.plot.destroy();
-            this.plot = null;
-        }
-        this.loadData();
+        // 保持旧图表可见，等待新数据到达后平滑更新
+        await this.loadData();
     }
 }
 

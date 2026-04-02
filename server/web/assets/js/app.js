@@ -83,15 +83,21 @@ async function updateMachineStatusLights() {
             const updatedTime = updated * 1000;
             const diff = currentTime - updatedTime;
             
-            let colorClass = 'bg-gray-400';
+            let colorClass = 'bg-neutral-300';
+            let pulseClass = '';
             if (updated > 0) {
-                if (diff < 5 * 60 * 1000) colorClass = 'bg-green-500';
-                else if (diff < 10 * 60 * 1000) colorClass = 'bg-yellow-500';
-                else colorClass = 'bg-red-500';
+                if (diff < 5 * 60 * 1000) {
+                    colorClass = 'bg-green-500';
+                    pulseClass = 'status-pulse-green';
+                } else if (diff < 10 * 60 * 1000) {
+                    colorClass = 'bg-yellow-500';
+                } else {
+                    colorClass = 'bg-red-500';
+                }
             }
             
-            const dot = item.querySelector('.status-dot');
-            if (dot) dot.className = `w-2 h-2 rounded-full mr-2 status-dot ${colorClass}`;
+            const dot = item.querySelector('.status-light span');
+            if (dot) dot.className = `w-2 h-2 rounded-full transition-colors duration-300 ${colorClass} ${pulseClass}`;
         });
     } catch (e) {
         // 忽略错误

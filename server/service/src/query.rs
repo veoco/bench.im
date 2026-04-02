@@ -175,4 +175,41 @@ impl Query {
 
         Ok(result)
     }
+
+    /// 批量获取指定机器所有目标的图表数据（用于机器页，解决 N+1 问题）
+    pub async fn find_pings_for_machine_targets(
+        db: &DbConn,
+        mid: i32,
+        target_ids: Vec<i32>,
+        delta: &str,
+        ipv6: bool,
+    ) -> Result<std::collections::HashMap<i32, Vec<ping::Model>>, DbErr> {
+        if target_ids.is_empty() {
+            return Ok(std::collections::HashMap::new());
+        }
+
+        let time_delta = if delta == "7d" {
+            Duration::from_secs(7 * 24 * 3600)
+        } else {
+            Duration::from_secs(24 * 3600)
+        };
+
+        // 一次性查询所有目标的 ping 数据
+        let pings = Ping::find()
+            .filter(ping::Column::MachineId.eq(mid))
+            .filter(ping::Column::TargetId.is_in(target_ids))
+            .filter(ping::Column::Ipv6.eq(ipv6))
+            .filter(ping::Column::Created.gt(Utc::now().naive_utc() - time_delta))
+            .order_by_asc(ping::Column::Created)
+            .all(db)
+            .await?;
+
+        // 按 target_id 分组
+        let mut result: std::collections::HashMap<i32, Vec<ping::Model>> = std::collections::HashMap::new();
+        for ping in pings {
+            result.entry(ping.target_id).or_default().push(ping);
+        }
+
+        Ok(result)
+    }
 }

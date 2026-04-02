@@ -3,26 +3,61 @@
 {% block title %}{{ site_name }} - 网络监控{% endblock %}
 
 {% block content %}
-<div class="m-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6" id="targetsGrid">
-    {% for target in targets %}
-    <div class="p-2 flex border bg-neutral-100 border-neutral-500 target-card" data-id="{{ target.id }}">
-        <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+{% if targets.is_empty() %}
+<!-- 空状态 -->
+<div class="p-4">
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+        <svg class="w-16 h-16 text-neutral-300 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path d="M5 11H19V5H5V11ZM21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4ZM19 13H5V19H19V13ZM7 15H10V17H7V15ZM7 7H10V9H7V7Z"></path>
         </svg>
-        {{ target.name }}
-        <span class="flex items-center ml-auto status-light" data-updated="{{ target.updated }}">
-            <span class="w-2 h-2 rounded-full mr-2 bg-gray-400"></span>
-        </span>
+        <h3 class="text-lg font-medium text-neutral-600 mb-2">暂无监控目标</h3>
+        <p class="text-sm text-neutral-400 mb-4">当前没有配置任何监控目标</p>
+        <a href="/admin" class="button-primary px-4 py-2 text-sm">前往管理后台添加</a>
+    </div>
+</div>
+{% else %}
+<!-- 目标网格 -->
+<div class="p-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6" id="targetsGrid">
+    {% for target in targets %}
+    {% set bar_color = "neutral" %}
+    {% set dot_color = "neutral" %}
+    {% set pulse_class = "" %}
+    {% if target.status_color == "green" %}
+        {% set bar_color = "green" %}
+        {% set dot_color = "green" %}
+        {% set pulse_class = "status-pulse-green" %}
+    {% elif target.status_color == "yellow" %}
+        {% set bar_color = "yellow" %}
+        {% set dot_color = "yellow" %}
+    {% elif target.status_color == "red" %}
+        {% set bar_color = "red" %}
+        {% set dot_color = "red" %}
+    {% endif %}
+    <div class="target-card border-l-3 border-{{ bar_color }}-500 status-bar-{{ target.status_color }}" data-id="{{ target.id }}" data-updated="{{ target.updated }}" data-status="{{ target.status_color }}">
+        <div class="p-3 flex items-center">
+            <div class="w-7 h-7 rounded-full bg-neutral-100 flex items-center justify-center mr-2 flex-shrink-0">
+                <svg class="w-3.5 text-neutral-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5 11H19V5H5V11ZM21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4ZM19 13H5V19H19V13ZM7 15H10V17H7V15ZM7 7H10V9H7V7Z"></path>
+                </svg>
+            </div>
+            <span class="truncate text-sm text-neutral-700 font-medium">{{ target.name }}</span>
+            <span class="flex items-center ml-auto flex-shrink-0 status-light" data-updated="{{ target.updated }}">
+                <span class="w-2 h-2 rounded-full bg-{{ dot_color }}-500 {{ pulse_class }} transition-colors duration-300"></span>
+            </span>
+        </div>
     </div>
     {% endfor %}
 </div>
+{% endif %}
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    updateTargetStatusLights();
-    setInterval(updateTargetStatusLights, 30000);
-});
+// 启动定时更新（保持状态实时性）
+setInterval(updateTargetStatusLights, 30000);
 
+// 定时更新状态灯
 async function updateTargetStatusLights() {
     try {
         const targets = await apiFetch('/api/targets/');
@@ -43,29 +78,50 @@ async function updateTargetStatusLights() {
                 statusLight.dataset.updated = updated;
             }
 
-            // 更新状态灯颜色
+            // 计算新的状态颜色
+            const currentTime = Date.now();
+            const updatedTime = updated * 1000;
+            const diff = currentTime - updatedTime;
+
+            let color = 'neutral';
+            let pulseClass = '';
+            if (updated === 0) {
+                color = 'neutral';
+            } else if (diff < 5 * 60 * 1000) {
+                color = 'green';
+                pulseClass = 'status-pulse-green';
+            } else if (diff < 10 * 60 * 1000) {
+                color = 'yellow';
+            } else {
+                color = 'red';
+            }
+            
+            // 更新状态灯
             const dot = card.querySelector('.status-light span');
             if (dot) {
-                const currentTime = Date.now();
-                const updatedTime = updated * 1000;
-                const diff = currentTime - updatedTime;
-
-                let color = 'bg-gray-400';
-                if (updated === 0) {
-                    color = 'bg-gray-400';
-                } else if (diff < 5 * 60 * 1000) {
-                    color = 'bg-green-500';
-                } else if (diff < 10 * 60 * 1000) {
-                    color = 'bg-yellow-500';
-                } else {
-                    color = 'bg-red-500';
-                }
-                dot.className = 'w-2 h-2 rounded-full mr-2 ' + color;
+                dot.className = `w-2 h-2 rounded-full bg-${color}-500 ${pulseClass} transition-colors duration-300`;
+            }
+            
+            // 更新状态条
+            const oldStatus = card.dataset.status;
+            if (oldStatus !== color) {
+                card.classList.remove(`status-bar-${oldStatus}`);
+                card.classList.remove(`border-${getColorForStatus(oldStatus)}-500`);
+                card.classList.add(`status-bar-${color}`);
+                card.classList.add(`border-${getColorForStatus(color)}-500`);
+                card.dataset.status = color;
             }
         });
     } catch (e) {
-        // 忽略错误
+        console.error('更新状态失败:', e);
     }
+}
+
+function getColorForStatus(status) {
+    if (status === 'green') return 'green';
+    if (status === 'yellow') return 'yellow';
+    if (status === 'red') return 'red';
+    return 'neutral';
 }
 </script>
 {% endblock %}

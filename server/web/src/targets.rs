@@ -188,6 +188,7 @@ async fn new_target_page(State(state): State<Arc<AppState>>) -> Html<String> {
         ipv4: "".to_string(),
         ipv6: "".to_string(),
         machines,
+        current_machine_id: 0,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -208,6 +209,7 @@ async fn edit_target_page(
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
             machines,
+            current_machine_id: 0,
         },
         _ => {
             return Html("Target not found".to_string());
@@ -233,6 +235,7 @@ async fn delete_target_page(
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
             machines,
+            current_machine_id: 0,
         },
         _ => {
             return Html("Target not found".to_string());

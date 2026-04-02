@@ -7,29 +7,55 @@
 {% endblock %}
 
 {% block content %}
-<div>
-    <div class="flex items-baseline p-2">
-        <h2 class="font-bold text-2xl mr-2">{{ machine.name }}</h2>
-        <p class="text-neutral-500 text-sm">{{ machine.ip }}</p>
+<div class="p-4">
+    <div class="flex items-baseline mb-4">
+        <h2 class="font-bold text-2xl mr-3 text-neutral-800">{{ machine.name }}</h2>
+        <p class="text-neutral-400 text-sm">{{ machine.ip }}</p>
     </div>
-    <div class="flex p-2 bg-neutral-100 leading-4 text-sm border-y border-neutral-400">
-        <button class="toggle-button px-2 py-0.5 mr-2" id="btnFixedY" type="button">对齐y轴</button>
-        <button class="toggle-button px-2 py-0.5 mr-2" id="btnIpv6" type="button">IPv6</button>
-        <select class="border border-neutral-600 shadow-sm px-2 py-0.5 bg-white cursor-pointer" id="dateRange">
+    <div class="flex items-center mb-4 gap-2 p-3 bg-white rounded-sm shadow-sm">
+        <button class="toggle-button px-3 py-1.5 text-sm font-medium" id="btnFixedY" type="button">对齐Y轴</button>
+        <button class="toggle-button px-3 py-1.5 text-sm font-medium" id="btnIpv6" type="button">IPv6</button>
+        <select class="bg-neutral-100 rounded-sm px-3 py-1.5 cursor-pointer text-sm focus:ring-2 focus:ring-sky-500/20 outline-none transition-all" id="dateRange">
             <option value="24h">最近 24 小时</option>
             <option value="7d">最近 7 天</option>
         </select>
     </div>
 
-    <div class="p-2 gap-2 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid">
+    {% if targets.is_empty() %}
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+        <svg class="w-16 h-16 text-neutral-300 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M5 11H19V5H5V11ZM21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4ZM19 13H5V19H19V13ZM7 15H10V17H7V15ZM7 7H10V9H7V7Z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-neutral-600 mb-2">暂无监控目标</h3>
+        <p class="text-sm text-neutral-400 mb-4">当前机器没有配置监控目标</p>
+        <a href="/admin" class="button-primary px-4 py-2 text-sm">前往管理后台添加</a>
+    </div>
+    {% else %}
+    <div class="gap-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid">
         {% for target in targets %}
-        <div class="bg-white border border-neutral-400 chart-container" data-tid="{{ target.id }}">
-            <h3 class="px-2 py-1 bg-neutral-100 border-b border-neutral-400 font-bold">{{ target.name }}</h3>
-            <div class="w-full aspect-video relative chart-wrapper" id="chart-{{ target.id }}"></div>
+        <div class="bg-white rounded-sm shadow-sm chart-container overflow-hidden" data-tid="{{ target.id }}">
+            <h3 class="px-4 py-2 bg-neutral-50 font-semibold text-sm text-neutral-700">{{ target.name }}</h3>
+            <div class="w-full h-64 relative chart-wrapper" id="chart-{{ target.id }}"></div>
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
+
+<!-- 嵌入图表数据 -->
+<script id="chartData" type="application/json">
+{
+    "mid": {{ machine.id }},
+    "targets": [
+        {% for target in targets %}
+        {
+            "id": {{ target.id }},
+            "data": {{ target.chart_data|json }}
+        }{% if !loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
 {% endblock %}
 
 {% block scripts %}
@@ -37,14 +63,17 @@
 <script src="/static/js/charts.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const mid = '{{ machine.id }}';
+    const chartDataEl = document.getElementById('chartData');
+    const chartData = JSON.parse(chartDataEl.textContent);
+    const mid = chartData.mid;
     const charts = {};
     
-    // 初始化所有图表
-    document.querySelectorAll('.chart-container').forEach(container => {
-        const tid = container.dataset.tid;
+    // 初始化所有图表（使用服务端嵌入的数据）
+    chartData.targets.forEach(target => {
+        const container = document.querySelector(`.chart-container[data-tid="${target.id}"]`);
+        if (!container) return;
         const wrapper = container.querySelector('.chart-wrapper');
-        charts[tid] = new PingChart(wrapper, mid, tid);
+        charts[target.id] = new PingChart(wrapper, mid, target.id, target.data);
     });
     
     // 控制按钮

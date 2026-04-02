@@ -3,25 +3,76 @@
 {% block title %}管理后台 - {{ site_name }}{% endblock %}
 
 {% block content %}
-<div>
-    <div class="flex border-b border-neutral-400 bg-neutral-100 p-2 items-center">
-        <h2 class="text-lg font-bold mr-3">机器列表</h2>
-        <button class="button text-sm px-2 py-1" onclick="location.href='/admin/machines/new'">
-            新增机器
-        </button>
-    </div>
-    <div class="w-full p-2" id="adminMachinesList">
-        <div class="text-neutral-500">加载中...</div>
+<div class="p-4">
+    <!-- 机器列表区域 -->
+    <div class="mb-6">
+        <div class="flex items-center mb-3">
+            <h2 class="text-lg font-bold text-neutral-800 mr-3">机器列表</h2>
+            <button class="button-primary text-sm px-3 py-1.5" onclick="location.href='/admin/machines/new'">
+                新增机器
+            </button>
+        </div>
+        <div id="adminMachinesList">
+            {% if admin_machines.is_empty() %}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="w-12 h-12 text-neutral-300 mb-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 3H20C20.5523 3 21 3.44772 21 4V11H3V4C3 3.44772 3.44772 3 4 3ZM3 13H21V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13ZM7 16V18H10V16H7ZM7 6V8H10V6H7Z"></path>
+                </svg>
+                <h3 class="text-neutral-600 font-medium mb-1">暂无机器</h3>
+                <p class="text-neutral-400 text-sm mb-3">点击上方按钮添加第一台机器</p>
+            </div>
+            {% else %}
+            <div class="gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                {% for m in admin_machines %}
+                <div class="admin-card group relative bg-white rounded-sm shadow-sm p-3 cursor-pointer" onclick="location.href='/admin/machines/{{ m.id }}'">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-sm text-neutral-800 truncate flex-1 mr-2">{{ m.name }}</span>
+                        <button class="admin-card-actions p-1 text-neutral-400 hover:text-red-500 transition-colors duration-150" onclick="event.stopPropagation(); location.href='/admin/machines/{{ m.id }}/delete'">
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                    <div class="text-xs text-neutral-500 truncate">{{ m.ip }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
     </div>
     
-    <div class="flex border-y border-neutral-400 bg-neutral-100 p-2 items-center">
-        <h2 class="text-lg font-bold mr-3">目标列表</h2>
-        <button class="button text-sm px-2 py-1" onclick="location.href='/admin/targets/new'">
-            新增目标
-        </button>
-    </div>
-    <div class="w-full p-2" id="targetsList">
-        <div class="text-neutral-500">加载中...</div>
+    <!-- 目标列表区域 -->
+    <div>
+        <div class="flex items-center mb-3">
+            <h2 class="text-lg font-bold text-neutral-800 mr-3">目标列表</h2>
+            <button class="button-primary text-sm px-3 py-1.5" onclick="location.href='/admin/targets/new'">
+                新增目标
+            </button>
+        </div>
+        <div id="targetsList">
+            {% if admin_targets.is_empty() %}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="w-12 h-12 text-neutral-300 mb-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5 11H19V5H5V11ZM21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4ZM19 13H5V19H19V13ZM7 15H10V17H7V15ZM7 7H10V9H7V7Z"></path>
+                </svg>
+                <h3 class="text-neutral-600 font-medium mb-1">暂无目标</h3>
+                <p class="text-neutral-400 text-sm mb-3">点击上方按钮添加第一个监控目标</p>
+            </div>
+            {% else %}
+            <div class="gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                {% for t in admin_targets %}
+                <div class="admin-card group relative bg-white rounded-sm shadow-sm p-3 cursor-pointer" onclick="location.href='/admin/targets/{{ t.id }}'">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-sm text-neutral-800 truncate flex-1 mr-2">{{ t.name }}</span>
+                        <button class="admin-card-actions p-1 text-neutral-400 hover:text-red-500 transition-colors duration-150" onclick="event.stopPropagation(); location.href='/admin/targets/{{ t.id }}/delete'">
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                    <div class="text-xs text-neutral-500 truncate">{{ t.ipv4 }}</div>
+                    <div class="text-xs text-neutral-400 truncate">{{ t.domain }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -35,77 +86,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.location.href = '/admin/login';
         return;
     }
-    
-    // 加载机器列表
-    try {
-        const machines = await apiFetch('/api/admin/machines/');
-        renderMachines(machines);
-    } catch (err) {
-        document.getElementById('adminMachinesList').innerHTML = '<div class="text-red-500">加载失败</div>';
-    }
-    
-    // 加载目标列表
-    try {
-        const targets = await apiFetch('/api/admin/targets/');
-        renderTargets(targets);
-    } catch (err) {
-        document.getElementById('targetsList').innerHTML = '<div class="text-red-500">加载失败</div>';
-    }
 });
-
-function renderMachines(machines) {
-    const container = document.getElementById('adminMachinesList');
-    if (!machines || machines.length === 0) {
-        container.innerHTML = '<div class="text-neutral-500">暂无机器</div>';
-        return;
-    }
-    
-    container.innerHTML = '<div class="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">' +
-        machines.map(m => `
-            <div class="flex flex-col bg-white border border-neutral-400 justify-between">
-                <h3 class="p-2 flex flex-col">
-                    <span class="font-bold text-sm truncate">${escapeHtml(m.name)}</span>
-                    <span class="text-neutral-500 text-xs truncate">${escapeHtml(m.ip)}</span>
-                </h3>
-                <ul class="flex border-t border-neutral-400 p-2 bg-neutral-100 text-xs items-center">
-                    <li class="mr-auto truncate"></li>
-                    <li class="ml-1 shrink-0">
-                        <button class="button-info text-xs px-1 py-0.5 mr-1" onclick="location.href='/admin/machines/${m.id}'">编辑</button>
-                    </li>
-                    <li class="shrink-0">
-                        <button class="button-danger text-xs px-1 py-0.5" onclick="location.href='/admin/machines/${m.id}/delete'">删除</button>
-                    </li>
-                </ul>
-            </div>
-        `).join('') + '</div>';
-}
-
-function renderTargets(targets) {
-    const container = document.getElementById('targetsList');
-    if (!targets || targets.length === 0) {
-        container.innerHTML = '<div class="text-neutral-500">暂无目标</div>';
-        return;
-    }
-    
-    container.innerHTML = '<div class="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">' +
-        targets.map(t => `
-            <div class="flex flex-col bg-white border border-neutral-400 justify-between">
-                <h3 class="p-2 flex flex-col">
-                    <span class="font-bold text-sm truncate">${escapeHtml(t.name)}</span>
-                    <span class="text-neutral-500 text-xs truncate">${t.ipv4 || ''}</span>
-                    <span class="text-neutral-500 text-xs truncate">${t.ipv6 || ''}</span>
-                </h3>
-                <ul class="flex border-t border-neutral-400 p-2 bg-neutral-100 text-xs items-center">
-                    <li class="mr-auto truncate">${t.domain || ''}</li>
-                    <li class="ml-1 shrink-0">
-                        <button class="button-info text-xs px-1 py-0.5 mr-1" onclick="location.href='/admin/targets/${t.id}'">编辑</button>
-                    </li>
-                    <li class="shrink-0">
-                        <button class="button-danger text-xs px-1 py-0.5" onclick="location.href='/admin/targets/${t.id}/delete'">删除</button>
-                    </li>
-                </ul>
-            </div>
-        `).join('') + '</div>';
-}
 </script>
 {% endblock %}
