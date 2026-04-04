@@ -54,6 +54,7 @@ async fn apply_page(
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: true,
+                ip: client_ip,
                 province: province.clone(),
                 isp: isp.clone(),
                 reason: String::new(),
@@ -75,6 +76,7 @@ async fn apply_page(
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
+                ip: client_ip,
                 province,
                 isp,
                 reason: e.to_string(),
@@ -127,6 +129,7 @@ async fn apply_submit(
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
+                ip: client_ip,
                 province,
                 isp,
                 reason: e.to_string(),
@@ -144,7 +147,7 @@ async fn apply_submit(
     let result = match ApplicationService::submit_application(
         &state.conn,
         ApplyRequest {
-            ip: client_ip,
+            ip: client_ip.clone(),
             province,
             isp,
         }
@@ -154,6 +157,7 @@ async fn apply_submit(
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
+                ip: client_ip,
                 province: String::new(),
                 isp: String::new(),
                 reason: e.to_string(),
@@ -187,6 +191,7 @@ async fn apply_submit(
 struct ApplyTemplate {
     site_name: String,
     eligible: bool,
+    ip: String,
     province: String,
     isp: String,
     reason: String,

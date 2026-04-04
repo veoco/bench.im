@@ -29,12 +29,23 @@ where
         _state: &S,
     ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
+            // 提取 IP 并去除端口号
+            let extract_ip = |value: &str| -> Option<String> {
+                let ip = value.trim();
+                if ip.is_empty() {
+                    return None;
+                }
+                // 去除端口号（IPv4:port 格式，如 1.2.3.4:12345）
+                // 注意：IPv6 地址格式复杂，这里简单处理 IPv4 带端口的情况
+                let ip = ip.split(':').next().unwrap_or(ip);
+                Some(ip.to_string())
+            };
+
             if let Some(header_value) = parts.headers.get("x-forwarded-for") {
                 if let Ok(value) = header_value.to_str() {
                     if let Some(ip) = value.split(',').last() {
-                        let ip = ip.trim();
-                        if !ip.is_empty() {
-                            return Ok(ClientIp(ip.to_string()));
+                        if let Some(ip) = extract_ip(ip) {
+                            return Ok(ClientIp(ip));
                         }
                     }
                 }
@@ -42,9 +53,8 @@ where
 
             if let Some(header_value) = parts.headers.get("x-real-ip") {
                 if let Ok(value) = header_value.to_str() {
-                    let ip = value.trim();
-                    if !ip.is_empty() {
-                        return Ok(ClientIp(ip.to_string()));
+                    if let Some(ip) = extract_ip(value) {
+                        return Ok(ClientIp(ip));
                     }
                 }
             }

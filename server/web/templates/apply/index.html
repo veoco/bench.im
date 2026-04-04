@@ -19,6 +19,10 @@
 
         <div class="space-y-3 mb-6 text-sm">
             <div class="flex justify-between">
+                <span class="text-neutral-400">IP 地址</span>
+                <span class="font-mono text-neutral-700">{{ ip }}</span>
+            </div>
+            <div class="flex justify-between">
                 <span class="text-neutral-400">所在省份</span>
                 <span class="text-neutral-700">{{ province }}</span>
             </div>
@@ -54,8 +58,11 @@
             <p class="text-sm text-neutral-500 mt-1">{{ reason }}</p>
         </div>
 
-        {% if !province.is_empty() || !isp.is_empty() %}
         <div class="space-y-3 mb-6 text-sm">
+            <div class="flex justify-between">
+                <span class="text-neutral-400">IP 地址</span>
+                <span class="font-mono text-neutral-700">{{ ip }}</span>
+            </div>
             {% if !province.is_empty() %}
             <div class="flex justify-between">
                 <span class="text-neutral-400">所在省份</span>
@@ -69,7 +76,6 @@
             </div>
             {% endif %}
         </div>
-        {% endif %}
 
         <div class="text-center">
             <a href="/" class="w-full p-2.5 button font-medium transition-all duration-150 hover:opacity-90 inline-block">
