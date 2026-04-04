@@ -1,4 +1,4 @@
-use ip2region::Searcher;
+use ip2region::{CachePolicy, Searcher};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::sync::Mutex;
@@ -33,7 +33,7 @@ pub fn init_searcher(v4_path: &str, v6_path: &str) -> Result<(), String> {
     let mut errors = vec![];
 
     // 尝试加载 IPv4 数据库
-    match Searcher::new(v4_path) {
+    match Searcher::new(v4_path.to_owned(), CachePolicy::VectorIndex) {
         Ok(s) => {
             eprintln!("Loaded IPv4 database: {}", v4_path);
             v4_searcher = Some(s);
@@ -45,7 +45,7 @@ pub fn init_searcher(v4_path: &str, v6_path: &str) -> Result<(), String> {
     }
 
     // 尝试加载 IPv6 数据库
-    match Searcher::new(v6_path) {
+    match Searcher::new(v6_path.to_owned(), CachePolicy::VectorIndex) {
         Ok(s) => {
             eprintln!("Loaded IPv6 database: {}", v6_path);
             v6_searcher = Some(s);
@@ -85,18 +85,25 @@ pub fn parse_ip(ip: &str) -> Option<IpGeoInfo> {
     let searcher = SEARCHER.lock().unwrap();
 
     // 根据 IP 类型选择对应的数据库
-    let location = if is_ipv6(ip) {
-        searcher.v6.as_ref()?.std_search(ip).ok()?
+    let result = if is_ipv6(ip) {
+        searcher.v6.as_ref()?.search(ip).ok()?
     } else if is_ipv4(ip) {
-        searcher.v4.as_ref()?.std_search(ip).ok()?
+        searcher.v4.as_ref()?.search(ip).ok()?
     } else {
         return None;
     };
 
+    // 官方库返回格式: "国家|省份|城市|运营商|国家代码"
+    // 例如: "中国|江苏省|0|联通|CN"
+    let parts: Vec<&str> = result.split('|').collect();
+    if parts.len() < 5 {
+        return None;
+    }
+
     Some(IpGeoInfo {
-        country: location.contry.unwrap_or_default(),
-        province: location.province.unwrap_or_default(),
-        isp: normalize_isp(&location.isp.unwrap_or_default()),
+        country: parts[0].to_string(),
+        province: parts[1].to_string(),
+        isp: normalize_isp(parts[3]),
     })
 }
 
