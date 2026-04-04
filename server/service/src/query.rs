@@ -130,64 +130,6 @@ impl Query {
             .await
     }
 
-    /// 批量获取所有目标的最新 ping 记录时间（用于首页，解决 N+1 问题）
-    pub async fn find_latest_pings_for_all_targets(
-        db: &DbConn,
-        target_ids: Vec<i32>,
-    ) -> Result<std::collections::HashMap<i32, NaiveDateTime>, DbErr> {
-        if target_ids.is_empty() {
-            return Ok(std::collections::HashMap::new());
-        }
-
-        let mut result = std::collections::HashMap::new();
-
-        for &tid in &target_ids {
-            if let Some(created) = Ping::find()
-                .select_only()
-                .column(ping::Column::Created)
-                .filter(ping::Column::TargetId.eq(tid))
-                .order_by_desc(ping::Column::Created)
-                .into_tuple()
-                .one(db)
-                .await?
-            {
-                result.insert(tid, created);
-            }
-        }
-
-        Ok(result)
-    }
-
-    /// 批量获取指定机器所有目标的最新 ping 记录时间（用于机器页，解决 N+1 问题）
-    pub async fn find_latest_pings_for_machine_targets(
-        db: &DbConn,
-        mid: i32,
-        target_ids: Vec<i32>,
-    ) -> Result<std::collections::HashMap<i32, NaiveDateTime>, DbErr> {
-        if target_ids.is_empty() {
-            return Ok(std::collections::HashMap::new());
-        }
-
-        let mut result = std::collections::HashMap::new();
-
-        for &tid in &target_ids {
-            if let Some(created) = Ping::find()
-                .select_only()
-                .column(ping::Column::Created)
-                .filter(ping::Column::MachineId.eq(mid))
-                .filter(ping::Column::TargetId.eq(tid))
-                .order_by_desc(ping::Column::Created)
-                .into_tuple()
-                .one(db)
-                .await?
-            {
-                result.insert(tid, created);
-            }
-        }
-
-        Ok(result)
-    }
-
     /// 批量获取指定机器所有目标的图表数据（用于机器页，解决 N+1 问题）
     pub async fn find_pings_for_machine_targets(
         db: &DbConn,
