@@ -65,6 +65,12 @@ cargo build --release
 DATABASE_URL=sqlite:db.sqlite3?mode=rwc
 ADMIN_PASSWORD=your_pass_word
 LISTEN_ADDRESS=0.0.0.0:3000
+SITE_NAME=Bench.im                    # 网站名称，可选，默认 Bench.im
+
+# 申请加入功能配置（可选）
+ENABLE_APPLY=false                    # 是否启用申请加入功能，默认 false
+IP2REGION_V4_DB=server/ip2region_v4.xdb   # IPv4 数据库路径，可选
+IP2REGION_V6_DB=server/ip2region_v6.xdb   # IPv6 数据库路径，可选
 ```
 
 3. 运行服务器：
@@ -93,6 +99,41 @@ cargo build --release
 ### systemd 部署
 
 详细的 systemd 配置请参考各组件目录下的 README 文件。
+
+## 申请加入功能
+
+bench.im 支持访客通过 Web 界面自助申请成为监控节点，无需管理员手动创建。
+
+### 功能特性
+
+- **自动命名**: 按照 `{省份}{运营商}{3位序号}` 格式自动命名（如：北京联通001）
+- **智能限制**:
+  - 仅限中国大陆 IP（国家识别为"中国"）
+  - 每个 (省份, 运营商) 组合最多接受 3 个申请者
+  - 每个 IP 地址只能有一个活跃申请
+- **自动清理**: 申请者 1 天内未上线将自动删除
+
+### 启用方法
+
+1. 下载 ip2region 数据库文件：
+
+```bash
+# 下载 IPv4 数据库（约 10.6MB）
+wget https://github.com/lionsoul2014/ip2region/raw/master/data/ip2region_v4.xdb -O server/ip2region_v4.xdb
+
+# 下载 IPv6 数据库（约 36MB）
+wget https://github.com/lionsoul2014/ip2region/raw/master/data/ip2region_v6.xdb -O server/ip2region_v6.xdb
+```
+
+2. 在 `.env` 中启用功能：
+
+```env
+ENABLE_APPLY=true
+```
+
+3. 重启服务器，访问首页点击"申请加入"按钮即可
+
+> **注意**: 如果数据库文件不存在，服务器会正常启动但自动禁用申请功能，并在日志中输出警告。
 
 ## 开发指南
 

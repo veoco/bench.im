@@ -58,7 +58,7 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines, current_machine_id: 0 };
+    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines, current_machine_id: 0, enable_apply: state.enable_apply };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -107,7 +107,7 @@ async fn machine_page(
 
     let machines = fetch_machines_for_list(&state).await;
 
-    let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id };
+    let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id, enable_apply: state.enable_apply };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -148,6 +148,7 @@ async fn target_page(
         machines: machines_for_list.clone(),  // 用于侧边栏
         target_machines: machines,            // 用于图表
         current_machine_id: 0,
+        enable_apply: state.enable_apply,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

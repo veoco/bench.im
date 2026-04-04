@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}申请成功 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-4 items-center sm:h-screen">
+    <div class="max-w-sm w-full bg-white rounded-sm shadow-sm p-6 sm:p-8">
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-sm flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-neutral-800">申请成功</h2>
+            <p class="text-sm text-neutral-500 mt-1">请保存好以下信息</p>
+        </div>
+
+        <div class="space-y-3 mb-6 text-sm">
+            <div class="flex justify-between">
+                <span class="text-neutral-400">节点名称</span>
+                <span class="font-medium text-neutral-700">{{ name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-neutral-400">Machine ID</span>
+                <span class="font-mono text-neutral-700">{{ machine_id }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-neutral-400">Token</span>
+                <span class="font-mono text-xs text-neutral-700 break-all text-right max-w-[150px]">{{ key }}</span>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-xs text-neutral-400 mb-1.5">启动命令</label>
+            <div class="relative">
+                <pre class="bg-neutral-800 text-neutral-100 p-3 rounded-sm text-xs overflow-x-auto"><code id="command">{{ command }}</code></pre>
+                <button onclick="copyCommand()" class="absolute top-2 right-2 px-2 py-1 bg-neutral-700 hover:bg-neutral-600 text-white text-xs rounded-sm transition-colors">
+                    复制
+                </button>
+            </div>
+        </div>
+
+        <p class="text-xs text-neutral-400 mb-6 text-center">
+            页面关闭后无法再次查看
+        </p>
+
+        <a href="/" class="w-full p-2.5 button font-medium transition-all duration-150 hover:opacity-90 inline-block text-center">
+            返回首页
+        </a>
+    </div>
+</div>
+
+<script>
+function copyCommand() {
+    const command = document.getElementById('command').textContent;
+    navigator.clipboard.writeText(command).then(() => {
+        alert('命令已复制到剪贴板');
+    }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = command;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('命令已复制到剪贴板');
+    });
+}
+</script>
+{% endblock %}

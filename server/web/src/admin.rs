@@ -70,9 +70,9 @@ async fn admin_index_page(State(state): State<Arc<AppState>>) -> Html<String> {
         Err(_) => vec![],
     };
     
-    let template = AdminIndexTemplate { 
-        site_name: state.site_name.clone(), 
-        machines, 
+    let template = AdminIndexTemplate {
+        site_name: state.site_name.clone(),
+        machines,
         current_machine_id: 0,
         admin_machines,
         admin_targets,

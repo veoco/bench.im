@@ -10,6 +10,11 @@ entity = { path = "../entity" }
 serde = "1"
 chrono = "0.4"
 validator = { version = "0.20", features = ["derive"] }
+ip2region = "0.1.0"
+regex = "1.10"
+lazy_static = "1.4"
+rand = "0.8"
+base64 = "0.22"
 
 [dependencies.sea-orm]
 version = "1"

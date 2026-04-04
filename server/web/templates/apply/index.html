@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}申请加入 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="flex justify-center p-4 items-center sm:h-screen">
+    <div class="max-w-sm w-full bg-white rounded-sm shadow-sm p-6 sm:p-8">
+        {% if eligible %}
+        <!-- 符合条件 -->
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-sm flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-neutral-800">申请加入</h2>
+            <p class="text-sm text-neutral-500 mt-1">您的网络符合申请条件</p>
+        </div>
+
+        <div class="space-y-3 mb-6 text-sm">
+            <div class="flex justify-between">
+                <span class="text-neutral-400">IP 地址</span>
+                <span class="font-mono text-neutral-700">{{ ip }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-neutral-400">所在省份</span>
+                <span class="text-neutral-700">{{ province }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-neutral-400">运营商</span>
+                <span class="text-neutral-700">{{ isp }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="/apply">
+            <button type="submit" class="w-full p-2.5 button-primary font-medium transition-all duration-150 hover:opacity-90">
+                确认加入
+            </button>
+        </form>
+
+        <p class="mt-4 text-xs text-neutral-400 text-center">
+            1天内未上线将自动删除
+        </p>
+
+        {% else %}
+        <!-- 不符合条件 -->
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 bg-red-100 rounded-sm flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-red-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-neutral-800">无法申请</h2>
+            <p class="text-sm text-neutral-500 mt-1">{{ reason }}</p>
+        </div>
+
+        <div class="text-center">
+            <a href="/" class="w-full p-2.5 button font-medium transition-all duration-150 hover:opacity-90 inline-block">
+                返回首页
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

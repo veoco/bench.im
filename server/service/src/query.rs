@@ -31,6 +31,18 @@ impl Query {
         Machine::find_by_id(id).one(db).await
     }
 
+    /// 根据名称前缀查找机器（用于申请者序号生成）
+    pub async fn find_machines_by_name_prefix(
+        db: &DbConn,
+        prefix: &str,
+    ) -> Result<Vec<machine::Model>, DbErr> {
+        Machine::find()
+            .filter(machine::Column::Name.like(format!("{}%", prefix)))
+            .order_by_asc(machine::Column::Name)
+            .all(db)
+            .await
+    }
+
     pub async fn find_targets(db: &DbConn) -> Result<Vec<target::Model>, DbErr> {
         Target::find()
             .order_by_asc(target::Column::Name)

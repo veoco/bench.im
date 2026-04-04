@@ -47,6 +47,7 @@ pub struct IndexTemplate {
     pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
 }
 
 #[derive(Template)]
@@ -57,6 +58,7 @@ pub struct MachineTemplate {
     pub targets: Vec<Target>,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
 }
 
 #[derive(Template)]
@@ -67,6 +69,7 @@ pub struct TargetTemplate {
     pub machines: Vec<MachineForList>, // 用于侧边栏机器列表
     pub target_machines: Vec<Machine>, // 用于目标页面的机器列表（显示图表）
     pub current_machine_id: i32,
+    pub enable_apply: bool,
 }
 
 #[derive(Template)]

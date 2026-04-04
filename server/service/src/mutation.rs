@@ -31,6 +31,26 @@ impl Mutation {
         Ok(machine)
     }
 
+    /// 创建申请者 machine（用于自助申请）
+    pub async fn create_applicant_machine(
+        db: &DbConn,
+        name: &str,
+        ip: &str,
+        key: &str,
+    ) -> Result<machine::Model, DbErr> {
+        let now = Utc::now().naive_utc();
+
+        machine::ActiveModel {
+            name: Set(name.to_string()),
+            ip: Set(ip.to_string()),
+            created: Set(now),
+            key: Set(key.to_string()),
+            ..Default::default()
+        }
+        .insert(db)
+        .await
+    }
+
     pub async fn edit_machine(
         db: &DbConn,
         id: i32,
