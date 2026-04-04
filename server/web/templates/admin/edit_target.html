@@ -31,6 +31,11 @@
         <button class="w-full p-2.5 button-primary font-medium transition-all duration-150 hover:opacity-90" type="submit">
             {% if is_edit %}保存修改{% else %}创建目标{% endif %}
         </button>
+        {% if is_edit %}
+        <button type="button" class="w-full p-2.5 button-danger font-medium transition-all duration-150 hover:opacity-90 mt-4" onclick="location.href='/admin/targets/{{ id }}/delete'">
+            删除目标
+        </button>
+        {% endif %}
     </form>
 </div>
 {% endblock %}
