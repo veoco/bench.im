@@ -23,19 +23,21 @@
             </button>
         </div>
         <div class="relative flex flex-col flex-grow sm:static bg-neutral-50 overflow-hidden">
-            <nav class="hidden sm:flex flex-col py-2 px-2 gap-px flex-1 overflow-y-auto" id="mainNav">
-                {% include "components/machines_list.html" %}
+            <nav class="hidden sm:flex flex-col flex-1" id="mainNav">
+                <div class="flex-1 overflow-y-auto py-2 px-2 gap-px">
+                    {% include "components/machines_list.html" %}
+                </div>
+                {% if enable_apply %}
+                <div class="mt-auto p-2" id="applyBtn">
+                    <a href="/apply" class="flex items-center justify-center px-4 py-3 text-neutral-600 hover:bg-neutral-100 text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"></path>
+                        </svg>
+                        加入网络
+                    </a>
+                </div>
+                {% endif %}
             </nav>
-            {% if enable_apply %}
-            <div class="sticky bottom-0 bg-neutral-50 p-2">
-                <a href="/apply" class="flex items-center justify-center px-4 py-3 text-neutral-600 hover:bg-neutral-100 text-sm font-medium transition-colors">
-                    <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"></path>
-                    </svg>
-                    加入网络
-                </a>
-            </div>
-            {% endif %}
         </div>
     </header>
     <main class="w-full min-h-screen">

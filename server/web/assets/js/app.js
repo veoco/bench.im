@@ -38,11 +38,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // 移动端菜单切换
     const menuBtn = document.getElementById('menuBtn');
     const mainNav = document.getElementById('mainNav');
-    
+    const applyBtn = document.getElementById('applyBtn');
+
     if (menuBtn && mainNav) {
         menuBtn.addEventListener('click', function() {
             mainNav.classList.toggle('hidden');
             mainNav.classList.toggle('flex');
+            // 同步切换加入网络按钮（移动端）
+            if (applyBtn) {
+                applyBtn.classList.toggle('hidden');
+            }
         });
     }
     
