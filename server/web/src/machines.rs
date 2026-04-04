@@ -197,6 +197,8 @@ async fn new_machine_page(State(state): State<Arc<AppState>>) -> Html<String> {
         key: "".to_string(),
         machines,
         current_machine_id: 0,
+        enable_apply: state.enable_apply,
+        is_admin: true,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -217,6 +219,8 @@ async fn edit_machine_page(
             key: m.key,
             machines,
             current_machine_id: m.id,
+            enable_apply: state.enable_apply,
+            is_admin: true,
         },
         _ => {
             return Html("Machine not found".to_string());
@@ -243,6 +247,8 @@ async fn delete_machine_page(
             ipv6: "".to_string(),
             machines,
             current_machine_id: m.id,
+            enable_apply: state.enable_apply,
+            is_admin: true,
         },
         _ => {
             return Html("Machine not found".to_string());

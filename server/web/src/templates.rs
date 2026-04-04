@@ -48,6 +48,7 @@ pub struct IndexTemplate {
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -59,6 +60,7 @@ pub struct MachineTemplate {
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -70,6 +72,7 @@ pub struct TargetTemplate {
     pub target_machines: Vec<Machine>, // 用于目标页面的机器列表（显示图表）
     pub current_machine_id: i32,
     pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -78,6 +81,8 @@ pub struct AdminLoginTemplate {
     pub site_name: String,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -88,6 +93,8 @@ pub struct AdminIndexTemplate {
     pub current_machine_id: i32,
     pub admin_machines: Vec<AdminMachine>, // 用于管理列表
     pub admin_targets: Vec<AdminTarget>,   // 用于管理列表
+    pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -101,6 +108,8 @@ pub struct EditMachineTemplate {
     pub key: String,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -115,6 +124,8 @@ pub struct EditTargetTemplate {
     pub ipv6: String,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
+    pub is_admin: bool,
 }
 
 #[derive(Template)]
@@ -129,4 +140,6 @@ pub struct DeleteTemplate {
     pub ipv6: String,
     pub machines: Vec<MachineForList>,
     pub current_machine_id: i32,
+    pub enable_apply: bool,
+    pub is_admin: bool,
 }

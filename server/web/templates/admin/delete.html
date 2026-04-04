@@ -1,9 +1,10 @@
-{% extends "admin/base.html" %}
+{% extends "base.html" %}
+{% set is_admin = true %}
 
 {% block title %}删除{{ item_type }} - {{ site_name }}{% endblock %}
 
 {% block content %}
-<div class="flex justify-center p-4 items-center sm:h-screen">
+<div class="flex justify-center p-4 items-center min-h-[calc(100vh-48px)] sm:h-screen">
     <form class="max-w-md w-full bg-white rounded-sm shadow-sm p-6 sm:p-8" id="deleteForm">
         <div class="text-center mb-6">
             <div class="w-12 h-12 bg-red-100 rounded-sm flex items-center justify-center mx-auto mb-4">

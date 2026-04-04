@@ -35,7 +35,13 @@ async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
-    let template = AdminLoginTemplate { site_name: state.site_name.clone(), machines, current_machine_id: 0 };
+    let template = AdminLoginTemplate {
+        site_name: state.site_name.clone(),
+        machines,
+        current_machine_id: 0,
+        enable_apply: state.enable_apply,
+        is_admin: true,
+    };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -76,6 +82,8 @@ async fn admin_index_page(State(state): State<Arc<AppState>>) -> Html<String> {
         current_machine_id: 0,
         admin_machines,
         admin_targets,
+        enable_apply: state.enable_apply,
+        is_admin: true,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }

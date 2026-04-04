@@ -9,7 +9,7 @@
 </head>
 <body class="flex flex-col sm:flex-row bg-neutral-100">
     <header class="w-full flex flex-col shrink-0 z-50 sticky top-0 sm:h-screen sm:w-56 bg-white">
-        <div class="flex bg-neutral-800 px-3 py-2.5 items-center">
+        <div class="flex bg-neutral-800 px-3 py-2.5 items-center shrink-0">
             <h1 class="font-bold text-xl text-white tracking-tight"><a href="/">{{ site_name }}</a></h1>
             <button class="ml-auto w-5 text-white/80 hover:text-white transition-colors" id="adminBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -22,13 +22,13 @@
                 </svg>
             </button>
         </div>
-        <div class="relative flex flex-col flex-grow sm:static bg-neutral-50 overflow-hidden">
-            <nav class="hidden sm:flex flex-col flex-1" id="mainNav">
-                <div class="flex-1 overflow-y-auto py-2 px-2 gap-px">
+        <div class="relative flex-grow sm:overflow-hidden">
+            <nav class="hidden absolute sm:static sm:flex inset-x-0 top-0 sm:inset-auto h-[calc(100vh-48px)] sm:h-full bg-neutral-50 shadow-lg sm:shadow-none z-40 flex-col" id="mainNav">
+                <div class="flex-1 overflow-y-auto py-2 px-2 min-h-0">
                     {% include "components/machines_list.html" %}
                 </div>
                 {% if enable_apply %}
-                <div class="mt-auto p-2" id="applyBtn">
+                <div class="shrink-0 p-2 bg-neutral-50">
                     <a href="/apply" class="flex items-center justify-center px-4 py-3 text-neutral-600 hover:bg-neutral-100 text-sm font-medium transition-colors">
                         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"></path>
@@ -40,10 +40,13 @@
             </nav>
         </div>
     </header>
-    <main class="w-full min-h-screen">
+    <main class="w-full min-h-[calc(100vh-48px)] sm:min-h-screen">
         {% block content %}{% endblock %}
     </main>
     <script src="/static/js/app.js"></script>
+    {% if is_admin %}
+    <script src="/static/js/admin.js"></script>
+    {% endif %}
     {% block scripts %}{% endblock %}
 </body>
 </html>

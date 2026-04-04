@@ -37,6 +37,7 @@ async fn apply_page(
             machines,
             current_machine_id: 0,
             enable_apply: state.enable_apply,
+            is_admin: false,
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
@@ -63,6 +64,7 @@ async fn apply_page(
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
+                is_admin: false,
             };
             Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
         }
@@ -85,6 +87,7 @@ async fn apply_page(
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
+                is_admin: false,
             };
             Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
         }
@@ -106,6 +109,7 @@ async fn apply_submit(
             machines,
             current_machine_id: 0,
             enable_apply: state.enable_apply,
+            is_admin: false,
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
@@ -138,6 +142,7 @@ async fn apply_submit(
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
+                is_admin: false,
             };
             return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
         }
@@ -166,6 +171,7 @@ async fn apply_submit(
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
+                is_admin: false,
             };
             return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
         }
@@ -181,6 +187,7 @@ async fn apply_submit(
         machines,
         current_machine_id: 0,
         enable_apply: state.enable_apply,
+        is_admin: false,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
@@ -200,6 +207,7 @@ struct ApplyTemplate {
     machines: Vec<MachineForList>,
     current_machine_id: i32,
     enable_apply: bool,
+    is_admin: bool,
 }
 
 /// 申请成功页面模板
@@ -214,6 +222,7 @@ struct ApplySuccessTemplate {
     machines: Vec<MachineForList>,
     current_machine_id: i32,
     enable_apply: bool,
+    is_admin: bool,
 }
 
 /// 申请功能关闭页面模板
@@ -224,4 +233,5 @@ struct ApplyDisabledTemplate {
     machines: Vec<MachineForList>,
     current_machine_id: i32,
     enable_apply: bool,
+    is_admin: bool,
 }

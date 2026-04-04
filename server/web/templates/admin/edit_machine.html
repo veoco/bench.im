@@ -1,9 +1,10 @@
-{% extends "admin/base.html" %}
+{% extends "base.html" %}
+{% set is_admin = true %}
 
 {% block title %}{% if is_edit %}编辑{% else %}新增{% endif %}机器 - {{ site_name }}{% endblock %}
 
 {% block content %}
-<div class="flex justify-center p-4 items-center sm:h-screen">
+<div class="flex justify-center p-4 items-center min-h-[calc(100vh-48px)] sm:h-screen">
     <form class="max-w-md w-full bg-white rounded-sm shadow-sm p-6 sm:p-8" id="machineForm" data-mid="{{ id }}">
         <h2 class="text-center text-xl font-bold text-neutral-800 mb-6">{% if is_edit %}编辑{% else %}新增{% endif %}机器</h2>
 
