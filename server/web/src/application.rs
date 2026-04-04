@@ -10,11 +10,12 @@ use axum::{
 use askama::Template;
 
 use crate::{
+    extractors::ClientIp,
     index::fetch_machines_for_list,
     templates::MachineForList,
     AppState,
 };
-use server_service::{ApplicationService, ApplyRequest};
+use server_service::{ApplicationService, ApplyRequest, ip_geo::parse_ip};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -24,10 +25,11 @@ pub fn create_router() -> Router<Arc<AppState>> {
 /// GET /apply - 显示申请页面
 async fn apply_page(
     State(state): State<Arc<AppState>>,
+    ClientIp(ip): ClientIp,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
-    
+
     // 如果功能未开启，显示关闭页面
     if !state.enable_apply {
         let template = ApplyDisabledTemplate {
@@ -39,18 +41,24 @@ async fn apply_page(
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
 
-    let client_ip = extract_client_ip(addr);
+    // 获取真实客户端 IP（优先从 header，否则使用连接地址）
+    let client_ip = if ip.is_empty() {
+        addr.ip().to_string()
+    } else {
+        ip
+    };
 
     match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
-        Ok((province, isp)) => {
+        Ok((province, isp, count)) => {
             // 符合条件，显示确认页面
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: true,
-                ip: client_ip,
                 province: province.clone(),
                 isp: isp.clone(),
                 reason: String::new(),
+                current_count: count,
+                max_count: 3,
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
@@ -58,14 +66,20 @@ async fn apply_page(
             Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
         }
         Err(e) => {
+            // 尝试解析 IP 获取省份和运营商信息
+            let (province, isp) = parse_ip(&client_ip)
+                .map(|geo| (geo.province, geo.isp))
+                .unwrap_or((String::new(), String::new()));
+
             // 不符合条件，显示错误页面
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
-                ip: client_ip,
-                province: String::new(),
-                isp: String::new(),
+                province,
+                isp,
                 reason: e.to_string(),
+                current_count: 0,
+                max_count: 3,
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
@@ -78,10 +92,11 @@ async fn apply_page(
 /// POST /apply - 提交申请
 async fn apply_submit(
     State(state): State<Arc<AppState>>,
+    ClientIp(ip): ClientIp,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
-    
+
     // 如果功能未开启
     if !state.enable_apply {
         let template = ApplyDisabledTemplate {
@@ -93,19 +108,30 @@ async fn apply_submit(
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
 
-    let client_ip = extract_client_ip(addr);
+    // 获取真实客户端 IP（优先从 header，否则使用连接地址）
+    let client_ip = if ip.is_empty() {
+        addr.ip().to_string()
+    } else {
+        ip
+    };
 
     // 重新检查资格（防止并发问题）
     let (province, isp) = match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
-        Ok(info) => info,
+        Ok((prov, isp, _)) => (prov, isp),
         Err(e) => {
+            // 尝试解析 IP 获取省份和运营商信息
+            let (province, isp) = parse_ip(&client_ip)
+                .map(|geo| (geo.province, geo.isp))
+                .unwrap_or((String::new(), String::new()));
+
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
-                ip: client_ip,
-                province: String::new(),
-                isp: String::new(),
+                province,
+                isp,
                 reason: e.to_string(),
+                current_count: 0,
+                max_count: 3,
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
@@ -128,10 +154,11 @@ async fn apply_submit(
             let template = ApplyTemplate {
                 site_name: state.site_name.clone(),
                 eligible: false,
-                ip: String::new(),
                 province: String::new(),
                 isp: String::new(),
                 reason: e.to_string(),
+                current_count: 0,
+                max_count: 3,
                 machines,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply,
@@ -154,23 +181,17 @@ async fn apply_submit(
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
-/// 提取客户端真实 IP
-fn extract_client_ip(addr: SocketAddr) -> String {
-    // 注意：如果有反向代理，应该从 X-Forwarded-For 头部获取
-    // 这里简化处理，直接使用连接 IP
-    addr.ip().to_string()
-}
-
 /// 申请页面模板
 #[derive(Template)]
 #[template(path = "apply/index.html")]
 struct ApplyTemplate {
     site_name: String,
     eligible: bool,
-    ip: String,
     province: String,
     isp: String,
     reason: String,
+    current_count: i32,
+    max_count: i32,
     machines: Vec<MachineForList>,
     current_machine_id: i32,
     enable_apply: bool,

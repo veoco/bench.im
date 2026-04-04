@@ -22,8 +22,8 @@ pub struct ApplyResult {
 pub enum ApplyError {
     NotInChina,
     IspNotSupported,
-    ProvinceFull,       // 该组合已达3个上限
-    IpAlreadyApplied,   // 该IP已有有效申请
+    ProvinceFull(i32),       // 该组合已达上限，携带当前数量
+    IpAlreadyApplied,        // 该IP已有有效申请
     ParseFailed,
     DatabaseError,
 }
@@ -33,7 +33,7 @@ impl std::fmt::Display for ApplyError {
         match self {
             ApplyError::NotInChina => write!(f, "仅支持中国大陆地区申请"),
             ApplyError::IspNotSupported => write!(f, "当前仅支持联通、电信、移动、铁通、广电运营商"),
-            ApplyError::ProvinceFull => write!(f, "该地区该运营商申请人数已达上限"),
+            ApplyError::ProvinceFull(count) => write!(f, "该地区该运营商申请人数已达上限（{}/3）", count),
             ApplyError::IpAlreadyApplied => write!(f, "该IP已有有效申请，请勿重复申请"),
             ApplyError::ParseFailed => write!(f, "IP解析失败"),
             ApplyError::DatabaseError => write!(f, "数据库错误"),
@@ -45,10 +45,11 @@ pub struct ApplicationService;
 
 impl ApplicationService {
     /// 检查申请资格
+    /// 返回：(省份, 运营商, 当前申请数量)
     pub async fn check_eligibility(
         db: &DbConn,
         ip: &str,
-    ) -> Result<(String, String), ApplyError> {
+    ) -> Result<(String, String, i32), ApplyError> {
         // 1. 解析 IP
         let geo = parse_ip(ip).ok_or(ApplyError::ParseFailed)?;
 
@@ -70,10 +71,10 @@ impl ApplicationService {
         // 5. 检查该组合是否已满（3个）
         let count = Self::count_by_province_isp(db, &geo.province, &geo.isp).await?;
         if count >= 3 {
-            return Err(ApplyError::ProvinceFull);
+            return Err(ApplyError::ProvinceFull(count));
         }
 
-        Ok((geo.province, geo.isp))
+        Ok((geo.province, geo.isp, count))
     }
 
     /// 提交申请
@@ -163,7 +164,7 @@ impl ApplicationService {
     }
 
     /// 统计某省份+运营商组合的申请者数量
-    async fn count_by_province_isp(
+    pub async fn count_by_province_isp(
         db: &DbConn,
         province: &str,
         isp: &str,
