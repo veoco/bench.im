@@ -35,8 +35,21 @@ where
                 if ip.is_empty() {
                     return None;
                 }
-                // 去除端口号（IPv4:port 格式，如 1.2.3.4:12345）
-                // 注意：IPv6 地址格式复杂，这里简单处理 IPv4 带端口的情况
+
+                // IPv6 地址处理
+                if ip.starts_with('[') {
+                    // IPv6 带端口格式: [2408:...]:port
+                    // 提取方括号内的内容
+                    if let Some(end) = ip.find(']') {
+                        return Some(ip[1..end].to_string());
+                    }
+                } else if ip.contains(':') && !ip.contains('.') {
+                    // 纯 IPv6 地址（包含冒号但不包含点）
+                    return Some(ip.to_string());
+                }
+
+                // IPv4 地址处理（去除端口号）
+                // IPv4:port 格式，如 1.2.3.4:12345
                 let ip = ip.split(':').next().unwrap_or(ip);
                 Some(ip.to_string())
             };
