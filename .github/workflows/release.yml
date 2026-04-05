@@ -16,47 +16,42 @@ env:
 
 jobs:
   build-server-linux:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     env:
       RUST_BACKTRACE: full
 
     strategy:
       matrix:
-        target:
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install cross
-        run: cargo install cross
+      - name: Install musl-tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
 
       - name: Install TailwindCSS
         run: |
           cd server/web
-          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-musl" ]; then
-            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64
-            chmod +x tailwindcss-linux-arm64
-            mv tailwindcss-linux-arm64 tailwindcss
-          else
-            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
-            chmod +x tailwindcss-linux-x64
-            mv tailwindcss-linux-x64 tailwindcss
-          fi
+          curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'arm64' || 'x64' }}-musl
+          chmod +x tailwindcss-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'arm64' || 'x64' }}-musl
+          mv tailwindcss-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'arm64' || 'x64' }}-musl tailwindcss
 
-      - name: Build ${{ matrix.target }}
+      - name: Build Server
         timeout-minutes: 15
-        working-directory: server
         run: |
-          mkdir -p ./build/release
-          cross build --target ${{ matrix.target }} --release
-          cp ../../target/${{ matrix.target }}/release/bim-server ./build/release/bim-server
+          mkdir -p server/build/release
+          cargo build --release --target ${{ matrix.target }} -p bim-server
+          cp target/${{ matrix.target }}/release/bim-server server/build/release/bim-server
 
       - name: UPX
         uses: crazy-max/ghaction-upx@v4
@@ -65,16 +60,14 @@ jobs:
           files: ./server/build/release/bim-server
           args: --best --lzma
 
-      - name: Tar Artifacts
-        working-directory: server/build/release
-        run: |
-          tar -czf server-${{ matrix.target }}.tar.gz bim-server
+      - name: Rename
+        run: mv server/build/release/bim-server server/build/release/server-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64' || 'x86_64' }}
 
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: server-${{ matrix.target }}
-          path: server/build/release/server-${{ matrix.target }}.tar.gz
+          path: server/build/release/server-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64' || 'x86_64' }}
 
   build-server-windows:
     runs-on: windows-latest
@@ -82,10 +75,17 @@ jobs:
       RUST_BACKTRACE: full
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
+
+      - name: Install TailwindCSS
+        run: |
+          cd server/web
+          curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe
+          chmod +x tailwindcss-windows-x64.exe
+          mv tailwindcss-windows-x64.exe tailwindcss.exe
 
       - name: Build
         timeout-minutes: 15
@@ -95,11 +95,14 @@ jobs:
           mkdir -p ./build/release
           cp ../../target/release/bim-server.exe ./build/release/bim-server.exe
 
+      - name: Rename
+        run: mv server/build/release/bim-server.exe server/build/release/server-windows.exe
+
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: server-windows
-          path: server/build/release/bim-server.exe
+          path: server/build/release/server-windows.exe
 
   build-server-macos:
     runs-on: macos-latest
@@ -107,7 +110,7 @@ jobs:
       RUST_BACKTRACE: full
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -115,59 +118,63 @@ jobs:
       - name: Install TailwindCSS
         run: |
           cd server/web
-          curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
-          chmod +x tailwindcss-macos-arm64
-          mv tailwindcss-macos-arm64 tailwindcss
+          if [ "$(uname -m)" = "arm64" ]; then
+            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+            chmod +x tailwindcss-macos-arm64
+            mv tailwindcss-macos-arm64 tailwindcss
+          else
+            curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64
+            chmod +x tailwindcss-macos-x64
+            mv tailwindcss-macos-x64 tailwindcss
+          fi
 
       - name: Build
-        timeout-minutes: 120
+        timeout-minutes: 15
         working-directory: server
         run: |
           cargo build --release
           mkdir -p ./build/release
           cp ../../target/release/bim-server ./build/release/bim-server
 
-      - name: Tar Artifacts
-        working-directory: server/build/release
-        run: |
-          tar -czf server-macos.tar.gz bim-server
+      - name: Rename
+        run: mv server/build/release/bim-server server/build/release/server-macos
 
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: server-macos
-          path: server/build/release/server-macos.tar.gz
+          path: server/build/release/server-macos
 
   build-client-linux:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     env:
       RUST_BACKTRACE: full
 
     strategy:
       matrix:
-        target:
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
-          target: ${{ matrix.target }}
+          targets: ${{ matrix.target }}
 
-      - name: Install cross
-        run: cargo install cross
+      - name: Install musl-tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
 
-      - name: Build ${{ matrix.target }}
+      - name: Build Client
         timeout-minutes: 15
-        working-directory: client
         run: |
-          mkdir -p build/release
-          cross build --target ${{ matrix.target }} --release
-          cp ../../target/${{ matrix.target }}/release/bim build/release/bim
+          mkdir -p client/build/release
+          cargo build --release --target ${{ matrix.target }} -p bim
+          cp target/${{ matrix.target }}/release/bim client/build/release/bim
 
       - name: UPX Compress
         uses: crazy-max/ghaction-upx@v4
@@ -177,16 +184,14 @@ jobs:
             client/build/release/bim
           args: --best --lzma
 
-      - name: Tar Artifacts
-        working-directory: client/build/release
-        run: |
-          tar -czf client-${{ matrix.target }}.tar.gz bim
+      - name: Rename
+        run: mv client/build/release/bim client/build/release/client-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64' || 'x86_64' }}
 
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: client-${{ matrix.target }}
-          path: client/build/release/client-${{ matrix.target }}.tar.gz
+          path: client/build/release/client-linux-${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64' || 'x86_64' }}
 
   build-client-windows:
     runs-on: windows-latest
@@ -194,12 +199,10 @@ jobs:
       RUST_BACKTRACE: full
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
+        uses: dtolnay/rust-toolchain@nightly
 
       - name: Build
         timeout-minutes: 15
@@ -209,11 +212,15 @@ jobs:
           mkdir build\release
           copy ..\..\target\release\bim.exe build\release\bim.exe
 
+      - name: Rename
+        run: |
+          mv client/build/release/bim.exe client/build/release/client-windows.exe
+
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: client-windows
-          path: client/build/release/bim.exe
+          path: client/build/release/client-windows.exe
 
   build-client-macos:
     runs-on: macos-latest
@@ -221,12 +228,10 @@ jobs:
       RUST_BACKTRACE: full
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
+        uses: dtolnay/rust-toolchain@nightly
 
       - name: Build
         timeout-minutes: 15
@@ -236,26 +241,24 @@ jobs:
           mkdir -p build/release
           cp ../../target/release/bim build/release/bim
 
-      - name: Tar Artifacts
-        working-directory: client/build/release
-        run: |
-          tar -czf client-macos.tar.gz bim
+      - name: Rename
+        run: mv client/build/release/bim client/build/release/client-macos
 
       - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: client-macos
-          path: client/build/release/client-macos.tar.gz
+          path: client/build/release/client-macos
 
   create-release:
     needs: [build-server-linux, build-server-windows, build-server-macos, build-client-linux, build-client-windows, build-client-macos]
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download All Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           path: artifacts
 
@@ -271,11 +274,11 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease }}
           generate_release_notes: true
           files: |
-            artifacts/server-x86_64-unknown-linux-musl/server-x86_64-unknown-linux-musl.tar.gz
-            artifacts/server-aarch64-unknown-linux-musl/server-aarch64-unknown-linux-musl.tar.gz
-            artifacts/server-windows/bim-server.exe
-            artifacts/server-macos/server-macos.tar.gz
-            artifacts/client-x86_64-unknown-linux-musl/client-x86_64-unknown-linux-musl.tar.gz
-            artifacts/client-aarch64-unknown-linux-musl/client-aarch64-unknown-linux-musl.tar.gz
-            artifacts/client-windows/bim.exe
-            artifacts/client-macos/client-macos.tar.gz
+            artifacts/server-x86_64-unknown-linux-musl/server-linux-x86_64
+            artifacts/server-aarch64-unknown-linux-musl/server-linux-aarch64
+            artifacts/server-windows/server-windows.exe
+            artifacts/server-macos/server-macos
+            artifacts/client-x86_64-unknown-linux-musl/client-linux-x86_64
+            artifacts/client-aarch64-unknown-linux-musl/client-linux-aarch64
+            artifacts/client-windows/client-windows.exe
+            artifacts/client-macos/client-macos
