@@ -103,7 +103,7 @@ async fn start() -> anyhow::Result<()> {
     let addr = env::var("LISTEN_ADDRESS").unwrap_or(String::from("127.0.0.1:3000"));
     let admin_password = env::var("ADMIN_PASSWORD").unwrap_or(String::from("fake-admin-password"));
     let site_name = env::var("SITE_NAME").unwrap_or(String::from("Bench.im"));
-    let server_url = env::var("SERVER_URL").unwrap_or(String::from("https://your-server.com"));
+    let server_url = env::var("SERVER_URL").unwrap_or(String::from("https://your-server.fake-url"));
     let v4_db_path = env::var("IP2REGION_V4_DB").unwrap_or_else(|_| "server/ip2region_v4.xdb".to_string());
     let v6_db_path = env::var("IP2REGION_V6_DB").unwrap_or_else(|_| "server/ip2region_v6.xdb".to_string());
 
