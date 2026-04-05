@@ -18,6 +18,11 @@ pub struct ApplyResult {
     pub command: String,
 }
 
+/// 启动命令格式配置
+pub struct CommandConfig<'a> {
+    pub server_url: &'a str,
+}
+
 #[derive(Debug)]
 pub enum ApplyError {
     NotInChina,
@@ -81,6 +86,7 @@ impl ApplicationService {
     pub async fn submit_application(
         db: &DbConn,
         req: ApplyRequest,
+        config: CommandConfig<'_>,
     ) -> Result<ApplyResult, ApplyError> {
         // 生成名称：省份运营商001
         let name = Self::generate_machine_name(db, &req.province, &req.isp).await?;
@@ -97,8 +103,8 @@ impl ApplicationService {
             id: machine.id,
             name,
             key: key.clone(),
-            command: format!("bim -m {} -t {} -s https://your-server.com",
-                machine.id, key),
+            command: format!("bim -m {} \\\n  -t {} \\\n  -s {}",
+                machine.id, key, config.server_url),
         })
     }
 

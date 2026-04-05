@@ -15,7 +15,7 @@ use crate::{
     templates::MachineForList,
     AppState,
 };
-use server_service::{ApplicationService, ApplyRequest, ip_geo::parse_ip};
+use server_service::{ApplicationService, ApplyRequest, CommandConfig, ip_geo::parse_ip};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -149,13 +149,17 @@ async fn apply_submit(
     };
 
     // 提交申请
+    let config = CommandConfig {
+        server_url: &state.server_url,
+    };
     let result = match ApplicationService::submit_application(
         &state.conn,
         ApplyRequest {
             ip: client_ip.clone(),
             province,
             isp,
-        }
+        },
+        config,
     ).await {
         Ok(result) => result,
         Err(e) => {
