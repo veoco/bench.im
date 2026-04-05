@@ -27,11 +27,16 @@ pub async fn ping_system(
     // Windows 使用 -n，Unix/Linux/macOS 使用 -c
     let count_arg = if cfg!(target_os = "windows") { "-n" } else { "-c" };
     
-    let output = Command::new("ping")
+    // macOS 的 ping 不支持 IPv6，需要使用 ping6
+    let ping_cmd = if cfg!(target_os = "macos") && target_ip.is_ipv6() {
+        "ping6"
+    } else {
+        "ping"
+    };
+    
+    let output = Command::new(ping_cmd)
         .arg(count_arg)
         .arg("20")
-        // 直接使用 IP 地址，不使用 -4/-6 参数
-        // macOS 和 Windows 的 ping 根据 IP 类型自动选择协议
         .arg(target_ip.to_string())
         .output()
         .await;
