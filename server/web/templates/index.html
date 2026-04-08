@@ -60,36 +60,10 @@ async function updateTargetStatusLights() {
         document.querySelectorAll('.target-card').forEach(card => {
             const tid = parseInt(card.dataset.id);
             const updated = targetMap.get(tid) || 0;
+            const status = getStatusFromTime(updated);
 
-            // 更新 data-updated 属性
-            const statusLight = card.querySelector('.status-light');
-            if (statusLight) {
-                statusLight.dataset.updated = updated;
-            }
-
-            // 计算状态颜色
-            const currentTime = Date.now();
-            const updatedTime = updated * 1000;
-            const diff = currentTime - updatedTime;
-
-            let colorClass = 'bg-neutral-300';
-            let pulseClass = '';
-            if (updated > 0) {
-                if (diff < 5 * 60 * 1000) {
-                    colorClass = 'bg-green-500';
-                    pulseClass = 'status-pulse-green';
-                } else if (diff < 10 * 60 * 1000) {
-                    colorClass = 'bg-yellow-500';
-                } else {
-                    colorClass = 'bg-red-500';
-                }
-            }
-
-            // 更新状态灯
             const dot = card.querySelector('.status-light span');
-            if (dot) {
-                dot.className = `w-2 h-2 rounded-full transition-colors duration-300 ${colorClass} ${pulseClass}`;
-            }
+            if (dot) setStatusLight(dot, status);
         });
     } catch (e) {
         // 忽略错误

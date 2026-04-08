@@ -40,6 +40,50 @@ window.escapeHtml = function(text) {
     return div.innerHTML;
 };
 
+// 状态灯工具函数
+
+/**
+ * 根据时间差计算状态
+ * @param {number} updated - 更新时间戳（秒）
+ * @returns {string} - 状态标识: 'online' | 'warning' | 'offline' | 'unknown'
+ */
+function getStatusFromTime(updated) {
+    if (!updated || updated <= 0) return 'unknown';
+
+    const diff = Date.now() - (updated * 1000);
+    if (diff < 5 * 60 * 1000) return 'online';
+    if (diff < 10 * 60 * 1000) return 'warning';
+    return 'offline';
+}
+
+/**
+ * 设置状态灯样式（带缓存，避免不必要的 DOM 更新）
+ * @param {HTMLElement} element - 状态灯元素
+ * @param {string} status - 状态: 'online' | 'warning' | 'offline' | 'unknown'
+ */
+function setStatusLight(element, status) {
+    const colorMap = {
+        online: { color: 'bg-green-500', pulse: 'status-pulse-green' },
+        warning: { color: 'bg-yellow-500', pulse: '' },
+        offline: { color: 'bg-red-500', pulse: '' },
+        unknown: { color: 'bg-neutral-300', pulse: '' }
+    };
+
+    const config = colorMap[status] || colorMap.unknown;
+    const currentStatus = element.dataset.status;
+
+    // 只有状态变化时才更新 DOM
+    if (currentStatus !== status) {
+        const className = `w-2 h-2 rounded-full transition-colors duration-300 ${config.color} ${config.pulse}`.trim();
+        element.className = className;
+        element.dataset.status = status;
+    }
+}
+
+// 全局导出供内联脚本使用
+window.getStatusFromTime = getStatusFromTime;
+window.setStatusLight = setStatusLight;
+
 // 导航控制
 document.addEventListener('DOMContentLoaded', function() {
     // 移动端菜单切换
@@ -52,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mainNav.classList.toggle('flex');
         });
     }
-    
+
     // 管理员按钮 - 始终跳转到管理后台，由后端判断是否需要登录
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -60,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/admin/';
         });
     }
-    
+
     // 更新机器列表状态灯
     updateMachineStatusLights();
     setInterval(updateMachineStatusLights, 30000);
@@ -71,39 +115,24 @@ async function updateMachineStatusLights() {
     try {
         const machines = await API.fetchJSON('/api/machines/');
         if (!machines) return;
-        
+
         const machineMap = new Map();
         machines.forEach(m => {
             machineMap.set(m.id, m.updated || 0);
         });
-        
+
         const items = document.querySelectorAll('#machinesList .machine-item');
         items.forEach(item => {
             const href = item.getAttribute('href');
             const midMatch = href.match(/\/m\/(\d+)/);
             if (!midMatch) return;
-            
+
             const mid = parseInt(midMatch[1]);
             const updated = machineMap.get(mid) || 0;
-            const currentTime = Date.now();
-            const updatedTime = updated * 1000;
-            const diff = currentTime - updatedTime;
-            
-            let colorClass = 'bg-neutral-300';
-            let pulseClass = '';
-            if (updated > 0) {
-                if (diff < 5 * 60 * 1000) {
-                    colorClass = 'bg-green-500';
-                    pulseClass = 'status-pulse-green';
-                } else if (diff < 10 * 60 * 1000) {
-                    colorClass = 'bg-yellow-500';
-                } else {
-                    colorClass = 'bg-red-500';
-                }
-            }
-            
+            const status = getStatusFromTime(updated);
+
             const dot = item.querySelector('.status-light span');
-            if (dot) dot.className = `w-2 h-2 rounded-full transition-colors duration-300 ${colorClass} ${pulseClass}`;
+            if (dot) setStatusLight(dot, status);
         });
     } catch (e) {
         // 忽略错误
