@@ -4,6 +4,7 @@ use std::sync::Arc;
 use axum::{
     extract::{FromRef, FromRequestParts},
     http::{request::Parts, StatusCode},
+    response::Html,
     Json, RequestPartsExt,
 };
 use axum_extra::{
@@ -103,6 +104,51 @@ where
             Err((
                 StatusCode::UNAUTHORIZED,
                 Json(json!({"msg": "Login required"})),
+            ))
+        }
+    }
+}
+
+/// 用于 HTML 页面路由的管理员认证提取器
+/// 仅从 Cookie 中读取 admin_token 进行认证
+/// 认证失败时返回 401，由前端处理重定向
+pub struct AdminUserWeb;
+
+impl<S> FromRequestParts<S> for AdminUserWeb
+where
+    S: Send + Sync,
+    Arc<AppState>: FromRef<S>,
+{
+    type Rejection = (StatusCode, Html<String>);
+
+    fn from_request_parts(
+        parts: &mut Parts,
+        state: &S,
+    ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let s = Arc::from_ref(state);
+
+            // 从 Cookie header 中读取 admin_token
+            let token = parts
+                .headers
+                .get_all("Cookie")
+                .iter()
+                .filter_map(|v| v.to_str().ok())
+                .flat_map(|v| v.split(';'))
+                .map(|v| v.trim())
+                .filter_map(|v| v.strip_prefix("admin_token="))
+                .next();
+
+            // 验证 token
+            if let Some(token) = token {
+                if token == s.admin_password {
+                    return Ok(Self);
+                }
+            }
+
+            Err((
+                StatusCode::UNAUTHORIZED,
+                Html(String::from(r#"<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Unauthorized</title><script>window.location.href='/admin/login';</script></head><body></body></html>"#)),
             ))
         }
     }

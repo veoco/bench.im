@@ -11,7 +11,7 @@ use axum::{
 use axum_valid::Valid;
 use serde_json::{json, Value};
 
-use crate::extractors::{AdminUser, ApiClient};
+use crate::extractors::{AdminUser, AdminUserWeb, ApiClient};
 use crate::{
     templates::{DeleteTemplate, EditTargetTemplate, MachineForList},
     AppState,
@@ -177,7 +177,10 @@ pub async fn delete_target_admin(
 }
 
 // 页面 handlers
-async fn new_target_page(State(state): State<Arc<AppState>>) -> Html<String> {
+async fn new_target_page(
+    State(state): State<Arc<AppState>>,
+    _: AdminUserWeb,
+) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
     let template = EditTargetTemplate {
         site_name: state.site_name.clone(),
@@ -198,6 +201,7 @@ async fn new_target_page(State(state): State<Arc<AppState>>) -> Html<String> {
 async fn edit_target_page(
     Path(tid): Path<i32>,
     State(state): State<Arc<AppState>>,
+    _: AdminUserWeb,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
     let machines = fetch_machines_for_list(&state).await;
@@ -226,6 +230,7 @@ async fn edit_target_page(
 async fn delete_target_page(
     Path(tid): Path<i32>,
     State(state): State<Arc<AppState>>,
+    _: AdminUserWeb,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
     let machines = fetch_machines_for_list(&state).await;

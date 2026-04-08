@@ -43,6 +43,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         if (res.status === 200) {
             sessionStorage.setItem('token', password);
+            // 设置 cookie 用于页面路由认证（7天有效期，SameSite=Strict）
+            document.cookie = `admin_token=${password}; path=/admin; max-age=604800; SameSite=Strict`;
             window.location.href = '/admin/';
         } else {
             alert('密码错误');

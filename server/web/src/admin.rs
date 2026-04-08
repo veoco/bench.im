@@ -8,6 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
+    extractors::AdminUserWeb,
     templates::{AdminIndexTemplate, AdminLoginTemplate, MachineForList, AdminMachine, AdminTarget},
     AppState,
 };
@@ -45,7 +46,10 @@ async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
-async fn admin_index_page(State(state): State<Arc<AppState>>) -> Html<String> {
+async fn admin_index_page(
+    State(state): State<Arc<AppState>>,
+    _: AdminUserWeb,
+) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
     
     // 查询 admin 机器列表（完整信息）

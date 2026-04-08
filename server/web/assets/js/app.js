@@ -10,13 +10,20 @@ const API = {
                 ...options.headers,
             },
         });
-        
+
+        // 处理 401 未授权 - 清除 token 并重定向到登录页
+        if (res.status === 401) {
+            sessionStorage.removeItem('token');
+            window.location.href = '/admin/login';
+            return null;
+        }
+
         if (!res.ok) {
             const err = new Error(res.statusText);
             err.status = res.status;
             throw err;
         }
-        
+
         if (res.status === 204) return null;
         return res.json();
     }

@@ -14,5 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // 管理员登出功能
 window.logout = function() {
     sessionStorage.removeItem('token');
+    // 清除 cookie
+    document.cookie = 'admin_token=; path=/admin; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     window.location.href = '/admin/login';
 };
