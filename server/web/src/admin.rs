@@ -1,10 +1,12 @@
 use askama::Template;
 use axum::{
     extract::State,
-    response::Html,
-    routing::get,
-    Router,
+    http::{header::SET_COOKIE, StatusCode},
+    response::{Html, IntoResponse, Response},
+    routing::{get, post},
+    Json, Router,
 };
+use serde::Deserialize;
 use std::sync::Arc;
 
 use crate::{
@@ -16,7 +18,8 @@ use server_service::query::Query;
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/admin/login", get(admin_login_page))
+        .route("/admin/login", get(admin_login_page).post(admin_login))
+        .route("/admin/logout", post(admin_logout))
         .route("/admin/", get(admin_index_page))
 }
 
@@ -34,6 +37,11 @@ async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
     }
 }
 
+#[derive(Deserialize)]
+struct LoginRequest {
+    password: String,
+}
+
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
     let template = AdminLoginTemplate {
@@ -44,6 +52,44 @@ async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
         is_admin: true,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
+}
+
+/// 处理登录请求，验证密码并设置 HttpOnly Cookie
+async fn admin_login(
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<LoginRequest>,
+) -> Response {
+    if req.password != state.admin_password {
+        return (StatusCode::UNAUTHORIZED, "Invalid password").into_response();
+    }
+
+    // 设置 HttpOnly Cookie
+    // Path=/ 确保 /admin/* 和 /api/admin/* 都能访问此 Cookie
+    let cookie = format!(
+        "admin_token={}; Path=/; HttpOnly; SameSite=Strict",
+        req.password
+    );
+
+    (
+        StatusCode::OK,
+        [(SET_COOKIE, cookie)],
+        "Login successful",
+    )
+        .into_response()
+}
+
+/// 处理登出请求，清除 Cookie
+async fn admin_logout() -> Response {
+    // 设置过期时间为过去的日期来清除 Cookie
+    // Path=/ 与设置时保持一致，才能正确清除
+    let cookie = "admin_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+
+    (
+        StatusCode::OK,
+        [(SET_COOKIE, cookie)],
+        "Logout successful",
+    )
+        .into_response()
 }
 
 async fn admin_index_page(

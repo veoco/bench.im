@@ -68,10 +68,15 @@ document.getElementById('deleteForm').addEventListener('submit', async function(
     const apiUrl = '/api' + url;
     
     try {
-        await apiFetch(apiUrl, { method: 'DELETE' });
-        window.location.href = '/admin/';
+        const result = await apiFetch(apiUrl, { method: 'DELETE' });
+        // apiFetch 在 401 时会返回 null 并重定向到登录页
+        // 如果 result 为 null，说明已经跳转了，不需要处理
+        if (result !== null) {
+            window.location.href = '/admin/';
+        }
     } catch (err) {
-        alert('删除失败');
+        console.error('Delete failed:', err);
+        alert('删除失败: ' + (err.message || '未知错误'));
     }
 });
 </script>

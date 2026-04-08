@@ -78,9 +78,25 @@ where
     }
 }
 
-pub struct AdminUser {}
+/// 辅助函数：从请求中提取指定名称的 Cookie 值
+fn extract_cookie(parts: &Parts, name: &str) -> Option<String> {
+    parts
+        .headers
+        .get_all("Cookie")
+        .iter()
+        .filter_map(|v| v.to_str().ok())
+        .flat_map(|v| v.split(';'))
+        .map(|v| v.trim())
+        .filter_map(|v| v.strip_prefix(&format!("{}=", name)))
+        .next()
+        .map(|v| v.to_string())
+}
 
-impl<S> FromRequestParts<S> for AdminUser
+/// 用于 Admin API 的认证提取器
+/// 支持 Cookie 或 Bearer Token，优先 Cookie
+pub struct AdminAuth;
+
+impl<S> FromRequestParts<S> for AdminAuth
 where
     S: Send + Sync,
     Arc<AppState>: FromRef<S>,
@@ -93,14 +109,24 @@ where
     ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let s = Arc::from_ref(state);
+
+            // 1. 优先从 Cookie 读取
+            if let Some(token) = extract_cookie(parts, "admin_token") {
+                if token == s.admin_password {
+                    return Ok(Self);
+                }
+            }
+
+            // 2. 其次从 Bearer Token 读取
             if let Ok(TypedHeader(Authorization(bearer))) =
                 parts.extract::<TypedHeader<Authorization<Bearer>>>().await
             {
                 let token = bearer.token();
                 if token == s.admin_password {
-                    return Ok(Self {});
+                    return Ok(Self);
                 }
             }
+
             Err((
                 StatusCode::UNAUTHORIZED,
                 Json(json!({"msg": "Login required"})),
@@ -128,19 +154,8 @@ where
         async move {
             let s = Arc::from_ref(state);
 
-            // 从 Cookie header 中读取 admin_token
-            let token = parts
-                .headers
-                .get_all("Cookie")
-                .iter()
-                .filter_map(|v| v.to_str().ok())
-                .flat_map(|v| v.split(';'))
-                .map(|v| v.trim())
-                .filter_map(|v| v.strip_prefix("admin_token="))
-                .next();
-
-            // 验证 token
-            if let Some(token) = token {
+            // 从 Cookie 中读取 admin_token
+            if let Some(token) = extract_cookie(parts, "admin_token") {
                 if token == s.admin_password {
                     return Ok(Self);
                 }

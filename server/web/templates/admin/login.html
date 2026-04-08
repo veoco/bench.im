@@ -32,19 +32,18 @@
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const password = document.getElementById('password').value;
-    
+
     try {
-        const res = await fetch('/api/admin/machines/', {
-            method: 'GET',
+        const res = await fetch('/admin/login', {
+            method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + password
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password: password })
         });
-        
+
         if (res.status === 200) {
-            sessionStorage.setItem('token', password);
-            // 设置 cookie 用于页面路由认证（会话级，浏览器关闭即失效，SameSite=Strict）
-            document.cookie = `admin_token=${password}; path=/admin; SameSite=Strict`;
+            // 后端已设置 HttpOnly Cookie，直接跳转
             window.location.href = '/admin/';
         } else {
             alert('密码错误');

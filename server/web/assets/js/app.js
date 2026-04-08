@@ -1,19 +1,19 @@
 // API 请求封装
 const API = {
     async fetchJSON(url, options = {}) {
-        const token = sessionStorage.getItem('token');
+        // 只在有 body 时才设置 Content-Type
+        const headers = { ...options.headers };
+        if (options.body) {
+            headers['Content-Type'] = 'application/json';
+        }
+
         const res = await fetch(url, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-                ...options.headers,
-            },
+            headers,
         });
 
-        // 处理 401 未授权 - 清除 token 并重定向到登录页
+        // 处理 401 未授权 - 重定向到登录页
         if (res.status === 401) {
-            sessionStorage.removeItem('token');
             window.location.href = '/admin/login';
             return null;
         }
@@ -53,12 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 管理员按钮
+    // 管理员按钮 - 始终跳转到管理后台，由后端判断是否需要登录
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
         adminBtn.addEventListener('click', function() {
-            const token = sessionStorage.getItem('token');
-            window.location.href = token ? '/admin/' : '/admin/login';
+            window.location.href = '/admin/';
         });
     }
     

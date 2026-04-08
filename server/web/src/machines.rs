@@ -11,7 +11,7 @@ use axum::{
 use axum_valid::Valid;
 use serde_json::{json, Value};
 
-use crate::extractors::{AdminUser, AdminUserWeb};
+use crate::extractors::{AdminAuth, AdminUserWeb};
 use crate::{
     templates::{DeleteTemplate, EditMachineTemplate, MachineForList},
     AppState,
@@ -97,7 +97,7 @@ pub async fn get_machine_by_mid(
 
 pub async fn create_machine_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Valid(Json(machine_create)): Valid<Json<MachineCreateAdmin>>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
@@ -122,7 +122,7 @@ pub async fn create_machine_admin(
 
 pub async fn edit_machine_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(mid): Path<i32>,
     Valid(Json(machine_create)): Valid<Json<MachineCreateAdmin>>,
 ) -> (StatusCode, Json<Value>) {
@@ -140,7 +140,7 @@ pub async fn edit_machine_admin(
 
 pub async fn list_machines_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
     let mut status = StatusCode::INTERNAL_SERVER_ERROR;
@@ -154,7 +154,7 @@ pub async fn list_machines_admin(
 
 pub async fn get_machine_by_mid_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(mid): Path<i32>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
@@ -170,7 +170,7 @@ pub async fn get_machine_by_mid_admin(
 
 pub async fn delete_machine_by_mid_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(mid): Path<i32>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});

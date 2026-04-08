@@ -11,7 +11,7 @@ use axum::{
 use axum_valid::Valid;
 use serde_json::{json, Value};
 
-use crate::extractors::{AdminUser, AdminUserWeb, ApiClient};
+use crate::extractors::{AdminAuth, AdminUserWeb, ApiClient};
 use crate::{
     templates::{DeleteTemplate, EditTargetTemplate, MachineForList},
     AppState,
@@ -88,7 +88,7 @@ pub async fn list_targets_client(
 
 pub async fn create_target_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
@@ -112,7 +112,7 @@ pub async fn create_target_admin(
 
 pub async fn edit_target_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(tid): Path<i32>,
     Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
 ) -> (StatusCode, Json<Value>) {
@@ -130,7 +130,7 @@ pub async fn edit_target_admin(
 
 pub async fn list_targets_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
     let mut status = StatusCode::INTERNAL_SERVER_ERROR;
@@ -145,7 +145,7 @@ pub async fn list_targets_admin(
 
 pub async fn get_target_by_tid_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(tid): Path<i32>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
@@ -161,7 +161,7 @@ pub async fn get_target_by_tid_admin(
 
 pub async fn delete_target_admin(
     State(state): State<Arc<AppState>>,
-    _: AdminUser,
+    _: AdminAuth,
     Path(tid): Path<i32>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});

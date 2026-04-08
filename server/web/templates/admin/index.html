@@ -77,16 +77,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', async function() {
-    // 检查登录状态
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/admin/login';
-        return;
-    }
-});
-</script>
-{% endblock %}
