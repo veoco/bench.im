@@ -1,6 +1,6 @@
 // Ping 图表类
 class PingChart {
-    constructor(container, mid, tid, initialData = null) {
+    constructor(container, mid, tid, initialData = null, autoInit = true) {
         this.container = container;
         this.mid = mid;
         this.tid = tid;
@@ -11,8 +11,10 @@ class PingChart {
         this.dateRange = '24h';
         this.initialData = initialData;
         this.skeleton = container.querySelector('.chart-skeleton');
-        
-        this.init();
+
+        if (autoInit) {
+            this.init();
+        }
     }
     
     async init() {

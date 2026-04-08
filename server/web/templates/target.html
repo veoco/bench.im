@@ -55,31 +55,63 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tid = parseInt(document.getElementById('chartsGrid').dataset.tid);
     const charts = {};
-    
-    // 初始化所有图表（从 API 异步加载数据）
-    document.querySelectorAll('.chart-container').forEach(container => {
+
+    // 检查元素是否在视口内
+    const isInViewport = (el) => {
+        const rect = el.getBoundingClientRect();
+        return rect.top < window.innerHeight && rect.bottom > 0;
+    };
+
+    // 初始化单个图表
+    const initChart = (container) => {
+        if (container._chart) return; // 已初始化
+
         const mid = parseInt(container.dataset.mid);
         const wrapper = container.querySelector('.chart-wrapper');
-        charts[mid] = new TargetPingChart(wrapper, mid, tid);
-    });
-    
+        const chart = new TargetPingChart(wrapper, mid, tid, null, false); // 不自动 init
+
+        chart.init();
+
+        container._chart = chart;
+        charts[mid] = chart;
+    };
+
+    const containers = [...document.querySelectorAll('.chart-container')];
+
+    // 1. 首屏立即加载
+    containers.filter(isInViewport).forEach(initChart);
+
+    // 2. 屏幕外懒加载（200px 预加载）
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                initChart(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { rootMargin: '200px' });
+
+    containers
+        .filter(c => !c._chart)
+        .forEach(c => observer.observe(c));
+
     // 控制按钮
     let fixedY = false;
     let ipv6 = false;
     let dateRange = '24h';
-    
+
     document.getElementById('btnFixedY').addEventListener('click', function() {
         fixedY = !fixedY;
         this.classList.toggle('active');
         Object.values(charts).forEach(chart => chart.setFixedY(fixedY));
     });
-    
+
     document.getElementById('btnIpv6').addEventListener('click', function() {
         ipv6 = !ipv6;
         this.classList.toggle('active');
         Object.values(charts).forEach(chart => chart.setIpv6(ipv6));
     });
-    
+
     document.getElementById('dateRange').addEventListener('change', function() {
         dateRange = this.value;
         Object.values(charts).forEach(chart => chart.setDateRange(dateRange));
