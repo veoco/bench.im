@@ -66,6 +66,7 @@ DATABASE_URL=sqlite:db.sqlite3?mode=rwc
 ADMIN_PASSWORD=your_pass_word
 LISTEN_ADDRESS=0.0.0.0:3000
 SITE_NAME=Bench.im                    # 网站名称，可选，默认 Bench.im
+SERVER_URL=https://your-server.com    # 服务器URL，用于申请加入功能邮件等，可选
 
 # 申请加入功能配置（可选）
 ENABLE_APPLY=false                    # 是否启用申请加入功能，默认 false
@@ -80,6 +81,48 @@ IP2REGION_V6_DB=server/ip2region_v6.xdb   # IPv6 数据库路径，可选
 ```
 
 服务器会自动提供 Web 界面（已嵌入二进制中），访问 `http://localhost:3000` 即可。
+
+#### 环境变量说明
+
+| 变量名 | 必填 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `DATABASE_URL` | 是 | - | SQLite 数据库连接字符串 |
+| `ADMIN_PASSWORD` | 是 | fake-admin-password | 管理员登录密码（请务必修改） |
+| `LISTEN_ADDRESS` | 否 | 127.0.0.1:3000 | 服务器监听地址和端口 |
+| `SITE_NAME` | 否 | Bench.im | 网站显示名称 |
+| `SERVER_URL` | 否 | https://your-server.fake-url | 服务器公网 URL，用于申请加入功能 |
+| `ENABLE_APPLY` | 否 | false | 是否启用申请加入功能 |
+| `IP2REGION_V4_DB` | 否 | server/ip2region_v4.xdb | IPv4 地理位置数据库路径 |
+| `IP2REGION_V6_DB` | 否 | server/ip2region_v6.xdb | IPv6 地理位置数据库路径 |
+
+#### systemd 服务配置
+
+创建 `/etc/systemd/system/bim-server.service`：
+
+```ini
+[Unit]
+Description=bim-server
+After=network.target
+
+[Service]
+WorkingDirectory=/your_path
+ExecStart=/your_path/bim-server
+User=your_user
+Group=your_group
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启用并启动服务：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable bim-server
+sudo systemctl start bim-server
+```
 
 ### 监控客户端部署
 
@@ -96,9 +139,46 @@ cargo build --release
 ./target/release/bim -m <机器id> -t <机器密钥> -s https://bench.im
 ```
 
-### systemd 部署
+#### 参数说明
 
-详细的 systemd 配置请参考各组件目录下的 README 文件。
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `-m, --mid` | 是 | 机器 ID，从服务器后台获取 |
+| `-t, --token` | 是 | 机器密钥，从服务器后台获取 |
+| `-s, --server_url` | 是 | 服务器 URL，如 https://bench.im |
+| `-h, --help` | 否 | 显示帮助信息 |
+
+#### systemd 服务配置
+
+创建 `/etc/systemd/system/bim.service`：
+
+```ini
+[Unit]
+Description=bim
+After=network.target
+
+[Service]
+ExecStart=/your_path/bim -m <机器id> -t <机器密钥> -s https://bench.im
+Restart=always
+RestartSec=3
+DynamicUser=true
+AmbientCapabilities=CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_RAW
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> **注意**: 客户端需要 `CAP_NET_RAW` 权限来发送 ICMP ping 包。
+
+启用并启动服务：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable bim
+sudo systemctl start bim
+```
 
 ## 申请加入功能
 
@@ -182,4 +262,4 @@ cd server/web
 
 ## License
 
-本项目采用 MIT License。
+本项目采用 GNU General Public License v2.0。
