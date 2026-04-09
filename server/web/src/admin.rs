@@ -8,6 +8,7 @@ use axum::{
 };
 use serde::Deserialize;
 use std::sync::Arc;
+use validator::Validate;
 
 use crate::{
     extractors::AdminUserWeb,
@@ -37,8 +38,9 @@ async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Validate, Deserialize)]
 struct LoginRequest {
+    #[validate(length(min = 1, max = 256))]
     password: String,
 }
 

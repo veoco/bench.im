@@ -211,8 +211,12 @@ where
                     StatusCode::UNAUTHORIZED,
                     Json(json!({"msg": "Invalid API token format"})),
                 ))?;
+                let mid = mid.parse::<i32>().map_err(|_| (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({"msg": "Invalid machine ID"})),
+                ))?;
                 if let Ok(Some(machine)) =
-                    QueryCore::find_machine_by_id(&s.conn, mid.parse::<i32>().unwrap_or(0)).await
+                    QueryCore::find_machine_by_id(&s.conn, mid).await
                 {
                     if machine.key == key {
                         return Ok(Self(machine));
