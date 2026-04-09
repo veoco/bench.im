@@ -94,6 +94,32 @@ IP2REGION_V6_DB=server/ip2region_v6.xdb   # IPv6 数据库路径，可选
 | `ENABLE_APPLY` | 否 | false | 是否启用申请加入功能 |
 | `IP2REGION_V4_DB` | 否 | server/ip2region_v4.xdb | IPv4 地理位置数据库路径 |
 | `IP2REGION_V6_DB` | 否 | server/ip2region_v6.xdb | IPv6 地理位置数据库路径 |
+| `TRUSTED_PROXIES` | 否 | - | 可信代理 IP 列表（见下方说明）|
+
+#### TRUSTED_PROXIES 配置说明
+
+用于防止 IP 伪造攻击，控制服务器如何获取客户端真实 IP。
+
+**场景 1：直接暴露在互联网（默认）**
+```env
+# 不设置或留空，服务器始终使用 TCP 连接地址
+TRUSTED_PROXIES=
+```
+
+**场景 2：使用 Nginx/CDN 反向代理**
+```env
+# 配置可信代理 IP 地址，支持单个 IP 或 CIDR
+TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8,172.16.0.0/12,::1
+```
+
+**配置规则：**
+- 不设置或为空：始终使用 TCP 连接地址（最安全，适用于直接暴露）
+- 设置可信代理：仅当请求来自这些 IP 时才信任 `X-Forwarded-For` 头
+- 支持格式：`192.168.1.1`（单个 IP）或 `10.0.0.0/8`（CIDR）
+- 多个值用逗号分隔
+
+**安全风险：**
+错误配置此选项可能导致 IP 伪造攻击，例如攻击者通过伪造 `X-Forwarded-For` 头绕过地理限制申请成为监控节点。
 
 #### systemd 服务配置
 

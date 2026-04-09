@@ -1,5 +1,6 @@
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
-use std::{env, net::SocketAddr};
+use std::{env, str::FromStr};
 
 use axum::{
     routing::get,
@@ -32,6 +33,78 @@ pub struct AppState {
     pub site_name: String,
     pub enable_apply: bool,
     pub server_url: String,
+    pub trusted_proxies: Option<Vec<IpRange>>,
+}
+
+/// IP 范围配置（支持单个 IP 或 CIDR）
+#[derive(Clone)]
+pub enum IpRange {
+    Single(IpAddr),
+    Cidr(ipnet::IpNet),
+}
+
+impl IpRange {
+    /// 检查 IP 是否在此范围内
+    pub fn contains(&self, ip: &IpAddr) -> bool {
+        match self {
+            IpRange::Single(addr) => addr == ip,
+            IpRange::Cidr(net) => net.contains(ip),
+        }
+    }
+}
+
+impl FromStr for IpRange {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // 尝试解析为 CIDR（如 10.0.0.0/8）
+        if s.contains('/') {
+            match s.parse::<ipnet::IpNet>() {
+                Ok(net) => return Ok(IpRange::Cidr(net)),
+                Err(e) => return Err(format!("Invalid CIDR {}: {}", s, e)),
+            }
+        }
+
+        // 尝试解析为单个 IP
+        match s.parse::<IpAddr>() {
+            Ok(addr) => Ok(IpRange::Single(addr)),
+            Err(e) => Err(format!("Invalid IP {}: {}", s, e)),
+        }
+    }
+}
+
+/// 解析可信代理配置
+fn parse_trusted_proxies(value: &str) -> Option<Vec<IpRange>> {
+    let value = value.trim();
+    if value.is_empty() {
+        return None;
+    }
+
+    let mut ranges = Vec::new();
+    for part in value.split(',') {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        match part.parse::<IpRange>() {
+            Ok(range) => ranges.push(range),
+            Err(e) => {
+                tracing::warn!("Failed to parse trusted proxy '{}': {}", part, e);
+            }
+        }
+    }
+
+    if ranges.is_empty() {
+        None
+    } else {
+        info!("Trusted proxies configured: {}", value);
+        Some(ranges)
+    }
+}
+
+/// 检查 IP 是否在可信代理列表中
+pub fn is_trusted_proxy(ip: &IpAddr, trusted: &[IpRange]) -> bool {
+    trusted.iter().any(|range| range.contains(ip))
 }
 
 async fn shutdown_signal() {
@@ -107,6 +180,11 @@ async fn start() -> anyhow::Result<()> {
     let v4_db_path = env::var("IP2REGION_V4_DB").unwrap_or_else(|_| "server/ip2region_v4.xdb".to_string());
     let v6_db_path = env::var("IP2REGION_V6_DB").unwrap_or_else(|_| "server/ip2region_v6.xdb".to_string());
 
+    // 解析可信代理配置
+    let trusted_proxies = env::var("TRUSTED_PROXIES")
+        .ok()
+        .and_then(|v| parse_trusted_proxies(&v));
+
     info!("Listening on http://{addr}/");
 
     // 初始化 IP 地理位置搜索器
@@ -139,6 +217,7 @@ async fn start() -> anyhow::Result<()> {
         site_name,
         enable_apply,
         server_url,
+        trusted_proxies,
     });
 
     tokio::spawn(clean_database(state.clone()));

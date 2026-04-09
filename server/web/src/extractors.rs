@@ -1,8 +1,9 @@
 use std::future::Future;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{
-    extract::{FromRef, FromRequestParts},
+    extract::{ConnectInfo, FromRef, FromRequestParts},
     http::{request::Parts, StatusCode},
     response::Html,
     Json, RequestPartsExt,
@@ -13,7 +14,7 @@ use axum_extra::{
 };
 use serde_json::{json, Value};
 
-use crate::AppState;
+use crate::{AppState, is_trusted_proxy};
 use entity::machine::Model as Machine;
 use server_service::Query as QueryCore;
 
@@ -22,16 +23,23 @@ pub struct ClientIp(pub String);
 impl<S> FromRequestParts<S> for ClientIp
 where
     S: Send + Sync,
+    Arc<AppState>: FromRef<S>,
 {
     type Rejection = std::convert::Infallible;
 
     fn from_request_parts(
         parts: &mut Parts,
-        _state: &S,
+        state: &S,
     ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
-            // 提取 IP 并去除端口号
-            let extract_ip = |value: &str| -> Option<String> {
+            let s = Arc::from_ref(state);
+
+            // 获取连接地址（始终可信）
+            let connect_info: Option<ConnectInfo<SocketAddr>> = parts.extensions.get::<ConnectInfo<SocketAddr>>().copied();
+            let peer_addr = connect_info.map(|ci| ci.0.ip());
+
+            // 从 Header 中提取 IP 的辅助函数
+            let extract_ip_from_header = |value: &str| -> Option<String> {
                 let ip = value.trim();
                 if ip.is_empty() {
                     return None;
@@ -39,41 +47,52 @@ where
 
                 // IPv6 地址处理
                 if ip.starts_with('[') {
-                    // IPv6 带端口格式: [2408:...]:port
-                    // 提取方括号内的内容
                     if let Some(end) = ip.find(']') {
                         return Some(ip[1..end].to_string());
                     }
                 } else if ip.contains(':') && !ip.contains('.') {
-                    // 纯 IPv6 地址（包含冒号但不包含点）
                     return Some(ip.to_string());
                 }
 
                 // IPv4 地址处理（去除端口号）
-                // IPv4:port 格式，如 1.2.3.4:12345
                 let ip = ip.split(':').next().unwrap_or(ip);
                 Some(ip.to_string())
             };
 
-            if let Some(header_value) = parts.headers.get("x-forwarded-for") {
-                if let Ok(value) = header_value.to_str() {
-                    if let Some(ip) = value.split(',').last() {
-                        if let Some(ip) = extract_ip(ip) {
-                            return Ok(ClientIp(ip));
-                        }
-                    }
-                }
-            }
+            // 尝试从 Header 获取 IP（X-Forwarded-For 优先）
+            let header_ip = parts
+                .headers
+                .get("x-forwarded-for")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|v| v.split(',').last())
+                .and_then(extract_ip_from_header)
+                .or_else(|| {
+                    parts
+                        .headers
+                        .get("x-real-ip")
+                        .and_then(|v| v.to_str().ok())
+                        .and_then(extract_ip_from_header)
+                });
 
-            if let Some(header_value) = parts.headers.get("x-real-ip") {
-                if let Ok(value) = header_value.to_str() {
-                    if let Some(ip) = extract_ip(value) {
-                        return Ok(ClientIp(ip));
+            // 决定使用哪个 IP
+            let client_ip = if let Some(ref trusted) = s.trusted_proxies {
+                // 配置了可信代理：只有来自可信代理的请求才使用 Header IP
+                if let Some(ref peer) = peer_addr {
+                    if is_trusted_proxy(peer, trusted) {
+                        header_ip.unwrap_or_else(|| peer.to_string())
+                    } else {
+                        // 非可信来源：使用连接地址
+                        peer.to_string()
                     }
+                } else {
+                    header_ip.unwrap_or_default()
                 }
-            }
+            } else {
+                // 未配置可信代理：始终使用连接地址（最安全的默认行为）
+                peer_addr.map(|p| p.to_string()).unwrap_or_default()
+            };
 
-            Ok(ClientIp(String::new()))
+            Ok(ClientIp(client_ip))
         }
     }
 }
