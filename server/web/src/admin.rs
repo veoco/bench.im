@@ -1,7 +1,7 @@
 use askama::Template;
 use axum::{
     extract::State,
-    http::{header::SET_COOKIE, StatusCode},
+    http::{header::SET_COOKIE, HeaderMap, StatusCode},
     response::{Html, IntoResponse, Response},
     routing::{get, post},
     Json, Router,
@@ -57,17 +57,30 @@ async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
 /// 处理登录请求，验证密码并设置 HttpOnly Cookie
 async fn admin_login(
     State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
     Json(req): Json<LoginRequest>,
 ) -> Response {
     if req.password != state.admin_password {
         return (StatusCode::UNAUTHORIZED, "Invalid password").into_response();
     }
 
+    // 检查是否 HTTPS（常用反向代理默认设置）
+    let is_https = headers
+        .get("x-forwarded-proto")
+        .and_then(|v| v.to_str().ok())
+        == Some("https")
+        || headers
+            .get("x-forwarded-scheme")
+            .and_then(|v| v.to_str().ok())
+            == Some("https");
+
+    let secure_flag = if is_https { "Secure; " } else { "" };
+
     // 设置 HttpOnly Cookie
     // Path=/ 确保 /admin/* 和 /api/admin/* 都能访问此 Cookie
     let cookie = format!(
-        "admin_token={}; Path=/; HttpOnly; SameSite=Strict",
-        req.password
+        "admin_token={}; Path=/; HttpOnly; SameSite=Strict; {}",
+        req.password, secure_flag
     );
 
     (
@@ -79,10 +92,25 @@ async fn admin_login(
 }
 
 /// 处理登出请求，清除 Cookie
-async fn admin_logout() -> Response {
+async fn admin_logout(headers: HeaderMap) -> Response {
+    // 检查是否 HTTPS（常用反向代理默认设置）
+    let is_https = headers
+        .get("x-forwarded-proto")
+        .and_then(|v| v.to_str().ok())
+        == Some("https")
+        || headers
+            .get("x-forwarded-scheme")
+            .and_then(|v| v.to_str().ok())
+            == Some("https");
+
+    let secure_flag = if is_https { "Secure; " } else { "" };
+
     // 设置过期时间为过去的日期来清除 Cookie
     // Path=/ 与设置时保持一致，才能正确清除
-    let cookie = "admin_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+    let cookie = format!(
+        "admin_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict; {}",
+        secure_flag
+    );
 
     (
         StatusCode::OK,
