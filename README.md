@@ -121,6 +121,38 @@ TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8,172.16.0.0/12,::1
 **安全风险：**
 错误配置此选项可能导致 IP 伪造攻击，例如攻击者通过伪造 `X-Forwarded-For` 头绕过地理限制申请成为监控节点。
 
+#### HTTPS 与 Cookie Secure 标志
+
+后台管理登录使用 Cookie 存储认证信息。为了提高安全性，当检测到 HTTPS 连接时，Cookie 会自动设置 `Secure` 标志（仅通过 HTTPS 传输）。
+
+**自动检测（无需配置）：**
+- Caddy、Traefik、Cloudflare 等反向代理会自动添加 `X-Forwarded-Proto: https` 头，服务器自动识别
+- 本地 HTTP 开发环境不设置 `Secure`，可正常登录
+
+**Nginx 用户需要手动添加配置：**
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+
+        # 必须添加这一行，否则 Cookie 不会设置 Secure
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 其他可选头
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+    }
+}
+```
+
+**注意事项：**
+- 如果通过反向代理访问管理后台时发现无法登录（Cookie 问题），请检查是否正确传递了 `X-Forwarded-Proto` 头
+- 直接暴露 HTTP（不通过反向代理）时，Cookie 不会设置 Secure，适合本地开发
+
 #### systemd 服务配置
 
 创建 `/etc/systemd/system/bim-server.service`：
