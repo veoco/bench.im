@@ -1,8 +1,7 @@
-use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{
-    extract::{ConnectInfo, Path, Query, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     routing::{get, post},
     Json, Router,
@@ -24,19 +23,12 @@ pub fn create_router() -> Router<Arc<AppState>> {
 pub async fn create_ping_client(
     State(state): State<Arc<AppState>>,
     ApiClient(machine): ApiClient,
-    ClientIp(ip): ClientIp,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    ClientIp(client_ip): ClientIp,
     Path(tid): Path<i32>,
     Valid(Json(ping_create)): Valid<Json<PingCreate>>,
 ) -> (StatusCode, Json<Value>) {
     let mut res = json!({"msg": "failed"});
     let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    let client_ip = if ip.is_empty() {
-        addr.ip().to_string()
-    } else {
-        ip
-    };
 
     if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, machine.id).await {
         if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {

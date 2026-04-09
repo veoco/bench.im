@@ -1,8 +1,7 @@
 use std::sync::Arc;
-use std::net::SocketAddr;
 
 use axum::{
-    extract::{ConnectInfo, State},
+    extract::State,
     response::Html,
     routing::get,
     Router,
@@ -25,8 +24,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 /// GET /apply - 显示申请页面
 async fn apply_page(
     State(state): State<Arc<AppState>>,
-    ClientIp(ip): ClientIp,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
 
@@ -41,13 +39,6 @@ async fn apply_page(
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
-
-    // 获取真实客户端 IP（优先从 header，否则使用连接地址）
-    let client_ip = if ip.is_empty() {
-        addr.ip().to_string()
-    } else {
-        ip
-    };
 
     match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
         Ok((province, isp, count)) => {
@@ -97,8 +88,7 @@ async fn apply_page(
 /// POST /apply - 提交申请
 async fn apply_submit(
     State(state): State<Arc<AppState>>,
-    ClientIp(ip): ClientIp,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
     let machines = fetch_machines_for_list(&state).await;
 
@@ -113,13 +103,6 @@ async fn apply_submit(
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
-
-    // 获取真实客户端 IP（优先从 header，否则使用连接地址）
-    let client_ip = if ip.is_empty() {
-        addr.ip().to_string()
-    } else {
-        ip
-    };
 
     // 重新检查资格（防止并发问题）
     let (province, isp) = match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
