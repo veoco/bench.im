@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use askama::Template;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -14,11 +13,12 @@ use serde_json::{json, Value};
 use crate::extractors::{AdminAuth, AdminUserWeb, ApiClient};
 use crate::{
     templates::{DeleteTemplate, EditTargetTemplate},
-    AppState,
+    ApiError, AppState, render_template,
 };
 use server_service::{
     Mutation as MutationCore, Query as QueryCore, TargetCreateAdmin, TargetPublic,
 };
+use entity::target::Model as Target;
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -41,59 +41,31 @@ pub fn create_router() -> Router<Arc<AppState>> {
         .route("/admin/targets/{tid}/delete", get(delete_target_page))
 }
 
-pub async fn list_targets(State(state): State<Arc<AppState>>) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    if let Ok(targets) = QueryCore::find_targets(&state.conn).await {
-        let mut outputs = vec![];
-        for t in targets {
-            outputs.push(TargetPublic::from(t));
-        }
-        res = json!(outputs);
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+pub async fn list_targets(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TargetPublic>>, ApiError> {
+    let targets = QueryCore::find_targets(&state.conn).await?;
+    Ok(Json(targets.into_iter().map(TargetPublic::from).collect()))
 }
 
 pub async fn list_targets_client(
     State(state): State<Arc<AppState>>,
     _: ApiClient,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    if let Ok(targets) = QueryCore::find_targets(&state.conn).await {
-        res = json!(targets);
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+) -> Result<Json<Vec<Target>>, ApiError> {
+    let targets = QueryCore::find_targets(&state.conn).await?;
+    Ok(Json(targets))
 }
 
 pub async fn create_target_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    if let Ok(Some(_)) = QueryCore::find_target_by_name(&state.conn, &target_create.name).await {
-        status = StatusCode::CONFLICT;
-        res = json!({"msg": "already exists"});
-    } else {
-        match MutationCore::create_target(&state.conn, &target_create).await {
-            Ok(_) => {
-                status = StatusCode::CREATED;
-                res = json!({"msg": "success"});
-            }
-            Err(_) => {}
-        }
+) -> Result<(StatusCode, Json<Value>), ApiError> {
+    // 检查是否已存在
+    if QueryCore::find_target_by_name(&state.conn, &target_create.name).await?.is_some() {
+        return Err(ApiError::Conflict("Target with this name already exists".to_string()));
     }
 
-    (status, Json(res))
+    MutationCore::create_target(&state.conn, &target_create).await?;
+    Ok((StatusCode::CREATED, Json(json!({"msg": "success"}))))
 }
 
 pub async fn edit_target_admin(
@@ -101,65 +73,47 @@ pub async fn edit_target_admin(
     _: AdminAuth,
     Path(tid): Path<i32>,
     Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
+) -> Result<Json<Value>, ApiError> {
+    let target = QueryCore::find_target_by_id(&state.conn, tid)
+        .await?
+        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
-    if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-        let _ = MutationCore::edit_target(&state.conn, target.id, &target_create).await;
-        res = json!({"msg": "success"});
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+    MutationCore::edit_target(&state.conn, target.id, &target_create).await?;
+    Ok(Json(json!({"msg": "success"})))
 }
 
 pub async fn list_targets_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    if let Ok(targets) = QueryCore::find_targets(&state.conn).await {
-        res = json!(targets);
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+) -> Result<Json<Vec<Target>>, ApiError> {
+    let targets = QueryCore::find_targets(&state.conn).await?;
+    Ok(Json(targets))
 }
 
 pub async fn get_target_by_tid_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Path(tid): Path<i32>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
+) -> Result<Json<Target>, ApiError> {
+    let target = QueryCore::find_target_by_id(&state.conn, tid)
+        .await?
+        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
-    if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-        res = json!(target);
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+    Ok(Json(target))
 }
 
 pub async fn delete_target_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Path(tid): Path<i32>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
+) -> Result<Json<Value>, ApiError> {
+    // 检查 target 存在
+    let _ = QueryCore::find_target_by_id(&state.conn, tid)
+        .await?
+        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
-    if let Ok(Some(_)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-        let _ = MutationCore::delete_target(&state.conn, tid).await;
-        res = json!({"msg": "success"});
-        status = StatusCode::OK;
-    }
-
-    (status, Json(res))
+    MutationCore::delete_target(&state.conn, tid).await?;
+    Ok(Json(json!({"msg": "success"})))
 }
 
 // 页面 handlers
@@ -181,7 +135,7 @@ async fn new_target_page(
         enable_apply: state.enable_apply,
         is_admin: true,
     };
-    Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
+    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
 }
 
 async fn edit_target_page(
@@ -191,6 +145,7 @@ async fn edit_target_page(
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
     let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+
     let template = match target_result {
         Ok(Some(t)) => EditTargetTemplate {
             site_name: state.site_name.clone(),
@@ -210,7 +165,7 @@ async fn edit_target_page(
         }
     };
 
-    Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
+    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
 }
 
 async fn delete_target_page(
@@ -220,6 +175,7 @@ async fn delete_target_page(
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
     let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+
     let template = match target_result {
         Ok(Some(t)) => DeleteTemplate {
             site_name: state.site_name.clone(),
@@ -239,5 +195,5 @@ async fn delete_target_page(
         }
     };
 
-    Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
+    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
 }

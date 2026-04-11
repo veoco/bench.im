@@ -19,12 +19,15 @@ use server_service::{Mutation as MutationCore, ApplicationService, init_searcher
 mod admin;
 mod application;
 mod assets;
+mod error;
 mod extractors;
 mod index;
 mod machines;
 mod pings;
 mod targets;
 mod templates;
+
+pub use error::{ApiError, render_template};
 
 #[derive(Clone)]
 pub struct AppState {

@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Path, Query, State},
-    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -10,7 +9,7 @@ use axum_valid::Valid;
 use serde_json::{json, Value};
 
 use crate::extractors::{ApiClient, ClientIp};
-use crate::AppState;
+use crate::{ApiError, AppState};
 use server_service::{Mutation as MutationCore, PingCreate, PingFilter, Query as QueryCore};
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -26,91 +25,56 @@ pub async fn create_ping_client(
     ClientIp(client_ip): ClientIp,
     Path(tid): Path<i32>,
     Valid(Json(ping_create)): Valid<Json<PingCreate>>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
+) -> Result<Json<Value>, ApiError> {
+    // 验证 target 存在
+    let target = QueryCore::find_target_by_id(&state.conn, tid)
+        .await?
+        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
-    if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, machine.id).await {
-        if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-            if let Ok(_) =
-                MutationCore::create_ping(&state.conn, ping_create, machine.id, target.id).await
-            {
-                let _ = MutationCore::update_machine(&state.conn, machine.id, client_ip).await;
-                let _ = MutationCore::update_target(&state.conn, target.id).await;
-                res = json!({"msg": "success"});
-                status = StatusCode::OK;
-            }
-        }
-    }
-    (status, Json(res))
+    // 创建 ping 记录
+    MutationCore::create_ping(&state.conn, ping_create, machine.id, target.id).await?;
+
+    // 更新 machine 和 target 的更新时间
+    let _ = MutationCore::update_machine(&state.conn, machine.id, client_ip).await;
+    let _ = MutationCore::update_target(&state.conn, target.id).await;
+
+    Ok(Json(json!({"msg": "success"})))
 }
 
 pub async fn list_pings(
     State(state): State<Arc<AppState>>,
     Path((mid, tid, delta)): Path<(i32, i32, String)>,
     Query(form): Query<PingFilter>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
+) -> Result<Json<Value>, ApiError> {
     let ipv6 = form.ipv6.unwrap_or(false);
 
-    if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, mid).await {
-        if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-            if let Ok(pings) = QueryCore::find_pings_by_machine_id_and_target_id(
-                &state.conn,
-                machine.id,
-                target.id,
-                &delta,
-                ipv6,
-            )
-            .await
-            {
-                let mut outputs = vec![];
-                for p in pings {
-                    outputs.push((p.created.and_utc().timestamp(), p.min, p.avg, p.fail));
-                }
-                res = json!({
-                    "results": outputs,
-                });
-                status = StatusCode::OK;
-            }
-        }
-    }
-    (status, Json(res))
+    // 验证 machine 和 target 存在（使用并行查询优化性能）
+    let (machine, target) = tokio::try_join!(
+        QueryCore::find_machine_by_id(&state.conn, mid),
+        QueryCore::find_target_by_id(&state.conn, tid)
+    )?;
+
+    let _ = machine.ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
+    let _ = target.ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
+
+    // 查询 ping 数据
+    let pings = QueryCore::find_pings_by_machine_id_and_target_id(
+        &state.conn, mid, tid, &delta, ipv6,
+    ).await?;
+
+    let outputs: Vec<_> = pings
+        .into_iter()
+        .map(|p| (p.created.and_utc().timestamp(), p.min, p.avg, p.fail))
+        .collect();
+
+    Ok(Json(json!({"results": outputs})))
 }
 
 pub async fn list_pings_by_target(
     State(state): State<Arc<AppState>>,
     Path((tid, mid, delta)): Path<(i32, i32, String)>,
     Query(form): Query<PingFilter>,
-) -> (StatusCode, Json<Value>) {
-    let mut res = json!({"msg": "failed"});
-    let mut status = StatusCode::INTERNAL_SERVER_ERROR;
-
-    let ipv6 = form.ipv6.unwrap_or(false);
-
-    if let Ok(Some(target)) = QueryCore::find_target_by_id(&state.conn, tid).await {
-        if let Ok(Some(machine)) = QueryCore::find_machine_by_id(&state.conn, mid).await {
-            if let Ok(pings) = QueryCore::find_pings_by_machine_id_and_target_id(
-                &state.conn,
-                machine.id,
-                target.id,
-                &delta,
-                ipv6,
-            )
-            .await
-            {
-                let mut outputs = vec![];
-                for p in pings {
-                    outputs.push((p.created.and_utc().timestamp(), p.min, p.avg, p.fail));
-                }
-                res = json!({
-                    "results": outputs,
-                });
-                status = StatusCode::OK;
-            }
-        }
-    }
-    (status, Json(res))
+) -> Result<Json<Value>, ApiError> {
+    // 与 list_pings 逻辑相同，复用实现
+    list_pings(State(state), Path((mid, tid, delta)), Query(form)).await
 }
