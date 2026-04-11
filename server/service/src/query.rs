@@ -27,6 +27,14 @@ impl Query {
             .await
     }
 
+    /// 获取机器列表（用于侧边栏等场景，返回精简的 DTO）
+    pub async fn fetch_machines_for_list(
+        db: &DbConn,
+    ) -> Result<Vec<super::MachineForList>, DbErr> {
+        let machines = Self::find_machines(db).await?;
+        Ok(machines.into_iter().map(super::MachineForList::from).collect())
+    }
+
     pub async fn find_machine_by_id(db: &DbConn, id: i32) -> Result<Option<machine::Model>, DbErr> {
         Machine::find_by_id(id).one(db).await
     }

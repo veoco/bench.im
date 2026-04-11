@@ -12,30 +12,16 @@ use validator::Validate;
 
 use crate::{
     extractors::AdminUserWeb,
-    templates::{AdminIndexTemplate, AdminLoginTemplate, MachineForList, AdminMachine, AdminTarget},
+    templates::{AdminIndexTemplate, AdminLoginTemplate, AdminMachine, AdminTarget},
     AppState,
 };
-use server_service::query::Query;
+use server_service::Query;
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/admin/login", get(admin_login_page).post(admin_login))
         .route("/admin/logout", post(admin_logout))
         .route("/admin/", get(admin_index_page))
-}
-
-async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
-    match Query::find_machines(&state.conn).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|m| MachineForList {
-                id: m.id,
-                name: m.name,
-                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
-            })
-            .collect(),
-        Err(_) => vec![],
-    }
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -45,7 +31,7 @@ struct LoginRequest {
 }
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = AdminLoginTemplate {
         site_name: state.site_name.clone(),
         machines,
@@ -126,8 +112,8 @@ async fn admin_index_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
-    
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+
     // 查询 admin 机器列表（完整信息）
     let admin_machines = match Query::find_machines(&state.conn).await {
         Ok(list) => list

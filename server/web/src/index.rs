@@ -8,7 +8,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, MachineForList, Target, TargetTemplate},
+    templates::{IndexTemplate, Machine, MachineTemplate, Target, TargetTemplate},
     AppState,
 };
 use server_service::{query::Query, MachinePublic};
@@ -18,20 +18,6 @@ pub fn create_router() -> Router<Arc<AppState>> {
         .route("/", get(index_page))
         .route("/m/{mid}", get(machine_page))
         .route("/t/{tid}", get(target_page))
-}
-
-pub async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
-    match Query::find_machines(&state.conn).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|m| MachineForList {
-                id: m.id,
-                name: m.name,
-                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
-            })
-            .collect(),
-        Err(_) => vec![],
-    }
 }
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
@@ -46,7 +32,7 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
         Err(_) => vec![],
     };
 
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
 
     let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines, current_machine_id: 0, enable_apply: state.enable_apply, is_admin: false };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
@@ -83,7 +69,7 @@ async fn machine_page(
         Err(_) => vec![],
     };
 
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
 
     let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id, enable_apply: state.enable_apply, is_admin: false };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
@@ -118,7 +104,7 @@ async fn target_page(
         Err(_) => vec![],
     };
 
-    let machines_for_list = fetch_machines_for_list(&state).await;
+    let machines_for_list = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
 
     let template = TargetTemplate {
         site_name: state.site_name.clone(),

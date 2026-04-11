@@ -13,26 +13,12 @@ use serde_json::{json, Value};
 
 use crate::extractors::{AdminAuth, AdminUserWeb, ApiClient};
 use crate::{
-    templates::{DeleteTemplate, EditTargetTemplate, MachineForList},
+    templates::{DeleteTemplate, EditTargetTemplate},
     AppState,
 };
 use server_service::{
     Mutation as MutationCore, Query as QueryCore, TargetCreateAdmin, TargetPublic,
 };
-
-async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
-    match QueryCore::find_machines(&state.conn).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|m| MachineForList {
-                id: m.id,
-                name: m.name,
-                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
-            })
-            .collect(),
-        Err(_) => vec![],
-    }
-}
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -181,7 +167,7 @@ async fn new_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = EditTargetTemplate {
         site_name: state.site_name.clone(),
         is_edit: false,
@@ -204,7 +190,7 @@ async fn edit_target_page(
     _: AdminUserWeb,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = match target_result {
         Ok(Some(t)) => EditTargetTemplate {
             site_name: state.site_name.clone(),
@@ -233,7 +219,7 @@ async fn delete_target_page(
     _: AdminUserWeb,
 ) -> Html<String> {
     let target_result = QueryCore::find_target_by_id(&state.conn, tid).await;
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = match target_result {
         Ok(Some(t)) => DeleteTemplate {
             site_name: state.site_name.clone(),

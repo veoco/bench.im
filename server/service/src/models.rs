@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use ::entity::{machine::Model as Machine, target::Model as Target};
+use entity::{machine::Model as Machine, target::Model as Target};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MachinePublic {
@@ -73,6 +73,24 @@ impl From<MachinePublic> for MachineTargetsPublic {
             ip: m.ip,
             created: m.created,
             targets: vec![],
+        }
+    }
+}
+
+/// 机器列表项 DTO（用于侧边栏列表等场景）
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MachineForList {
+    pub id: i32,
+    pub name: String,
+    pub updated: i64,
+}
+
+impl From<Machine> for MachineForList {
+    fn from(m: Machine) -> Self {
+        Self {
+            id: m.id,
+            name: m.name,
+            updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
         }
     }
 }

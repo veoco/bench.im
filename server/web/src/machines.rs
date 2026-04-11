@@ -13,27 +13,13 @@ use serde_json::{json, Value};
 
 use crate::extractors::{AdminAuth, AdminUserWeb};
 use crate::{
-    templates::{DeleteTemplate, EditMachineTemplate, MachineForList},
+    templates::{DeleteTemplate, EditMachineTemplate},
     AppState,
 };
 use server_service::{
     MachineCreateAdmin, MachinePublic, MachineTargetsPublic, Mutation as MutationCore,
     Query as QueryCore, TargetPublic,
 };
-
-async fn fetch_machines_for_list(state: &Arc<AppState>) -> Vec<MachineForList> {
-    match QueryCore::find_machines(&state.conn).await {
-        Ok(list) => list
-            .into_iter()
-            .map(|m| MachineForList {
-                id: m.id,
-                name: m.name,
-                updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
-            })
-            .collect(),
-        Err(_) => vec![],
-    }
-}
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -190,7 +176,7 @@ async fn new_machine_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = EditMachineTemplate {
         site_name: state.site_name.clone(),
         is_edit: false,
@@ -212,7 +198,7 @@ async fn edit_machine_page(
     _: AdminUserWeb,
 ) -> Html<String> {
     let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = match machine_result {
         Ok(Some(m)) => EditMachineTemplate {
             site_name: state.site_name.clone(),
@@ -240,7 +226,7 @@ async fn delete_machine_page(
     _: AdminUserWeb,
 ) -> Html<String> {
     let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
     let template = match machine_result {
         Ok(Some(m)) => DeleteTemplate {
             site_name: state.site_name.clone(),

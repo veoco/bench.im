@@ -1,6 +1,9 @@
 use askama::Template;
 use serde::Serialize;
 
+// 从 service 层导入 MachineForList
+pub use server_service::MachineForList;
+
 #[derive(Serialize, Clone)]
 pub struct Target {
     pub id: i32,
@@ -31,13 +34,6 @@ pub struct Machine {
     pub id: i32,
     pub name: String,
     pub ip: String,
-}
-
-#[derive(Serialize, Clone)]
-pub struct MachineForList {
-    pub id: i32,
-    pub name: String,
-    pub updated: i64,
 }
 
 #[derive(Template)]

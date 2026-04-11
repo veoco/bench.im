@@ -10,11 +10,9 @@ use askama::Template;
 
 use crate::{
     extractors::ClientIp,
-    index::fetch_machines_for_list,
-    templates::MachineForList,
     AppState,
 };
-use server_service::{ApplicationService, ApplyRequest, CommandConfig, ip_geo::parse_ip};
+use server_service::{ApplicationService, ApplyRequest, CommandConfig, MachineForList, Query, ip_geo::parse_ip};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -26,7 +24,7 @@ async fn apply_page(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
 
     // 如果功能未开启，显示关闭页面
     if !state.enable_apply {
@@ -90,7 +88,7 @@ async fn apply_submit(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = fetch_machines_for_list(&state).await;
+    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
 
     // 如果功能未开启
     if !state.enable_apply {
