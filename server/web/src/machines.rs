@@ -43,7 +43,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 pub async fn list_machines(State(state): State<Arc<AppState>>) -> Result<Json<Vec<MachinePublic>>, ApiError> {
-    let machines = QueryCore::find_machines(&state.conn).await?;
+    let machines = QueryCore::find_machines(&state.db()).await?;
     Ok(Json(machines.into_iter().map(MachinePublic::from).collect()))
 }
 
@@ -51,14 +51,14 @@ pub async fn get_machine_by_mid(
     State(state): State<Arc<AppState>>,
     Path(mid): Path<i32>,
 ) -> Result<Json<MachineTargetsPublic>, ApiError> {
-    let machine = QueryCore::find_machine_by_id(&state.conn, mid)
+    let machine = QueryCore::find_machine_by_id(&state.db(), mid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
 
     let mut result = MachineTargetsPublic::from(MachinePublic::from(machine));
 
     // 获取所有 targets
-    let targets = QueryCore::find_targets(&state.conn).await?;
+    let targets = QueryCore::find_targets(&state.db()).await?;
     result.targets = targets.into_iter().map(TargetPublic::from).collect();
 
     Ok(Json(result))
@@ -70,11 +70,11 @@ pub async fn create_machine_admin(
     Valid(Json(machine_create)): Valid<Json<MachineCreateAdmin>>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     // 检查是否已存在
-    if QueryCore::find_machine_by_name(&state.conn, &machine_create.name).await?.is_some() {
+    if QueryCore::find_machine_by_name(&state.db(), &machine_create.name).await?.is_some() {
         return Err(ApiError::Conflict("Machine with this name already exists".to_string()));
     }
 
-    let machine = MutationCore::create_machine(&state.conn, &machine_create).await?;
+    let machine = MutationCore::create_machine(&state.db(), &machine_create).await?;
     let mid = machine.id.as_ref();
 
     Ok((StatusCode::CREATED, Json(json!({"msg": mid}))))
@@ -86,11 +86,11 @@ pub async fn edit_machine_admin(
     Path(mid): Path<i32>,
     Valid(Json(machine_create)): Valid<Json<MachineCreateAdmin>>,
 ) -> Result<Json<Value>, ApiError> {
-    let machine = QueryCore::find_machine_by_id(&state.conn, mid)
+    let machine = QueryCore::find_machine_by_id(&state.db(), mid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
 
-    MutationCore::edit_machine(&state.conn, machine.id, &machine_create).await?;
+    MutationCore::edit_machine(&state.db(), machine.id, &machine_create).await?;
     Ok(Json(json!({"msg": "success"})))
 }
 
@@ -98,7 +98,7 @@ pub async fn list_machines_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
 ) -> Result<Json<Vec<Machine>>, ApiError> {
-    let machines = QueryCore::find_machines(&state.conn).await?;
+    let machines = QueryCore::find_machines(&state.db()).await?;
     Ok(Json(machines))
 }
 
@@ -107,7 +107,7 @@ pub async fn get_machine_by_mid_admin(
     _: AdminAuth,
     Path(mid): Path<i32>,
 ) -> Result<Json<Machine>, ApiError> {
-    let machine = QueryCore::find_machine_by_id(&state.conn, mid)
+    let machine = QueryCore::find_machine_by_id(&state.db(), mid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
 
@@ -120,11 +120,11 @@ pub async fn delete_machine_by_mid_admin(
     Path(mid): Path<i32>,
 ) -> Result<Json<Value>, ApiError> {
     // 检查 machine 存在
-    let _ = QueryCore::find_machine_by_id(&state.conn, mid)
+    let _ = QueryCore::find_machine_by_id(&state.db(), mid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
 
-    MutationCore::delete_machine(&state.conn, mid).await?;
+    MutationCore::delete_machine(&state.db(), mid).await?;
     Ok(Json(json!({"msg": "success"})))
 }
 
@@ -133,9 +133,9 @@ async fn new_machine_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
     let template = EditMachineTemplate {
-        site_name: state.site_name.clone(),
+        site_name: state.site_name().to_string(),
         is_edit: false,
         id: 0,
         name: "".to_string(),
@@ -143,7 +143,7 @@ async fn new_machine_page(
         key: "".to_string(),
         machines,
         current_machine_id: 0,
-        enable_apply: state.enable_apply,
+        enable_apply: state.enable_apply(),
         is_admin: true,
     };
     Html(render_template(template).unwrap_or_else(|e| e.to_string()))
@@ -154,12 +154,12 @@ async fn edit_machine_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
-    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machine_result = QueryCore::find_machine_by_id(&state.db(), mid).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     let template = match machine_result {
         Ok(Some(m)) => EditMachineTemplate {
-            site_name: state.site_name.clone(),
+            site_name: state.site_name().to_string(),
             is_edit: true,
             id: m.id,
             name: m.name,
@@ -167,7 +167,7 @@ async fn edit_machine_page(
             key: m.key,
             machines,
             current_machine_id: m.id,
-            enable_apply: state.enable_apply,
+            enable_apply: state.enable_apply(),
             is_admin: true,
         },
         _ => {
@@ -183,12 +183,12 @@ async fn delete_machine_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machine_result = QueryCore::find_machine_by_id(&state.conn, mid).await;
-    let machines = QueryCore::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machine_result = QueryCore::find_machine_by_id(&state.db(), mid).await;
+    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     let template = match machine_result {
         Ok(Some(m)) => DeleteTemplate {
-            site_name: state.site_name.clone(),
+            site_name: state.site_name().to_string(),
             item_type: "机器".to_string(),
             name: m.name,
             ip: m.ip,
@@ -197,7 +197,7 @@ async fn delete_machine_page(
             ipv6: "".to_string(),
             machines,
             current_machine_id: m.id,
-            enable_apply: state.enable_apply,
+            enable_apply: state.enable_apply(),
             is_admin: true,
         },
         _ => {

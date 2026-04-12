@@ -27,16 +27,16 @@ pub async fn create_ping_client(
     Valid(Json(ping_create)): Valid<Json<PingCreate>>,
 ) -> Result<Json<Value>, ApiError> {
     // 验证 target 存在
-    let target = QueryCore::find_target_by_id(&state.conn, tid)
+    let target = QueryCore::find_target_by_id(&state.db(), tid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
     // 创建 ping 记录
-    MutationCore::create_ping(&state.conn, ping_create, machine.id, target.id).await?;
+    MutationCore::create_ping(&state.db(), ping_create, machine.id, target.id).await?;
 
     // 更新 machine 和 target 的更新时间
-    let _ = MutationCore::update_machine(&state.conn, machine.id, client_ip).await;
-    let _ = MutationCore::update_target(&state.conn, target.id).await;
+    let _ = MutationCore::update_machine(&state.db(), machine.id, client_ip).await;
+    let _ = MutationCore::update_target(&state.db(), target.id).await;
 
     Ok(Json(json!({"msg": "success"})))
 }
@@ -50,8 +50,8 @@ pub async fn list_pings(
 
     // 验证 machine 和 target 存在（使用并行查询优化性能）
     let (machine, target) = tokio::try_join!(
-        QueryCore::find_machine_by_id(&state.conn, mid),
-        QueryCore::find_target_by_id(&state.conn, tid)
+        QueryCore::find_machine_by_id(&state.db(), mid),
+        QueryCore::find_target_by_id(&state.db(), tid)
     )?;
 
     let _ = machine.ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;
@@ -59,7 +59,7 @@ pub async fn list_pings(
 
     // 查询 ping 数据
     let pings = QueryCore::find_pings_by_machine_id_and_target_id(
-        &state.conn, mid, tid, &delta, ipv6,
+        &state.db(), mid, tid, &delta, ipv6,
     ).await?;
 
     let outputs: Vec<_> = pings

@@ -31,12 +31,12 @@ struct LoginRequest {
 }
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
     let template = AdminLoginTemplate {
-        site_name: state.site_name.clone(),
+        site_name: state.site_name().to_string(),
         machines,
         current_machine_id: 0,
-        enable_apply: state.enable_apply,
+        enable_apply: state.enable_apply(),
         is_admin: true,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
@@ -48,7 +48,7 @@ async fn admin_login(
     headers: HeaderMap,
     Json(req): Json<LoginRequest>,
 ) -> Response {
-    if req.password != state.admin_password {
+    if !state.verify_admin(&req.password) {
         return (StatusCode::UNAUTHORIZED, "Invalid password").into_response();
     }
 
@@ -112,10 +112,10 @@ async fn admin_index_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     // 查询 admin 机器列表（完整信息）
-    let admin_machines = match Query::find_machines(&state.conn).await {
+    let admin_machines = match Query::find_machines(&state.db()).await {
         Ok(list) => list
             .into_iter()
             .map(|m| AdminMachine {
@@ -128,7 +128,7 @@ async fn admin_index_page(
     };
     
     // 查询 admin 目标列表（完整信息）
-    let admin_targets = match Query::find_targets(&state.conn).await {
+    let admin_targets = match Query::find_targets(&state.db()).await {
         Ok(list) => list
             .into_iter()
             .map(|t| AdminTarget {
@@ -143,12 +143,12 @@ async fn admin_index_page(
     };
     
     let template = AdminIndexTemplate {
-        site_name: state.site_name.clone(),
+        site_name: state.site_name().to_string(),
         machines,
         current_machine_id: 0,
         admin_machines,
         admin_targets,
-        enable_apply: state.enable_apply,
+        enable_apply: state.enable_apply(),
         is_admin: true,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))

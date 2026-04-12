@@ -1,6 +1,6 @@
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use axum::{
     routing::get,
@@ -13,31 +13,25 @@ use tokio::time::interval;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use server_service::sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use server_service::sea_orm::{ConnectOptions, Database};
 use server_service::{Mutation as MutationCore, ApplicationService, init_searcher};
 
 mod admin;
 mod application;
 mod assets;
+mod config;
 mod error;
 mod extractors;
 mod index;
 mod machines;
 mod pings;
+mod state;
 mod targets;
 mod templates;
 
+pub use config::Config;
 pub use error::{ApiError, render_template};
-
-#[derive(Clone)]
-pub struct AppState {
-    pub conn: DatabaseConnection,
-    pub admin_password: String,
-    pub site_name: String,
-    pub enable_apply: bool,
-    pub server_url: String,
-    pub trusted_proxies: Option<Vec<IpRange>>,
-}
+pub use state::AppState;
 
 /// IP 范围配置（支持单个 IP 或 CIDR）
 #[derive(Clone)]
@@ -73,35 +67,6 @@ impl FromStr for IpRange {
             Ok(addr) => Ok(IpRange::Single(addr)),
             Err(e) => Err(format!("Invalid IP {}: {}", s, e)),
         }
-    }
-}
-
-/// 解析可信代理配置
-fn parse_trusted_proxies(value: &str) -> Option<Vec<IpRange>> {
-    let value = value.trim();
-    if value.is_empty() {
-        return None;
-    }
-
-    let mut ranges = Vec::new();
-    for part in value.split(',') {
-        let part = part.trim();
-        if part.is_empty() {
-            continue;
-        }
-        match part.parse::<IpRange>() {
-            Ok(range) => ranges.push(range),
-            Err(e) => {
-                tracing::warn!("Failed to parse trusted proxy '{}': {}", part, e);
-            }
-        }
-    }
-
-    if ranges.is_empty() {
-        None
-    } else {
-        info!("Trusted proxies configured: {}", value);
-        Some(ranges)
     }
 }
 
@@ -142,9 +107,9 @@ async fn clean_database(state: Arc<AppState>) {
     loop {
         it.tick().await;
         // 清理过期 ping 数据
-        let _ = MutationCore::delete_expire_pings(&state.conn).await;
+        let _ = MutationCore::delete_expire_pings(state.db()).await;
         // 清理过期申请者（1天未更新）
-        let _ = ApplicationService::clean_expired_applicants(&state.conn).await;
+        let _ = ApplicationService::clean_expired_applicants(state.db()).await;
     }
 }
 
@@ -174,32 +139,21 @@ async fn start() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    dotenvy::dotenv().ok();
-    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-    let addr = env::var("LISTEN_ADDRESS").unwrap_or(String::from("127.0.0.1:3000"));
-    let admin_password = env::var("ADMIN_PASSWORD").unwrap_or(String::from("fake-admin-password"));
-    let site_name = env::var("SITE_NAME").unwrap_or(String::from("Bench.im"));
-    let server_url = env::var("SERVER_URL").unwrap_or(String::from("https://your-server.fake-url"));
-    let v4_db_path = env::var("IP2REGION_V4_DB").unwrap_or_else(|_| "server/ip2region_v4.xdb".to_string());
-    let v6_db_path = env::var("IP2REGION_V6_DB").unwrap_or_else(|_| "server/ip2region_v6.xdb".to_string());
+    // 加载配置
+    let config = Config::from_env();
+    let addr = config.listen_address;
 
-    // 解析可信代理配置
-    let trusted_proxies = env::var("TRUSTED_PROXIES")
-        .ok()
-        .and_then(|v| parse_trusted_proxies(&v));
-
-    info!("Listening on http://{addr}/");
+    info!("Listening on http://{}/", addr);
 
     // 初始化 IP 地理位置搜索器
-    let enable_apply = match init_searcher(&v4_db_path, &v6_db_path) {
+    let enable_apply = match init_searcher(&config.ip2region_v4_path, &config.ip2region_v6_path) {
         Ok(_) => {
-            let enabled = env::var("ENABLE_APPLY").unwrap_or_else(|_| "false".to_string()) == "true";
-            if enabled {
+            if config.enable_apply {
                 info!("Apply feature: enabled");
             } else {
                 info!("Apply feature: disabled (set ENABLE_APPLY=true to enable)");
             }
-            enabled
+            config.enable_apply
         }
         Err(e) => {
             tracing::warn!("Failed to init ip2region searcher: {}", e);
@@ -208,20 +162,17 @@ async fn start() -> anyhow::Result<()> {
         }
     };
 
-    let opt = ConnectOptions::new(db_url.clone());
+    // 数据库连接
+    let opt = ConnectOptions::new(config.database_url.clone());
     let conn = Database::connect(opt)
         .await
         .expect("Database connection failed");
     Migrator::up(&conn, None).await.unwrap();
 
-    let state = Arc::new(AppState {
-        conn,
-        admin_password,
-        site_name,
-        enable_apply,
-        server_url,
-        trusted_proxies,
-    });
+    // 创建 AppState（enable_apply 可能因初始化失败而改变）
+    let mut config = config;
+    config.enable_apply = enable_apply;
+    let state = Arc::new(AppState::new(conn, config));
 
     tokio::spawn(clean_database(state.clone()));
 

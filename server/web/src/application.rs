@@ -24,25 +24,25 @@ async fn apply_page(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     // 如果功能未开启，显示关闭页面
-    if !state.enable_apply {
+    if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
-            site_name: state.site_name.clone(),
+            site_name: state.site_name().to_string(),
             machines,
             current_machine_id: 0,
-            enable_apply: state.enable_apply,
+            enable_apply: state.enable_apply(),
             is_admin: false,
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
 
-    match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
+    match ApplicationService::check_eligibility(&state.db(), &client_ip).await {
         Ok((province, isp, count)) => {
             // 符合条件，显示确认页面
             let template = ApplyTemplate {
-                site_name: state.site_name.clone(),
+                site_name: state.site_name().to_string(),
                 eligible: true,
                 ip: client_ip,
                 province: province.clone(),
@@ -52,7 +52,7 @@ async fn apply_page(
                 max_count: 3,
                 machines,
                 current_machine_id: 0,
-                enable_apply: state.enable_apply,
+                enable_apply: state.enable_apply(),
                 is_admin: false,
             };
             Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
@@ -65,7 +65,7 @@ async fn apply_page(
 
             // 不符合条件，显示错误页面
             let template = ApplyTemplate {
-                site_name: state.site_name.clone(),
+                site_name: state.site_name().to_string(),
                 eligible: false,
                 ip: client_ip,
                 province,
@@ -75,7 +75,7 @@ async fn apply_page(
                 max_count: 3,
                 machines,
                 current_machine_id: 0,
-                enable_apply: state.enable_apply,
+                enable_apply: state.enable_apply(),
                 is_admin: false,
             };
             Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
@@ -88,22 +88,22 @@ async fn apply_submit(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     // 如果功能未开启
-    if !state.enable_apply {
+    if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
-            site_name: state.site_name.clone(),
+            site_name: state.site_name().to_string(),
             machines,
             current_machine_id: 0,
-            enable_apply: state.enable_apply,
+            enable_apply: state.enable_apply(),
             is_admin: false,
         };
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
 
     // 重新检查资格（防止并发问题）
-    let (province, isp) = match ApplicationService::check_eligibility(&state.conn, &client_ip).await {
+    let (province, isp) = match ApplicationService::check_eligibility(&state.db(), &client_ip).await {
         Ok((prov, isp, _)) => (prov, isp),
         Err(e) => {
             // 尝试解析 IP 获取省份和运营商信息
@@ -112,7 +112,7 @@ async fn apply_submit(
                 .unwrap_or((String::new(), String::new()));
 
             let template = ApplyTemplate {
-                site_name: state.site_name.clone(),
+                site_name: state.site_name().to_string(),
                 eligible: false,
                 ip: client_ip,
                 province,
@@ -122,7 +122,7 @@ async fn apply_submit(
                 max_count: 3,
                 machines,
                 current_machine_id: 0,
-                enable_apply: state.enable_apply,
+                enable_apply: state.enable_apply(),
                 is_admin: false,
             };
             return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
@@ -131,10 +131,10 @@ async fn apply_submit(
 
     // 提交申请
     let config = CommandConfig {
-        server_url: &state.server_url,
+        server_url: &state.server_url(),
     };
     let result = match ApplicationService::submit_application(
-        &state.conn,
+        &state.db(),
         ApplyRequest {
             ip: client_ip.clone(),
             province,
@@ -145,7 +145,7 @@ async fn apply_submit(
         Ok(result) => result,
         Err(e) => {
             let template = ApplyTemplate {
-                site_name: state.site_name.clone(),
+                site_name: state.site_name().to_string(),
                 eligible: false,
                 ip: client_ip,
                 province: String::new(),
@@ -155,7 +155,7 @@ async fn apply_submit(
                 max_count: 3,
                 machines,
                 current_machine_id: 0,
-                enable_apply: state.enable_apply,
+                enable_apply: state.enable_apply(),
                 is_admin: false,
             };
             return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
@@ -164,14 +164,14 @@ async fn apply_submit(
 
     // 显示成功页面
     let template = ApplySuccessTemplate {
-        site_name: state.site_name.clone(),
+        site_name: state.site_name().to_string(),
         machine_id: result.id,
         name: result.name,
         key: result.key,
         command: result.command,
         machines,
         current_machine_id: 0,
-        enable_apply: state.enable_apply,
+        enable_apply: state.enable_apply(),
         is_admin: false,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))

@@ -75,7 +75,7 @@ where
                 });
 
             // 决定使用哪个 IP
-            let client_ip = if let Some(ref trusted) = s.trusted_proxies {
+            let client_ip = if let Some(ref trusted) = s.trusted_proxies() {
                 // 配置了可信代理：只有来自可信代理的请求才使用 Header IP
                 if let Some(ref peer) = peer_addr {
                     if is_trusted_proxy(peer, trusted) {
@@ -131,7 +131,7 @@ where
 
             // 1. 优先从 Cookie 读取
             if let Some(token) = extract_cookie(parts, "admin_token") {
-                if token == s.admin_password {
+                if s.verify_admin(&token) {
                     return Ok(Self);
                 }
             }
@@ -141,7 +141,7 @@ where
                 parts.extract::<TypedHeader<Authorization<Bearer>>>().await
             {
                 let token = bearer.token();
-                if token == s.admin_password {
+                if s.verify_admin(token) {
                     return Ok(Self);
                 }
             }
@@ -175,7 +175,7 @@ where
 
             // 从 Cookie 中读取 admin_token
             if let Some(token) = extract_cookie(parts, "admin_token") {
-                if token == s.admin_password {
+                if s.verify_admin(&token) {
                     return Ok(Self);
                 }
             }
@@ -216,7 +216,7 @@ where
                     Json(json!({"msg": "Invalid machine ID"})),
                 ))?;
                 if let Ok(Some(machine)) =
-                    QueryCore::find_machine_by_id(&s.conn, mid).await
+                    QueryCore::find_machine_by_id(&s.db(), mid).await
                 {
                     if machine.key == key {
                         return Ok(Self(machine));

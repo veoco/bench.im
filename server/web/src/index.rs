@@ -21,7 +21,7 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let targets: Vec<Target> = match Query::find_targets(&state.conn).await {
+    let targets: Vec<Target> = match Query::find_targets(&state.db()).await {
         Ok(list) => {
             list.into_iter().map(|t| Target {
                 id: t.id,
@@ -32,9 +32,9 @@ async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
         Err(_) => vec![],
     };
 
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
-    let template = IndexTemplate { site_name: state.site_name.clone(), targets, machines, current_machine_id: 0, enable_apply: state.enable_apply, is_admin: false };
+    let template = IndexTemplate { site_name: state.site_name().to_string(), targets, machines, current_machine_id: 0, enable_apply: state.enable_apply(), is_admin: false };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -42,7 +42,7 @@ async fn machine_page(
     Path(mid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let machine_result = Query::find_machine_by_id(&state.conn, mid).await;
+    let machine_result = Query::find_machine_by_id(&state.db(), mid).await;
     let machine = match machine_result {
         Ok(Some(m)) => {
             // 使用 MachinePublic 的模糊处理逻辑对 IP 进行脱敏
@@ -58,7 +58,7 @@ async fn machine_page(
         }
     };
 
-    let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.conn, mid).await {
+    let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.db(), mid).await {
         Ok(list) => {
             list.into_iter().map(|t| Target {
                 id: t.id,
@@ -69,9 +69,9 @@ async fn machine_page(
         Err(_) => vec![],
     };
 
-    let machines = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
-    let template = MachineTemplate { site_name: state.site_name.clone(), machine: machine.clone(), targets, machines, current_machine_id: machine.id, enable_apply: state.enable_apply, is_admin: false };
+    let template = MachineTemplate { site_name: state.site_name().to_string(), machine: machine.clone(), targets, machines, current_machine_id: machine.id, enable_apply: state.enable_apply(), is_admin: false };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -79,7 +79,7 @@ async fn target_page(
     Path(tid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let target_result = Query::find_target_by_id(&state.conn, tid).await;
+    let target_result = Query::find_target_by_id(&state.db(), tid).await;
     let target = match target_result {
         Ok(Some(t)) => Target {
             id: t.id,
@@ -91,7 +91,7 @@ async fn target_page(
         }
     };
 
-    let machines: Vec<Machine> = match Query::find_machines(&state.conn).await {
+    let machines: Vec<Machine> = match Query::find_machines(&state.db()).await {
         Ok(list) => {
             list.into_iter().map(|m| {
                 Machine {
@@ -104,15 +104,15 @@ async fn target_page(
         Err(_) => vec![],
     };
 
-    let machines_for_list = Query::fetch_machines_for_list(&state.conn).await.unwrap_or_default();
+    let machines_for_list = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     let template = TargetTemplate {
-        site_name: state.site_name.clone(),
+        site_name: state.site_name().to_string(),
         target: target.clone(),
         machines: machines_for_list.clone(),  // 用于侧边栏
         target_machines: machines,            // 用于图表
         current_machine_id: 0,
-        enable_apply: state.enable_apply,
+        enable_apply: state.enable_apply(),
         is_admin: false,
     };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
