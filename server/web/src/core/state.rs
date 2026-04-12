@@ -5,7 +5,7 @@ use server_service::service::{MachineService, TargetService, PingService, Applic
 use server_service::output::MachineListItem;
 use server_service::IpGeoService;
 
-use crate::config::Config;
+use super::config::Config;
 use crate::IpRange;
 
 /// 应用状态 - 封装配置、数据库连接和外部服务
@@ -68,7 +68,7 @@ impl AppState {
     /// 获取侧边栏机器列表
     pub async fn get_sidebar_machines(&self) -> Vec<MachineListItem> {
         self.machine_service()
-            .find_all_for_list()
+            .find_all::<MachineListItem>()
             .await
             .unwrap_or_default()
     }

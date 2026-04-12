@@ -23,6 +23,15 @@ impl<'a, C: ConnectionTrait> PingService<'a, C> {
         Self { conn }
     }
 
+    /// 解析时间间隔字符串为 Duration
+    fn parse_time_delta(delta: &str) -> Duration {
+        if delta == "7d" {
+            Duration::from_secs(7 * 24 * 3600)
+        } else {
+            Duration::from_secs(24 * 3600)
+        }
+    }
+
     /// 查找指定机器和目标的 Ping 记录
     pub async fn find_by_machine_and_target(
         &self,
@@ -31,11 +40,7 @@ impl<'a, C: ConnectionTrait> PingService<'a, C> {
         delta: &str,
         ipv6: bool,
     ) -> Result<Vec<PingResponse>, ServiceError> {
-        let time_delta = if delta == "7d" {
-            Duration::from_secs(7 * 24 * 3600)
-        } else {
-            Duration::from_secs(24 * 3600)
-        };
+        let time_delta = Self::parse_time_delta(delta);
 
         let pings = Ping::find()
             .filter(ping::Column::MachineId.eq(machine_id))
@@ -61,11 +66,7 @@ impl<'a, C: ConnectionTrait> PingService<'a, C> {
             return Ok(HashMap::new());
         }
 
-        let time_delta = if delta == "7d" {
-            Duration::from_secs(7 * 24 * 3600)
-        } else {
-            Duration::from_secs(24 * 3600)
-        };
+        let time_delta = Self::parse_time_delta(delta);
 
         // 一次性查询所有目标的 ping 数据
         let pings = Ping::find()

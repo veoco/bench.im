@@ -16,22 +16,15 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use server_service::sea_orm::{ConnectOptions, Database};
 use server_service::IpGeoService;
 
-mod admin;
-mod application;
-mod assets;
-mod config;
-mod error;
-mod extractors;
-mod index;
-mod machines;
-mod pings;
-mod state;
-mod targets;
-mod templates;
+// 核心模块
+pub mod core;
+pub mod templates;
 
-pub use config::Config;
-pub use error::{ApiError, render_template};
-pub use state::AppState;
+// 路由和处理器（私有，通过 routes 聚合）
+mod handlers;
+mod routes;
+
+pub use core::{Config, ApiError, AppState, render_template};
 
 /// IP 范围配置（支持单个 IP 或 CIDR）
 #[derive(Clone)]
@@ -115,16 +108,9 @@ async fn clean_database(state: Arc<AppState>) {
 
 fn build_app(state: Arc<AppState>) -> Router {
     Router::new()
-        // 页面路由
-        .merge(index::create_router())      // 首页 + 机器详情
-        .merge(admin::create_router())      // 管理后台
-        .merge(application::create_router()) // 申请加入
-        // API 路由
-        .merge(machines::create_router())   // machines API + 管理页面
-        .merge(targets::create_router())    // targets API + 管理页面
-        .merge(pings::create_router())      // pings API
-        // 静态资源
-        .route("/static/{*path}", get(assets::serve_static))
+        .merge(routes::pages::create_router())
+        .merge(routes::api::create_router())
+        .route("/static/{*path}", get(core::assets::serve_static))
         .with_state(state)
 }
 

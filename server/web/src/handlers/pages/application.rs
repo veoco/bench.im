@@ -6,15 +6,11 @@ use axum::{
     routing::get,
     Router,
 };
-use askama::Template;
 
 use server_service::input::CreateApplicationRequest;
-use server_service::output::MachineListItem;
 
-use crate::{
-    extractors::ClientIp,
-    AppState,
-};
+use crate::core::{AppState, ClientIp};
+use crate::templates::application::{ApplyDisabledTemplate, ApplySuccessTemplate, ApplyTemplate};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -26,6 +22,8 @@ async fn apply_page(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
+    use askama::Template;
+
     // 如果功能未开启，显示关闭页面
     if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
@@ -94,6 +92,8 @@ async fn apply_submit(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
+    use askama::Template;
+
     // 如果功能未开启
     if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
@@ -187,46 +187,4 @@ async fn apply_submit(
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
-/// 申请页面模板
-#[derive(Template)]
-#[template(path = "apply/index.html")]
-struct ApplyTemplate {
-    site_name: String,
-    eligible: bool,
-    ip: String,
-    province: String,
-    isp: String,
-    reason: String,
-    current_count: i32,
-    max_count: i32,
-    machines: Vec<MachineListItem>,
-    current_machine_id: i32,
-    enable_apply: bool,
-    is_admin: bool,
-}
 
-/// 申请成功页面模板
-#[derive(Template)]
-#[template(path = "apply/success.html")]
-struct ApplySuccessTemplate {
-    site_name: String,
-    machine_id: i32,
-    name: String,
-    key: String,
-    command: String,
-    machines: Vec<MachineListItem>,
-    current_machine_id: i32,
-    enable_apply: bool,
-    is_admin: bool,
-}
-
-/// 申请功能关闭页面模板
-#[derive(Template)]
-#[template(path = "apply/disabled.html")]
-struct ApplyDisabledTemplate {
-    site_name: String,
-    machines: Vec<MachineListItem>,
-    current_machine_id: i32,
-    enable_apply: bool,
-    is_admin: bool,
-}

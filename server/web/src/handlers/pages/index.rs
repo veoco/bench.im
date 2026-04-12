@@ -1,4 +1,3 @@
-use askama::Template;
 use axum::{
     extract::{Path, State},
     response::Html,
@@ -7,10 +6,11 @@ use axum::{
 };
 use std::sync::Arc;
 
-use crate::{
-    templates::{IndexTemplate, Machine, MachineTemplate, Target, TargetTemplate},
-    AppState,
-};
+use server_service::output::{Machine as MachineDto, Target as TargetDto};
+
+use crate::core::AppState;
+use crate::templates::pages::{IndexTemplate, MachineTemplate, TargetTemplate};
+use crate::templates::{Machine, Target};
 
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -21,13 +21,15 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let targets: Vec<Target> = match state.target_service().find_all().await {
+    use askama::Template;
+
+    let targets = match state.target_service().find_all::<TargetDto>().await {
         Ok(list) => list
             .into_iter()
             .map(|t| Target {
                 id: t.id,
                 name: t.name,
-                updated: t.updated.unwrap_or(0) as i64,
+                updated: t.updated.unwrap_or(0),
             })
             .collect(),
         Err(_) => vec![],
@@ -48,7 +50,9 @@ async fn machine_page(
     Path(mid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let machine = match state.machine_service().find_by_id(mid).await {
+    use askama::Template;
+
+    let machine = match state.machine_service().find_by_id::<MachineDto>(mid).await {
         Ok(Some(m)) => Machine {
             id: m.id,
             name: m.name,
@@ -59,13 +63,13 @@ async fn machine_page(
         }
     };
 
-    let targets: Vec<Target> = match state.target_service().find_all().await {
+    let targets = match state.target_service().find_all::<TargetDto>().await {
         Ok(list) => list
             .into_iter()
             .map(|t| Target {
                 id: t.id,
                 name: t.name,
-                updated: t.updated.unwrap_or(0) as i64,
+                updated: t.updated.unwrap_or(0),
             })
             .collect(),
         Err(_) => vec![],
@@ -87,18 +91,20 @@ async fn target_page(
     Path(tid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let target = match state.target_service().find_by_id(tid).await {
+    use askama::Template;
+
+    let target = match state.target_service().find_by_id::<TargetDto>(tid).await {
         Ok(Some(t)) => Target {
             id: t.id,
             name: t.name,
-            updated: t.updated.unwrap_or(0) as i64,
+            updated: t.updated.unwrap_or(0),
         },
         _ => {
             return Html("Target not found".to_string());
         }
     };
 
-    let machines: Vec<Machine> = match state.machine_service().find_all().await {
+    let machines = match state.machine_service().find_all::<MachineDto>().await {
         Ok(list) => list
             .into_iter()
             .map(|m| Machine {

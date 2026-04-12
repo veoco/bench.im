@@ -11,19 +11,13 @@ use axum_valid::Valid;
 use serde_json::{json, Value};
 
 use server_service::input::{CreateTargetRequest, UpdateTargetRequest};
-use server_service::output::TargetResponse;
+use server_service::output::Target;
 
-use crate::extractors::{AdminAuth, AdminUserWeb, ApiClient};
-use crate::{
-    templates::{DeleteTemplate, EditTargetTemplate},
-    ApiError, AppState, render_template,
-};
+use crate::core::{AdminAuth, AdminUserWeb, ApiError, AppState, render_template};
+use crate::templates::pages::{DeleteTemplate, EditTargetTemplate};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
-        // API 路由
-        .route("/api/targets/", get(list_targets))
-        .route("/api/client/targets/", get(list_targets_client))
         .route(
             "/api/admin/targets/",
             axum::routing::post(create_target_admin).get(list_targets_admin),
@@ -40,22 +34,6 @@ pub fn create_router() -> Router<Arc<AppState>> {
         .route("/admin/targets/{tid}/delete", get(delete_target_page))
 }
 
-pub async fn list_targets(
-    State(state): State<Arc<AppState>>,
-) -> Result<Json<Vec<TargetResponse>>, ApiError> {
-    let targets = state.target_service().find_all().await?;
-    Ok(Json(targets))
-}
-
-pub async fn list_targets_client(
-    State(state): State<Arc<AppState>>,
-    _: ApiClient,
-) -> Result<Json<Vec<entity::target::Model>>, ApiError> {
-    // 客户端需要完整信息
-    let targets = state.target_service().find_all_admin().await?;
-    Ok(Json(targets))
-}
-
 pub async fn create_target_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
@@ -64,7 +42,7 @@ pub async fn create_target_admin(
     // 检查是否已存在
     if state
         .target_service()
-        .find_by_name(&req.name)
+        .find_by_name::<Target>(&req.name)
         .await?
         .is_some()
     {
@@ -83,8 +61,6 @@ pub async fn edit_target_admin(
     Path(tid): Path<i32>,
     Valid(Json(req)): Valid<Json<UpdateTargetRequest>>,
 ) -> Result<Json<Value>, ApiError> {
-    state.target_service().ensure_exists(tid).await?;
-
     state.target_service().update(tid, req).await?;
     Ok(Json(json!({"msg": "success"})))
 }
@@ -92,8 +68,8 @@ pub async fn edit_target_admin(
 pub async fn list_targets_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
-) -> Result<Json<Vec<entity::target::Model>>, ApiError> {
-    let targets = state.target_service().find_all_admin().await?;
+) -> Result<Json<Vec<Target>>, ApiError> {
+    let targets = state.target_service().find_all().await?;
     Ok(Json(targets))
 }
 
@@ -101,10 +77,10 @@ pub async fn get_target_by_tid_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Path(tid): Path<i32>,
-) -> Result<Json<entity::target::Model>, ApiError> {
+) -> Result<Json<Target>, ApiError> {
     let target = state
         .target_service()
-        .find_by_id_admin(tid)
+        .find_by_id(tid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
@@ -116,9 +92,6 @@ pub async fn delete_target_admin(
     _: AdminAuth,
     Path(tid): Path<i32>,
 ) -> Result<Json<Value>, ApiError> {
-    // 检查 target 存在
-    state.target_service().ensure_exists(tid).await?;
-
     state.target_service().delete(tid).await?;
     Ok(Json(json!({"msg": "success"})))
 }
@@ -149,7 +122,7 @@ async fn edit_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let template = match state.target_service().find_by_id_admin(tid).await {
+    let template = match state.target_service().find_by_id::<Target>(tid).await {
         Ok(Some(t)) => EditTargetTemplate {
             site_name: state.site_name().to_string(),
             is_edit: true,
@@ -176,20 +149,16 @@ async fn delete_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let template = match state.target_service().find_by_id_admin(tid).await {
-        Ok(Some(t)) => DeleteTemplate {
-            site_name: state.site_name().to_string(),
-            item_type: "目标".to_string(),
-            name: t.name,
-            ip: "".to_string(),
-            domain: t.domain.unwrap_or_default(),
-            ipv4: t.ipv4.unwrap_or_default(),
-            ipv6: t.ipv6.unwrap_or_default(),
-            machines: state.get_sidebar_machines().await,
-            current_machine_id: 0,
-            enable_apply: state.enable_apply(),
-            is_admin: true,
-        },
+    let template = match state.target_service().find_by_id::<Target>(tid).await {
+        Ok(Some(t)) => DeleteTemplate::for_target(
+            state.site_name().to_string(),
+            t.name,
+            t.domain,
+            t.ipv4,
+            t.ipv6,
+            state.get_sidebar_machines().await,
+            state.enable_apply(),
+        ),
         _ => {
             return Html("Target not found".to_string());
         }

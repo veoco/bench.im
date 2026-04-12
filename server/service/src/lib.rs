@@ -28,8 +28,8 @@ pub mod input {
 
 pub mod output {
     pub use crate::dto::output::{
-        machine::{MachineResponse, MachineListItem, MachineWithTargets},
-        target::{TargetResponse, TargetDetailResponse},
+        machine::{Machine, MaskedMachine, MachineListItem, MachineDetail, ClientAuthInfo},
+        target::{Target, TargetPublic},
         ping::{PingResponse, PingData},
     };
 }

@@ -1,9 +1,9 @@
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, ColumnTrait, Condition, ConnectionTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, Set};
-use entity::machine::{self, Entity as Machine};
+use entity::machine::{self, Entity as MachineEntity};
 
 use crate::dto::input::machine::{CreateMachineRequest, UpdateMachineRequest};
-use crate::dto::output::machine::{MachineListItem, MachineResponse};
+use crate::dto::output::machine::{Machine as MachineDto, ClientAuthInfo};
 use crate::error::ServiceError;
 use crate::infrastructure::ip_geo::is_applicant_machine;
 
@@ -18,47 +18,57 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         Self { conn }
     }
 
-    // === 公开 API（返回 DTO） ===
+    // === 公开 API（泛型版本） ===
 
     /// 查找所有机器
-    pub async fn find_all(&self) -> Result<Vec<MachineResponse>, ServiceError> {
-        let machines = Machine::find()
+    ///
+    /// 使用示例：
+    /// - `let machines: Vec<Machine> = service.find_all().await?;`
+    /// - `let items: Vec<MachineListItem> = service.find_all().await?;`
+    /// - `let masked: Vec<MaskedMachine> = service.find_all().await?;`
+    pub async fn find_all<T>(&self) -> Result<Vec<T>, ServiceError>
+    where
+        T: From<machine::Model>,
+    {
+        let machines = MachineEntity::find()
             .order_by_asc(machine::Column::Name)
             .all(self.conn)
             .await?;
 
-        Ok(machines.into_iter().map(MachineResponse::from).collect())
+        Ok(machines.into_iter().map(Into::into).collect())
     }
 
-    /// 获取机器列表（精简版，用于侧边栏）
-    pub async fn find_all_for_list(&self) -> Result<Vec<MachineListItem>, ServiceError> {
-        let machines = Machine::find()
-            .order_by_asc(machine::Column::Name)
-            .all(self.conn)
-            .await?;
-
-        Ok(machines.into_iter().map(MachineListItem::from).collect())
-    }
-
-    /// 根据 ID 查找机器（公开 API，返回脱敏 DTO）
-    pub async fn find_by_id(&self, id: i32) -> Result<Option<MachineResponse>, ServiceError> {
-        let machine = Machine::find_by_id(id).one(self.conn).await?;
-        Ok(machine.map(MachineResponse::from))
+    /// 根据 ID 查找机器
+    ///
+    /// 使用示例：
+    /// - `let machine: Option<Machine> = service.find_by_id(id).await?;`
+    pub async fn find_by_id<T>(&self, id: i32) -> Result<Option<T>, ServiceError>
+    where
+        T: From<machine::Model>,
+    {
+        let machine = MachineEntity::find_by_id(id).one(self.conn).await?;
+        Ok(machine.map(Into::into))
     }
 
     /// 根据名称查找机器
-    pub async fn find_by_name(&self, name: &str) -> Result<Option<MachineResponse>, ServiceError> {
-        let machine = Machine::find()
+    ///
+    /// 使用示例：
+    /// - `let machine: Option<Machine> = service.find_by_name("name").await?;`
+    pub async fn find_by_name<T>(&self, name: &str) -> Result<Option<T>, ServiceError>
+    where
+        T: From<machine::Model>,
+    {
+        let machine = MachineEntity::find()
             .filter(machine::Column::Name.eq(name))
             .one(self.conn)
             .await?;
-        Ok(machine.map(MachineResponse::from))
+        Ok(machine.map(Into::into))
     }
 
     /// 创建机器
-    pub async fn create(&self, req: CreateMachineRequest) -> Result<MachineResponse, ServiceError> {
+    pub async fn create(&self, req: CreateMachineRequest) -> Result<MachineDto, ServiceError> {
         // 检查名称是否已存在
-        if self.find_by_name(&req.name).await?.is_some() {
+        if self.find_by_name::<MachineDto>(&req.name).await?.is_some() {
             return Err(ServiceError::conflict(format!(
                 "Machine with name '{}' already exists",
                 req.name
@@ -77,14 +87,14 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         .insert(self.conn)
         .await?;
 
-        Ok(MachineResponse::from(machine))
+        Ok(MachineDto::from(machine))
     }
 
     /// 更新机器
-    pub async fn update(&self, id: i32, req: UpdateMachineRequest) -> Result<MachineResponse, ServiceError> {
+    pub async fn update(&self, id: i32, req: UpdateMachineRequest) -> Result<MachineDto, ServiceError> {
         // 检查机器是否存在
         let _ = self
-            .find_by_id_admin(id)
+            .find_by_id_raw(id)
             .await?
             .ok_or_else(|| ServiceError::not_found("Machine", id))?;
 
@@ -95,36 +105,37 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
             name: Set(req.name),
             ip: Set(req.ip),
             key: Set(req.key),
-            created: Set(now),
+            updated: Set(Some(now)),
             ..Default::default()
         }
         .update(self.conn)
         .await?;
 
-        Ok(MachineResponse::from(machine))
+        Ok(MachineDto::from(machine))
     }
 
-    // === 管理员 API（返回完整 Model） ===
+    /// 删除机器
+    pub async fn delete(&self, id: i32) -> Result<(), ServiceError> {
+        // 检查机器是否存在
+        let _ = self
+            .find_by_id_raw(id)
+            .await?
+            .ok_or_else(|| ServiceError::not_found("Machine", id))?;
 
-    /// 根据 ID 查找机器（管理员专用，返回完整 Model）
-    pub async fn find_by_id_admin(&self, id: i32) -> Result<Option<machine::Model>, ServiceError> {
-        Machine::find_by_id(id).one(self.conn).await.map_err(Into::into)
+        MachineEntity::delete_by_id(id).exec(self.conn).await?;
+        Ok(())
     }
 
-    /// 获取所有机器（管理员专用，返回完整 Model）
-    pub async fn find_all_admin(&self) -> Result<Vec<machine::Model>, ServiceError> {
-        Machine::find()
-            .order_by_asc(machine::Column::Name)
-            .all(self.conn)
-            .await
-            .map_err(Into::into)
-    }
+    // === 内部/服务间调用（返回原始 Model） ===
 
-    // === 内部/服务间调用（返回 Model） ===
+    /// 根据 ID 查找机器（内部使用，返回原始 Model）
+    pub(crate) async fn find_by_id_raw(&self, id: i32) -> Result<Option<machine::Model>, ServiceError> {
+        MachineEntity::find_by_id(id).one(self.conn).await.map_err(Into::into)
+    }
 
     /// 根据名称前缀查找机器（内部使用）
     pub(crate) async fn find_by_name_prefix(&self, prefix: &str) -> Result<Vec<machine::Model>, ServiceError> {
-        Machine::find()
+        MachineEntity::find()
             .filter(machine::Column::Name.like(format!("{}%", prefix)))
             .order_by_asc(machine::Column::Name)
             .all(self.conn)
@@ -166,18 +177,6 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         .map_err(Into::into)
     }
 
-    /// 删除机器
-    pub async fn delete(&self, id: i32) -> Result<(), ServiceError> {
-        // 检查机器是否存在
-        let _ = self
-            .find_by_id_admin(id)
-            .await?
-            .ok_or_else(|| ServiceError::not_found("Machine", id))?;
-
-        Machine::delete_by_id(id).exec(self.conn).await?;
-        Ok(())
-    }
-
     // === 业务方法 ===
 
     /// 清理过期申请者（1天未更新）
@@ -187,7 +186,7 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         let one_day_ago = Utc::now().naive_utc() - Duration::hours(24);
 
         // 查找所有超过1天未更新的 machine
-        let machines = Machine::find()
+        let machines = MachineEntity::find()
             .filter(
                 Condition::any()
                     .add(
@@ -208,7 +207,7 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         for m in machines {
             // 只删除 name 匹配申请者格式的
             if is_applicant_machine(&m.name) {
-                Machine::delete_by_id(m.id).exec(self.conn).await?;
+                MachineEntity::delete_by_id(m.id).exec(self.conn).await?;
                 deleted += 1;
             }
         }
@@ -220,7 +219,7 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
     pub async fn count_by_province_isp(&self, province: &str, isp: &str) -> Result<i32, ServiceError> {
         let prefix = format!("{}{}", province, isp);
 
-        let count = Machine::find()
+        let count = MachineEntity::find()
             .filter(machine::Column::Name.like(format!("{}%", prefix)))
             .count(self.conn)
             .await?;
@@ -234,7 +233,7 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
 
         let one_day_ago = Utc::now().naive_utc() - Duration::hours(24);
 
-        let count = Machine::find()
+        let count = MachineEntity::find()
             .filter(machine::Column::Ip.eq(ip))
             .filter(machine::Column::Updated.gt(one_day_ago))
             .filter(
@@ -251,9 +250,28 @@ impl<'a, C: ConnectionTrait> MachineService<'a, C> {
         Ok(count > 0)
     }
 
-    /// 确保机器存在（辅助方法）
-    pub async fn ensure_exists(&self, id: i32) -> Result<MachineResponse, ServiceError> {
-        self.find_by_id(id).await?
-            .ok_or_else(|| ServiceError::not_found("Machine", id))
+    /// 验证客户端 Token
+    /// Token 格式: "machine_id:key"
+    /// 验证成功返回 ClientAuthInfo
+    pub async fn verify_client_token(&self, token: &str) -> Result<ClientAuthInfo, ServiceError> {
+        let (mid, key) = token.split_once(':')
+            .ok_or_else(|| ServiceError::Validation("Invalid token format".to_string()))?;
+        
+        let mid = mid.parse::<i32>()
+            .map_err(|_| ServiceError::Validation("Invalid machine ID".to_string()))?;
+        
+        let machine = MachineEntity::find_by_id(mid)
+            .one(self.conn)
+            .await?
+            .ok_or_else(|| ServiceError::not_found("Machine", mid))?;
+        
+        if machine.key != key {
+            return Err(ServiceError::Unauthorized("Invalid credentials".to_string()));
+        }
+        
+        Ok(ClientAuthInfo {
+            id: machine.id,
+            name: machine.name,
+        })
     }
 }

@@ -1,4 +1,3 @@
-use askama::Template;
 use axum::{
     extract::State,
     http::{header::SET_COOKIE, HeaderMap, StatusCode},
@@ -10,11 +9,23 @@ use serde::Deserialize;
 use std::sync::Arc;
 use validator::Validate;
 
-use crate::{
-    extractors::AdminUserWeb,
-    templates::{AdminIndexTemplate, AdminLoginTemplate, AdminMachine, AdminTarget},
-    AppState,
-};
+use server_service::output::{Machine as MachineDto, Target as TargetDto};
+
+use crate::core::{AdminUserWeb, AppState};
+use crate::templates::pages::{AdminIndexTemplate, AdminLoginTemplate};
+use crate::templates::{AdminMachine, AdminTarget};
+
+/// 检查请求是否通过 HTTPS 传输
+fn is_https_request(headers: &HeaderMap) -> bool {
+    headers
+        .get("x-forwarded-proto")
+        .and_then(|v| v.to_str().ok())
+        == Some("https")
+        || headers
+            .get("x-forwarded-scheme")
+            .and_then(|v| v.to_str().ok())
+            == Some("https")
+}
 
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -31,6 +42,8 @@ struct LoginRequest {
 }
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
+    use askama::Template;
+
     let template = AdminLoginTemplate {
         site_name: state.site_name().to_string(),
         machines: state.get_sidebar_machines().await,
@@ -51,17 +64,7 @@ async fn admin_login(
         return (StatusCode::UNAUTHORIZED, "Invalid password").into_response();
     }
 
-    // 检查是否 HTTPS（常用反向代理默认设置）
-    let is_https = headers
-        .get("x-forwarded-proto")
-        .and_then(|v| v.to_str().ok())
-        == Some("https")
-        || headers
-            .get("x-forwarded-scheme")
-            .and_then(|v| v.to_str().ok())
-            == Some("https");
-
-    let secure_flag = if is_https { "Secure; " } else { "" };
+    let secure_flag = if is_https_request(&headers) { "Secure; " } else { "" };
 
     // 设置 HttpOnly Cookie
     // Path=/ 确保 /admin/* 和 /api/admin/* 都能访问此 Cookie
@@ -80,17 +83,7 @@ async fn admin_login(
 
 /// 处理登出请求，清除 Cookie
 async fn admin_logout(headers: HeaderMap) -> Response {
-    // 检查是否 HTTPS（常用反向代理默认设置）
-    let is_https = headers
-        .get("x-forwarded-proto")
-        .and_then(|v| v.to_str().ok())
-        == Some("https")
-        || headers
-            .get("x-forwarded-scheme")
-            .and_then(|v| v.to_str().ok())
-            == Some("https");
-
-    let secure_flag = if is_https { "Secure; " } else { "" };
+    let secure_flag = if is_https_request(&headers) { "Secure; " } else { "" };
 
     // 设置过期时间为过去的日期来清除 Cookie
     // Path=/ 与设置时保持一致，才能正确清除
@@ -111,8 +104,10 @@ async fn admin_index_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
+    use askama::Template;
+
     // 查询 admin 机器列表（完整信息）
-    let admin_machines = match state.machine_service().find_all_admin().await {
+    let admin_machines = match state.machine_service().find_all::<MachineDto>().await {
         Ok(list) => list
             .into_iter()
             .map(|m| AdminMachine {
@@ -125,7 +120,7 @@ async fn admin_index_page(
     };
 
     // 查询 admin 目标列表（完整信息）
-    let admin_targets = match state.target_service().find_all_admin().await {
+    let admin_targets = match state.target_service().find_all::<TargetDto>().await {
         Ok(list) => list
             .into_iter()
             .map(|t| AdminTarget {

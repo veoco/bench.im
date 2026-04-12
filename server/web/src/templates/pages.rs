@@ -1,40 +1,6 @@
 use askama::Template;
-use serde::Serialize;
 
-// 从 service 层导入 MachineListItem
-pub use server_service::output::MachineListItem;
-
-#[derive(Serialize, Clone)]
-pub struct Target {
-    pub id: i32,
-    pub name: String,
-    pub updated: i64,
-}
-
-// Admin 页面使用的机器结构（包含完整信息）
-#[derive(Serialize, Clone)]
-pub struct AdminMachine {
-    pub id: i32,
-    pub name: String,
-    pub ip: String,
-}
-
-// Admin 页面使用的目标结构（包含完整信息）
-#[derive(Serialize, Clone)]
-pub struct AdminTarget {
-    pub id: i32,
-    pub name: String,
-    pub domain: String,
-    pub ipv4: String,
-    pub ipv6: String,
-}
-
-#[derive(Serialize, Clone)]
-pub struct Machine {
-    pub id: i32,
-    pub name: String,
-    pub ip: String,
-}
+use crate::templates::{AdminMachine, AdminTarget, Machine, MachineListItem, Target};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -138,4 +104,55 @@ pub struct DeleteTemplate {
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
+}
+
+impl DeleteTemplate {
+    /// 创建机器删除模板
+    pub fn for_machine(
+        site_name: String,
+        name: String,
+        ip: String,
+        machines: Vec<MachineListItem>,
+        current_machine_id: i32,
+        enable_apply: bool,
+    ) -> Self {
+        Self {
+            site_name,
+            item_type: "机器".to_string(),
+            name,
+            ip,
+            domain: String::new(),
+            ipv4: String::new(),
+            ipv6: String::new(),
+            machines,
+            current_machine_id,
+            enable_apply,
+            is_admin: true,
+        }
+    }
+
+    /// 创建目标删除模板
+    pub fn for_target(
+        site_name: String,
+        name: String,
+        domain: Option<String>,
+        ipv4: Option<String>,
+        ipv6: Option<String>,
+        machines: Vec<MachineListItem>,
+        enable_apply: bool,
+    ) -> Self {
+        Self {
+            site_name,
+            item_type: "目标".to_string(),
+            name,
+            ip: String::new(),
+            domain: domain.unwrap_or_default(),
+            ipv4: ipv4.unwrap_or_default(),
+            ipv6: ipv6.unwrap_or_default(),
+            machines,
+            current_machine_id: 0,
+            enable_apply,
+            is_admin: true,
+        }
+    }
 }

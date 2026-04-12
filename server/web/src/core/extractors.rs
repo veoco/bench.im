@@ -14,8 +14,9 @@ use axum_extra::{
 };
 use serde_json::{json, Value};
 
-use crate::{AppState, is_trusted_proxy};
-use entity::machine::Model as Machine;
+use crate::core::AppState;
+use crate::is_trusted_proxy;
+use server_service::output::ClientAuthInfo;
 
 pub struct ClientIp(pub String);
 
@@ -187,7 +188,7 @@ where
     }
 }
 
-pub struct ApiClient(pub Machine);
+pub struct ApiClient(pub ClientAuthInfo);
 
 impl<S> FromRequestParts<S> for ApiClient
 where
@@ -206,18 +207,13 @@ where
                 parts.extract::<TypedHeader<Authorization<Bearer>>>().await
             {
                 let token = bearer.token();
-            let (mid, key) = token.split_once(':').ok_or((
-                StatusCode::UNAUTHORIZED,
-                Json(json!({"msg": "Invalid API token format"})),
-            ))?;
-            let mid = mid.parse::<i32>().map_err(|_| (
-                StatusCode::UNAUTHORIZED,
-                Json(json!({"msg": "Invalid machine ID"})),
-            ))?;
-            if let Ok(Some(machine)) = s.machine_service().find_by_id_admin(mid).await
-                {
-                    if machine.key == key {
-                        return Ok(Self(machine));
+                match s.machine_service().verify_client_token(token).await {
+                    Ok(auth_info) => return Ok(Self(auth_info)),
+                    Err(_) => {
+                        return Err((
+                            StatusCode::UNAUTHORIZED,
+                            Json(json!({"msg": "Invalid API token"})),
+                        ));
                     }
                 }
             }

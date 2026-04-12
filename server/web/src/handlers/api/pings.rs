@@ -9,9 +9,9 @@ use axum_valid::Valid;
 use serde_json::{json, Value};
 
 use server_service::input::{CreatePingRequest, PingFilter};
+use server_service::output::{Machine, Target};
 
-use crate::extractors::{ApiClient, ClientIp};
-use crate::{ApiError, AppState};
+use crate::core::{ApiClient, ApiError, AppState, ClientIp};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -22,13 +22,13 @@ pub fn create_router() -> Router<Arc<AppState>> {
 
 pub async fn create_ping_client(
     State(state): State<Arc<AppState>>,
-    ApiClient(machine): ApiClient,
+    ApiClient(auth): ApiClient,
     ClientIp(client_ip): ClientIp,
     Path(tid): Path<i32>,
     Valid(Json(req)): Valid<Json<CreatePingRequest>>,
 ) -> Result<Json<Value>, ApiError> {
     // 验证 target 存在
-    let target = state
+    let target: Target = state
         .target_service()
         .find_by_id(tid)
         .await?
@@ -37,7 +37,7 @@ pub async fn create_ping_client(
     // 使用事务创建 ping 并更新相关记录
     state
         .ping_service()
-        .create_with_updates(machine.id, target.id, req, client_ip)
+        .create_with_updates(auth.id, target.id, req, client_ip)
         .await?;
 
     Ok(Json(json!({"msg": "success"})))
@@ -55,8 +55,8 @@ pub async fn list_pings(
     let machine_service = state.machine_service();
     let target_service = state.target_service();
     let (machine, target) = tokio::try_join!(
-        machine_service.find_by_id(mid),
-        target_service.find_by_id(tid)
+        machine_service.find_by_id::<Machine>(mid),
+        target_service.find_by_id::<Target>(tid)
     )?;
 
     let _ = machine.ok_or_else(|| ApiError::NotFound(format!("Machine {} not found", mid)))?;

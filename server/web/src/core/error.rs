@@ -58,6 +58,7 @@ impl From<server_service::ServiceError> for ApiError {
             ServiceError::Conflict(msg) => ApiError::Conflict(msg),
             ServiceError::IpGeo(msg) => ApiError::DatabaseError(msg),
             ServiceError::Application(msg) => ApiError::ValidationError(msg),
+            ServiceError::Unauthorized(_msg) => ApiError::Unauthorized,
         }
     }
 }

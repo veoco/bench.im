@@ -20,6 +20,9 @@ pub enum ServiceError {
 
     #[error("Application error: {0}")]
     Application(String),
+
+    #[error("Unauthorized: {0}")]
+    Unauthorized(String),
 }
 
 impl ServiceError {
