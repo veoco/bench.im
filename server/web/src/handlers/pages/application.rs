@@ -8,8 +8,18 @@ use axum::{
 };
 
 use server_service::input::CreateApplicationRequest;
+use server_service::ServiceError;
 
 use crate::core::{AppState, ClientIp};
+
+/// 提取 ServiceError 中的友好错误消息
+/// 对于 Application 错误，返回原始消息（去掉 "Application error: " 前缀）
+fn extract_error_message(e: ServiceError) -> String {
+    match e {
+        ServiceError::Application(msg) => msg,
+        _ => "申请检查失败，请稍后重试".to_string(),
+    }
+}
 use crate::templates::application::{ApplyDisabledTemplate, ApplySuccessTemplate, ApplyTemplate};
 
 pub fn create_router() -> Router<Arc<AppState>> {
@@ -74,7 +84,7 @@ async fn apply_page(
                 ip: client_ip,
                 province,
                 isp,
-                reason: e.to_string(),
+                reason: extract_error_message(e),
                 current_count: 0,
                 max_count: 3,
                 machines: state.get_sidebar_machines().await,
@@ -127,7 +137,7 @@ async fn apply_submit(
                 ip: client_ip,
                 province,
                 isp,
-                reason: e.to_string(),
+                reason: extract_error_message(e),
                 current_count: 0,
                 max_count: 3,
                 machines: state.get_sidebar_machines().await,
@@ -160,7 +170,7 @@ async fn apply_submit(
                 ip: client_ip,
                 province: String::new(),
                 isp: String::new(),
-                reason: e.to_string(),
+                reason: extract_error_message(e),
                 current_count: 0,
                 max_count: 3,
                 machines: state.get_sidebar_machines().await,

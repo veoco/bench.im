@@ -102,7 +102,7 @@ async fn new_machine_page(
         enable_apply: state.enable_apply(),
         is_admin: true,
     };
-    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
+    Html(render_template(template).unwrap_or_else(|_| "<h1>页面加载失败</h1><p>请稍后重试</p>".to_string()))
 }
 
 async fn edit_machine_page(
@@ -128,7 +128,7 @@ async fn edit_machine_page(
         }
     };
 
-    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
+    Html(render_template(template).unwrap_or_else(|_| "<h1>页面加载失败</h1><p>请稍后重试</p>".to_string()))
 }
 
 async fn delete_machine_page(
@@ -150,5 +150,5 @@ async fn delete_machine_page(
         }
     };
 
-    Html(render_template(template).unwrap_or_else(|e| e.to_string()))
+    Html(render_template(template).unwrap_or_else(|_| "<h1>页面加载失败</h1><p>请稍后重试</p>".to_string()))
 }
