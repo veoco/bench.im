@@ -1,15 +1,38 @@
-mod forms;
-mod models;
-mod mutation;
-pub mod query;
-pub mod ip_geo;
-pub mod application;
+pub mod dto;
+pub mod error;
+pub mod infrastructure;
+pub mod services;
 
-pub use forms::*;
-pub use models::*;
-pub use mutation::*;
-pub use query::*;
-pub use ip_geo::*;
-pub use application::*;
+pub use error::ServiceError;
+pub use infrastructure::ip_geo::{IpGeoService, IpGeoInfo};
 
+// 导出服务
+pub mod service {
+    pub use crate::services::{
+        machine::MachineService,
+        target::TargetService,
+        ping::PingService,
+        application::{ApplicationService, ApplicationResult},
+    };
+}
+
+// 导出 DTO
+pub mod input {
+    pub use crate::dto::input::{
+        machine::{CreateMachineRequest, UpdateMachineRequest},
+        target::{CreateTargetRequest, UpdateTargetRequest},
+        ping::{CreatePingRequest, PingFilter},
+        application::CreateApplicationRequest,
+    };
+}
+
+pub mod output {
+    pub use crate::dto::output::{
+        machine::{MachineResponse, MachineListItem, MachineWithTargets},
+        target::{TargetResponse, TargetDetailResponse},
+        ping::{PingResponse, PingData},
+    };
+}
+
+// 保留 sea_orm 导出供 web 层使用（如 DatabaseConnection）
 pub use sea_orm;

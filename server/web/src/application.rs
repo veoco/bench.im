@@ -8,11 +8,13 @@ use axum::{
 };
 use askama::Template;
 
+use server_service::input::CreateApplicationRequest;
+use server_service::output::MachineListItem;
+
 use crate::{
     extractors::ClientIp,
     AppState,
 };
-use server_service::{ApplicationService, ApplyRequest, CommandConfig, MachineForList, Query, ip_geo::parse_ip};
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -24,13 +26,11 @@ async fn apply_page(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
     // 如果功能未开启，显示关闭页面
     if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
             site_name: state.site_name().to_string(),
-            machines,
+            machines: state.get_sidebar_machines().await,
             current_machine_id: 0,
             enable_apply: state.enable_apply(),
             is_admin: false,
@@ -38,7 +38,11 @@ async fn apply_page(
         return Html(template.render().unwrap_or_else(|_| "Template error".to_string()));
     }
 
-    match ApplicationService::check_eligibility(&state.db(), &client_ip).await {
+    match state
+        .application_service()
+        .check_eligibility(&client_ip)
+        .await
+    {
         Ok((province, isp, count)) => {
             // 符合条件，显示确认页面
             let template = ApplyTemplate {
@@ -50,7 +54,7 @@ async fn apply_page(
                 reason: String::new(),
                 current_count: count,
                 max_count: 3,
-                machines,
+                machines: state.get_sidebar_machines().await,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply(),
                 is_admin: false,
@@ -59,7 +63,9 @@ async fn apply_page(
         }
         Err(e) => {
             // 尝试解析 IP 获取省份和运营商信息
-            let (province, isp) = parse_ip(&client_ip)
+            let (province, isp) = state
+                .ip_geo()
+                .parse_ip(&client_ip)
                 .map(|geo| (geo.province, geo.isp))
                 .unwrap_or((String::new(), String::new()));
 
@@ -73,7 +79,7 @@ async fn apply_page(
                 reason: e.to_string(),
                 current_count: 0,
                 max_count: 3,
-                machines,
+                machines: state.get_sidebar_machines().await,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply(),
                 is_admin: false,
@@ -88,13 +94,11 @@ async fn apply_submit(
     State(state): State<Arc<AppState>>,
     ClientIp(client_ip): ClientIp,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
     // 如果功能未开启
     if !state.enable_apply() {
         let template = ApplyDisabledTemplate {
             site_name: state.site_name().to_string(),
-            machines,
+            machines: state.get_sidebar_machines().await,
             current_machine_id: 0,
             enable_apply: state.enable_apply(),
             is_admin: false,
@@ -103,11 +107,17 @@ async fn apply_submit(
     }
 
     // 重新检查资格（防止并发问题）
-    let (province, isp) = match ApplicationService::check_eligibility(&state.db(), &client_ip).await {
+    let (province, isp) = match state
+        .application_service()
+        .check_eligibility(&client_ip)
+        .await
+    {
         Ok((prov, isp, _)) => (prov, isp),
         Err(e) => {
             // 尝试解析 IP 获取省份和运营商信息
-            let (province, isp) = parse_ip(&client_ip)
+            let (province, isp) = state
+                .ip_geo()
+                .parse_ip(&client_ip)
                 .map(|geo| (geo.province, geo.isp))
                 .unwrap_or((String::new(), String::new()));
 
@@ -120,7 +130,7 @@ async fn apply_submit(
                 reason: e.to_string(),
                 current_count: 0,
                 max_count: 3,
-                machines,
+                machines: state.get_sidebar_machines().await,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply(),
                 is_admin: false,
@@ -130,18 +140,18 @@ async fn apply_submit(
     };
 
     // 提交申请
-    let config = CommandConfig {
-        server_url: &state.server_url(),
-    };
-    let result = match ApplicationService::submit_application(
-        &state.db(),
-        ApplyRequest {
-            ip: client_ip.clone(),
-            province,
-            isp,
-        },
-        config,
-    ).await {
+    let result = match state
+        .application_service()
+        .submit(
+            CreateApplicationRequest {
+                ip: client_ip.clone(),
+                province,
+                isp,
+            },
+            state.server_url(),
+        )
+        .await
+    {
         Ok(result) => result,
         Err(e) => {
             let template = ApplyTemplate {
@@ -153,7 +163,7 @@ async fn apply_submit(
                 reason: e.to_string(),
                 current_count: 0,
                 max_count: 3,
-                machines,
+                machines: state.get_sidebar_machines().await,
                 current_machine_id: 0,
                 enable_apply: state.enable_apply(),
                 is_admin: false,
@@ -169,7 +179,7 @@ async fn apply_submit(
         name: result.name,
         key: result.key,
         command: result.command,
-        machines,
+        machines: state.get_sidebar_machines().await,
         current_machine_id: 0,
         enable_apply: state.enable_apply(),
         is_admin: false,
@@ -189,7 +199,7 @@ struct ApplyTemplate {
     reason: String,
     current_count: i32,
     max_count: i32,
-    machines: Vec<MachineForList>,
+    machines: Vec<MachineListItem>,
     current_machine_id: i32,
     enable_apply: bool,
     is_admin: bool,
@@ -204,7 +214,7 @@ struct ApplySuccessTemplate {
     name: String,
     key: String,
     command: String,
-    machines: Vec<MachineForList>,
+    machines: Vec<MachineListItem>,
     current_machine_id: i32,
     enable_apply: bool,
     is_admin: bool,
@@ -215,7 +225,7 @@ struct ApplySuccessTemplate {
 #[template(path = "apply/disabled.html")]
 struct ApplyDisabledTemplate {
     site_name: String,
-    machines: Vec<MachineForList>,
+    machines: Vec<MachineListItem>,
     current_machine_id: i32,
     enable_apply: bool,
     is_admin: bool,

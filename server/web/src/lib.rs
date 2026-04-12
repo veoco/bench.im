@@ -14,7 +14,7 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use server_service::sea_orm::{ConnectOptions, Database};
-use server_service::{Mutation as MutationCore, ApplicationService, init_searcher};
+use server_service::IpGeoService;
 
 mod admin;
 mod application;
@@ -107,9 +107,9 @@ async fn clean_database(state: Arc<AppState>) {
     loop {
         it.tick().await;
         // 清理过期 ping 数据
-        let _ = MutationCore::delete_expire_pings(state.db()).await;
+        let _ = state.ping_service().delete_expired().await;
         // 清理过期申请者（1天未更新）
-        let _ = ApplicationService::clean_expired_applicants(state.db()).await;
+        let _ = state.machine_service().clean_expired_applicants().await;
     }
 }
 
@@ -146,19 +146,23 @@ async fn start() -> anyhow::Result<()> {
     info!("Listening on http://{}/", addr);
 
     // 初始化 IP 地理位置搜索器
-    let enable_apply = match init_searcher(&config.ip2region_v4_path, &config.ip2region_v6_path) {
-        Ok(_) => {
+    let ip_geo = match IpGeoService::new(&config.ip2region_v4_path, &config.ip2region_v6_path) {
+        Ok(service) => {
             if config.enable_apply {
                 info!("Apply feature: enabled");
             } else {
                 info!("Apply feature: disabled (set ENABLE_APPLY=true to enable)");
             }
-            config.enable_apply
+            Arc::new(service)
         }
         Err(e) => {
             tracing::warn!("Failed to init ip2region searcher: {}", e);
             tracing::warn!("Apply feature will be disabled");
-            false
+            // 创建一个不可用的服务
+            Arc::new(IpGeoService::new("/dev/null", "/dev/null").unwrap_or_else(|_| {
+                // 这种情况不应该发生，但为了编译通过提供一个默认值
+                panic!("Failed to create IpGeoService");
+            }))
         }
     };
 
@@ -169,10 +173,7 @@ async fn start() -> anyhow::Result<()> {
         .expect("Database connection failed");
     Migrator::up(&conn, None).await.unwrap();
 
-    // 创建 AppState（enable_apply 可能因初始化失败而改变）
-    let mut config = config;
-    config.enable_apply = enable_apply;
-    let state = Arc::new(AppState::new(conn, config));
+    let state = Arc::new(AppState::new(conn, config, ip_geo));
 
     tokio::spawn(clean_database(state.clone()));
 

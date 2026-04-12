@@ -11,7 +11,7 @@ use crate::{
     templates::{IndexTemplate, Machine, MachineTemplate, Target, TargetTemplate},
     AppState,
 };
-use server_service::{query::Query, MachinePublic};
+
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -21,20 +21,26 @@ pub fn create_router() -> Router<Arc<AppState>> {
 }
 
 async fn index_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let targets: Vec<Target> = match Query::find_targets(&state.db()).await {
-        Ok(list) => {
-            list.into_iter().map(|t| Target {
+    let targets: Vec<Target> = match state.target_service().find_all().await {
+        Ok(list) => list
+            .into_iter()
+            .map(|t| Target {
                 id: t.id,
                 name: t.name,
-                updated: 0,
-            }).collect()
-        }
+                updated: t.updated.unwrap_or(0) as i64,
+            })
+            .collect(),
         Err(_) => vec![],
     };
 
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
-    let template = IndexTemplate { site_name: state.site_name().to_string(), targets, machines, current_machine_id: 0, enable_apply: state.enable_apply(), is_admin: false };
+    let template = IndexTemplate {
+        site_name: state.site_name().to_string(),
+        targets,
+        machines: state.get_sidebar_machines().await,
+        current_machine_id: 0,
+        enable_apply: state.enable_apply(),
+        is_admin: false,
+    };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -42,36 +48,38 @@ async fn machine_page(
     Path(mid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let machine_result = Query::find_machine_by_id(&state.db(), mid).await;
-    let machine = match machine_result {
-        Ok(Some(m)) => {
-            // 使用 MachinePublic 的模糊处理逻辑对 IP 进行脱敏
-            let machine_public = MachinePublic::from(m);
-            Machine {
-                id: machine_public.id,
-                name: machine_public.name,
-                ip: machine_public.ip,
-            }
-        }
+    let machine = match state.machine_service().find_by_id(mid).await {
+        Ok(Some(m)) => Machine {
+            id: m.id,
+            name: m.name,
+            ip: m.ip,
+        },
         _ => {
             return Html("Machine not found".to_string());
         }
     };
 
-    let targets: Vec<Target> = match Query::find_targets_by_machine_id(&state.db(), mid).await {
-        Ok(list) => {
-            list.into_iter().map(|t| Target {
+    let targets: Vec<Target> = match state.target_service().find_all().await {
+        Ok(list) => list
+            .into_iter()
+            .map(|t| Target {
                 id: t.id,
                 name: t.name,
-                updated: 0,
-            }).collect()
-        }
+                updated: t.updated.unwrap_or(0) as i64,
+            })
+            .collect(),
         Err(_) => vec![],
     };
 
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
-    let template = MachineTemplate { site_name: state.site_name().to_string(), machine: machine.clone(), targets, machines, current_machine_id: machine.id, enable_apply: state.enable_apply(), is_admin: false };
+    let template = MachineTemplate {
+        site_name: state.site_name().to_string(),
+        machine: machine.clone(),
+        targets,
+        machines: state.get_sidebar_machines().await,
+        current_machine_id: machine.id,
+        enable_apply: state.enable_apply(),
+        is_admin: false,
+    };
     Html(template.render().unwrap_or_else(|_| "Template error".to_string()))
 }
 
@@ -79,38 +87,34 @@ async fn target_page(
     Path(tid): Path<i32>,
     State(state): State<Arc<AppState>>,
 ) -> Html<String> {
-    let target_result = Query::find_target_by_id(&state.db(), tid).await;
-    let target = match target_result {
+    let target = match state.target_service().find_by_id(tid).await {
         Ok(Some(t)) => Target {
             id: t.id,
             name: t.name,
-            updated: t.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
+            updated: t.updated.unwrap_or(0) as i64,
         },
         _ => {
             return Html("Target not found".to_string());
         }
     };
 
-    let machines: Vec<Machine> = match Query::find_machines(&state.db()).await {
-        Ok(list) => {
-            list.into_iter().map(|m| {
-                Machine {
-                    id: m.id,
-                    name: m.name,
-                    ip: m.ip,
-                }
-            }).collect()
-        }
+    let machines: Vec<Machine> = match state.machine_service().find_all().await {
+        Ok(list) => list
+            .into_iter()
+            .map(|m| Machine {
+                id: m.id,
+                name: m.name,
+                ip: m.ip,
+            })
+            .collect(),
         Err(_) => vec![],
     };
-
-    let machines_for_list = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
 
     let template = TargetTemplate {
         site_name: state.site_name().to_string(),
         target: target.clone(),
-        machines: machines_for_list.clone(),  // 用于侧边栏
-        target_machines: machines,            // 用于图表
+        machines: state.get_sidebar_machines().await, // 用于侧边栏
+        target_machines: machines,                    // 用于图表
         current_machine_id: 0,
         enable_apply: state.enable_apply(),
         is_admin: false,

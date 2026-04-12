@@ -15,7 +15,7 @@ use crate::{
     templates::{AdminIndexTemplate, AdminLoginTemplate, AdminMachine, AdminTarget},
     AppState,
 };
-use server_service::Query;
+
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -31,10 +31,9 @@ struct LoginRequest {
 }
 
 async fn admin_login_page(State(state): State<Arc<AppState>>) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
     let template = AdminLoginTemplate {
         site_name: state.site_name().to_string(),
-        machines,
+        machines: state.get_sidebar_machines().await,
         current_machine_id: 0,
         enable_apply: state.enable_apply(),
         is_admin: true,
@@ -112,10 +111,8 @@ async fn admin_index_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = Query::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
     // 查询 admin 机器列表（完整信息）
-    let admin_machines = match Query::find_machines(&state.db()).await {
+    let admin_machines = match state.machine_service().find_all_admin().await {
         Ok(list) => list
             .into_iter()
             .map(|m| AdminMachine {
@@ -126,9 +123,9 @@ async fn admin_index_page(
             .collect(),
         Err(_) => vec![],
     };
-    
+
     // 查询 admin 目标列表（完整信息）
-    let admin_targets = match Query::find_targets(&state.db()).await {
+    let admin_targets = match state.target_service().find_all_admin().await {
         Ok(list) => list
             .into_iter()
             .map(|t| AdminTarget {
@@ -141,10 +138,10 @@ async fn admin_index_page(
             .collect(),
         Err(_) => vec![],
     };
-    
+
     let template = AdminIndexTemplate {
         site_name: state.site_name().to_string(),
-        machines,
+        machines: state.get_sidebar_machines().await,
         current_machine_id: 0,
         admin_machines,
         admin_targets,

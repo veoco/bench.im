@@ -16,7 +16,6 @@ use serde_json::{json, Value};
 
 use crate::{AppState, is_trusted_proxy};
 use entity::machine::Model as Machine;
-use server_service::Query as QueryCore;
 
 pub struct ClientIp(pub String);
 
@@ -207,16 +206,15 @@ where
                 parts.extract::<TypedHeader<Authorization<Bearer>>>().await
             {
                 let token = bearer.token();
-                let (mid, key) = token.split_once(':').ok_or((
-                    StatusCode::UNAUTHORIZED,
-                    Json(json!({"msg": "Invalid API token format"})),
-                ))?;
-                let mid = mid.parse::<i32>().map_err(|_| (
-                    StatusCode::UNAUTHORIZED,
-                    Json(json!({"msg": "Invalid machine ID"})),
-                ))?;
-                if let Ok(Some(machine)) =
-                    QueryCore::find_machine_by_id(&s.db(), mid).await
+            let (mid, key) = token.split_once(':').ok_or((
+                StatusCode::UNAUTHORIZED,
+                Json(json!({"msg": "Invalid API token format"})),
+            ))?;
+            let mid = mid.parse::<i32>().map_err(|_| (
+                StatusCode::UNAUTHORIZED,
+                Json(json!({"msg": "Invalid machine ID"})),
+            ))?;
+            if let Ok(Some(machine)) = s.machine_service().find_by_id_admin(mid).await
                 {
                     if machine.key == key {
                         return Ok(Self(machine));

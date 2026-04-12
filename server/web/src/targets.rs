@@ -10,15 +10,14 @@ use axum::{
 use axum_valid::Valid;
 use serde_json::{json, Value};
 
+use server_service::input::{CreateTargetRequest, UpdateTargetRequest};
+use server_service::output::TargetResponse;
+
 use crate::extractors::{AdminAuth, AdminUserWeb, ApiClient};
 use crate::{
     templates::{DeleteTemplate, EditTargetTemplate},
     ApiError, AppState, render_template,
 };
-use server_service::{
-    Mutation as MutationCore, Query as QueryCore, TargetCreateAdmin, TargetPublic,
-};
-use entity::target::Model as Target;
 
 pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -41,30 +40,40 @@ pub fn create_router() -> Router<Arc<AppState>> {
         .route("/admin/targets/{tid}/delete", get(delete_target_page))
 }
 
-pub async fn list_targets(State(state): State<Arc<AppState>>) -> Result<Json<Vec<TargetPublic>>, ApiError> {
-    let targets = QueryCore::find_targets(&state.db()).await?;
-    Ok(Json(targets.into_iter().map(TargetPublic::from).collect()))
+pub async fn list_targets(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<TargetResponse>>, ApiError> {
+    let targets = state.target_service().find_all().await?;
+    Ok(Json(targets))
 }
 
 pub async fn list_targets_client(
     State(state): State<Arc<AppState>>,
     _: ApiClient,
-) -> Result<Json<Vec<Target>>, ApiError> {
-    let targets = QueryCore::find_targets(&state.db()).await?;
+) -> Result<Json<Vec<entity::target::Model>>, ApiError> {
+    // 客户端需要完整信息
+    let targets = state.target_service().find_all_admin().await?;
     Ok(Json(targets))
 }
 
 pub async fn create_target_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
-    Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
+    Valid(Json(req)): Valid<Json<CreateTargetRequest>>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     // 检查是否已存在
-    if QueryCore::find_target_by_name(&state.db(), &target_create.name).await?.is_some() {
-        return Err(ApiError::Conflict("Target with this name already exists".to_string()));
+    if state
+        .target_service()
+        .find_by_name(&req.name)
+        .await?
+        .is_some()
+    {
+        return Err(ApiError::Conflict(
+            "Target with this name already exists".to_string(),
+        ));
     }
 
-    MutationCore::create_target(&state.db(), &target_create).await?;
+    state.target_service().create(req).await?;
     Ok((StatusCode::CREATED, Json(json!({"msg": "success"}))))
 }
 
@@ -72,21 +81,19 @@ pub async fn edit_target_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Path(tid): Path<i32>,
-    Valid(Json(target_create)): Valid<Json<TargetCreateAdmin>>,
+    Valid(Json(req)): Valid<Json<UpdateTargetRequest>>,
 ) -> Result<Json<Value>, ApiError> {
-    let target = QueryCore::find_target_by_id(&state.db(), tid)
-        .await?
-        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
+    state.target_service().ensure_exists(tid).await?;
 
-    MutationCore::edit_target(&state.db(), target.id, &target_create).await?;
+    state.target_service().update(tid, req).await?;
     Ok(Json(json!({"msg": "success"})))
 }
 
 pub async fn list_targets_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
-) -> Result<Json<Vec<Target>>, ApiError> {
-    let targets = QueryCore::find_targets(&state.db()).await?;
+) -> Result<Json<Vec<entity::target::Model>>, ApiError> {
+    let targets = state.target_service().find_all_admin().await?;
     Ok(Json(targets))
 }
 
@@ -94,8 +101,10 @@ pub async fn get_target_by_tid_admin(
     State(state): State<Arc<AppState>>,
     _: AdminAuth,
     Path(tid): Path<i32>,
-) -> Result<Json<Target>, ApiError> {
-    let target = QueryCore::find_target_by_id(&state.db(), tid)
+) -> Result<Json<entity::target::Model>, ApiError> {
+    let target = state
+        .target_service()
+        .find_by_id_admin(tid)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
 
@@ -108,11 +117,9 @@ pub async fn delete_target_admin(
     Path(tid): Path<i32>,
 ) -> Result<Json<Value>, ApiError> {
     // 检查 target 存在
-    let _ = QueryCore::find_target_by_id(&state.db(), tid)
-        .await?
-        .ok_or_else(|| ApiError::NotFound(format!("Target {} not found", tid)))?;
+    state.target_service().ensure_exists(tid).await?;
 
-    MutationCore::delete_target(&state.db(), tid).await?;
+    state.target_service().delete(tid).await?;
     Ok(Json(json!({"msg": "success"})))
 }
 
@@ -121,7 +128,6 @@ async fn new_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
     let template = EditTargetTemplate {
         site_name: state.site_name().to_string(),
         is_edit: false,
@@ -130,7 +136,7 @@ async fn new_target_page(
         domain: "".to_string(),
         ipv4: "".to_string(),
         ipv6: "".to_string(),
-        machines,
+        machines: state.get_sidebar_machines().await,
         current_machine_id: 0,
         enable_apply: state.enable_apply(),
         is_admin: true,
@@ -143,10 +149,7 @@ async fn edit_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let target_result = QueryCore::find_target_by_id(&state.db(), tid).await;
-    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
-    let template = match target_result {
+    let template = match state.target_service().find_by_id_admin(tid).await {
         Ok(Some(t)) => EditTargetTemplate {
             site_name: state.site_name().to_string(),
             is_edit: true,
@@ -155,7 +158,7 @@ async fn edit_target_page(
             domain: t.domain.unwrap_or_default(),
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
-            machines,
+            machines: state.get_sidebar_machines().await,
             current_machine_id: 0,
             enable_apply: state.enable_apply(),
             is_admin: true,
@@ -173,10 +176,7 @@ async fn delete_target_page(
     State(state): State<Arc<AppState>>,
     _: AdminUserWeb,
 ) -> Html<String> {
-    let target_result = QueryCore::find_target_by_id(&state.db(), tid).await;
-    let machines = QueryCore::fetch_machines_for_list(&state.db()).await.unwrap_or_default();
-
-    let template = match target_result {
+    let template = match state.target_service().find_by_id_admin(tid).await {
         Ok(Some(t)) => DeleteTemplate {
             site_name: state.site_name().to_string(),
             item_type: "目标".to_string(),
@@ -185,7 +185,7 @@ async fn delete_target_page(
             domain: t.domain.unwrap_or_default(),
             ipv4: t.ipv4.unwrap_or_default(),
             ipv6: t.ipv6.unwrap_or_default(),
-            machines,
+            machines: state.get_sidebar_machines().await,
             current_machine_id: 0,
             enable_apply: state.enable_apply(),
             is_admin: true,

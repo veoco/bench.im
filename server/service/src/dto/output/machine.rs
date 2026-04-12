@@ -1,9 +1,9 @@
+use entity::machine::Model as MachineModel;
 use serde::{Deserialize, Serialize};
 
-use entity::{machine::Model as Machine, target::Model as Target};
-
+/// 机器响应（公开，IP 已脱敏）
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MachinePublic {
+pub struct MachineResponse {
     pub id: i32,
     pub name: String,
     pub ip: String,
@@ -11,8 +11,8 @@ pub struct MachinePublic {
     pub updated: Option<u64>,
 }
 
-impl From<Machine> for MachinePublic {
-    fn from(m: Machine) -> Self {
+impl From<MachineModel> for MachineResponse {
+    fn from(m: MachineModel) -> Self {
         let ipv4 = m.ip.contains(".");
         let ip = if ipv4 {
             let parts: Vec<&str> = m.ip.split(".").collect();
@@ -30,67 +30,49 @@ impl From<Machine> for MachinePublic {
         Self {
             id: m.id,
             name: m.name,
-            ip: ip,
+            ip,
             created: m.created.and_utc().timestamp() as u64,
             updated: m.updated.map(|dt| dt.and_utc().timestamp() as u64),
         }
     }
 }
 
+/// 机器列表项（精简版，用于侧边栏）
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct TargetPublic {
+pub struct MachineListItem {
     pub id: i32,
     pub name: String,
-    pub created: u64,
-    pub updated: Option<u64>,
+    pub updated: i64,
 }
 
-impl From<Target> for TargetPublic {
-    fn from(t: Target) -> Self {
+impl From<MachineModel> for MachineListItem {
+    fn from(m: MachineModel) -> Self {
         Self {
-            id: t.id,
-            name: t.name,
-            created: t.created.and_utc().timestamp() as u64,
-            updated: t.updated.map(|dt| dt.and_utc().timestamp() as u64),
+            id: m.id,
+            name: m.name,
+            updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
         }
     }
 }
 
+/// 机器详情（包含目标列表）
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MachineTargetsPublic {
+pub struct MachineWithTargets {
     pub id: i32,
     pub name: String,
     pub ip: String,
     pub created: u64,
-    pub targets: Vec<TargetPublic>,
+    pub targets: Vec<crate::dto::output::target::TargetResponse>,
 }
 
-impl From<MachinePublic> for MachineTargetsPublic {
-    fn from(m: MachinePublic) -> Self {
+impl From<MachineResponse> for MachineWithTargets {
+    fn from(m: MachineResponse) -> Self {
         Self {
             id: m.id,
             name: m.name,
             ip: m.ip,
             created: m.created,
             targets: vec![],
-        }
-    }
-}
-
-/// 机器列表项 DTO（用于侧边栏列表等场景）
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MachineForList {
-    pub id: i32,
-    pub name: String,
-    pub updated: i64,
-}
-
-impl From<Machine> for MachineForList {
-    fn from(m: Machine) -> Self {
-        Self {
-            id: m.id,
-            name: m.name,
-            updated: m.updated.map(|dt| dt.and_utc().timestamp()).unwrap_or(0),
         }
     }
 }

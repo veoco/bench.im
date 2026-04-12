@@ -1,8 +1,8 @@
 use askama::Template;
 use serde::Serialize;
 
-// 从 service 层导入 MachineForList
-pub use server_service::MachineForList;
+// 从 service 层导入 MachineListItem
+pub use server_service::output::MachineListItem;
 
 #[derive(Serialize, Clone)]
 pub struct Target {
@@ -41,7 +41,7 @@ pub struct Machine {
 pub struct IndexTemplate {
     pub site_name: String,
     pub targets: Vec<Target>,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -53,7 +53,7 @@ pub struct MachineTemplate {
     pub site_name: String,
     pub machine: Machine,
     pub targets: Vec<Target>,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -64,8 +64,8 @@ pub struct MachineTemplate {
 pub struct TargetTemplate {
     pub site_name: String,
     pub target: Target,
-    pub machines: Vec<MachineForList>, // 用于侧边栏机器列表
-    pub target_machines: Vec<Machine>, // 用于目标页面的机器列表（显示图表）
+    pub machines: Vec<MachineListItem>, // 用于侧边栏机器列表
+    pub target_machines: Vec<Machine>,  // 用于目标页面的机器列表（显示图表）
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -75,7 +75,7 @@ pub struct TargetTemplate {
 #[template(path = "admin/login.html")]
 pub struct AdminLoginTemplate {
     pub site_name: String,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -85,7 +85,7 @@ pub struct AdminLoginTemplate {
 #[template(path = "admin/index.html")]
 pub struct AdminIndexTemplate {
     pub site_name: String,
-    pub machines: Vec<MachineForList>, // 用于侧边栏
+    pub machines: Vec<MachineListItem>, // 用于侧边栏
     pub current_machine_id: i32,
     pub admin_machines: Vec<AdminMachine>, // 用于管理列表
     pub admin_targets: Vec<AdminTarget>,   // 用于管理列表
@@ -102,7 +102,7 @@ pub struct EditMachineTemplate {
     pub name: String,
     pub ip: String,
     pub key: String,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -118,7 +118,7 @@ pub struct EditTargetTemplate {
     pub domain: String,
     pub ipv4: String,
     pub ipv6: String,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,
@@ -134,7 +134,7 @@ pub struct DeleteTemplate {
     pub domain: String,
     pub ipv4: String,
     pub ipv6: String,
-    pub machines: Vec<MachineForList>,
+    pub machines: Vec<MachineListItem>,
     pub current_machine_id: i32,
     pub enable_apply: bool,
     pub is_admin: bool,

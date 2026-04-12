@@ -48,6 +48,20 @@ impl From<sea_orm::DbErr> for ApiError {
     }
 }
 
+impl From<server_service::ServiceError> for ApiError {
+    fn from(e: server_service::ServiceError) -> Self {
+        use server_service::ServiceError;
+        match e {
+            ServiceError::NotFound(msg) => ApiError::NotFound(msg),
+            ServiceError::Validation(msg) => ApiError::ValidationError(msg),
+            ServiceError::Database(e) => ApiError::DatabaseError(e.to_string()),
+            ServiceError::Conflict(msg) => ApiError::Conflict(msg),
+            ServiceError::IpGeo(msg) => ApiError::DatabaseError(msg),
+            ServiceError::Application(msg) => ApiError::ValidationError(msg),
+        }
+    }
+}
+
 impl From<validator::ValidationErrors> for ApiError {
     fn from(e: validator::ValidationErrors) -> Self {
         ApiError::ValidationError(e.to_string())
