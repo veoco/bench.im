@@ -3,7 +3,7 @@
 {% block title %}{{ target.name }} - {{ site_name }}{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/css/uplot.min.css">
+<link rel="stylesheet" href="{{ crate::core::assets::asset_url("css/uplot.min.css") }}">
 {% endblock %}
 
 {% block content %}
@@ -49,8 +49,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/uplot.iife.min.js"></script>
-<script src="/static/js/charts.js"></script>
+<script src="{{ crate::core::assets::asset_url("js/uplot.iife.min.js") }}"></script>
+<script src="{{ crate::core::assets::asset_url("js/charts.js") }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tid = parseInt(document.getElementById('chartsGrid').dataset.tid);
