@@ -34,7 +34,9 @@
     <div class="gap-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" id="chartsGrid" data-mid="{{ machine.id }}">
         {% for target in targets %}
         <div class="bg-white rounded-sm shadow-sm chart-container overflow-hidden" data-tid="{{ target.id }}">
-            <h3 class="px-4 py-2 bg-neutral-50 font-semibold text-sm text-neutral-700">{{ target.name }}</h3>
+            <h3 class="px-4 py-2 bg-neutral-50 font-semibold text-sm text-neutral-700">
+                <a href="/t/{{ target.id }}" class="text-neutral-700 hover:text-sky-600 transition-colors">{{ target.name }}</a>
+            </h3>
             <div class="w-full h-64 relative chart-wrapper" id="chart-{{ target.id }}">
                 <div class="chart-skeleton absolute inset-0">
                     <div class="absolute inset-0 flex items-center justify-center">
